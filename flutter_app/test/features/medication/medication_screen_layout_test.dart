@@ -9,6 +9,11 @@ void main() {
   testWidgets('medication screen keeps original PWA page layout', (
     tester,
   ) async {
+    tester.view.physicalSize = const Size(430, 1600);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
     final db = AppDatabase.memory();
     addTearDown(db.close);
 
@@ -24,7 +29,12 @@ void main() {
     expect(find.text('Ihr Medikamentenplan'), findsOneWidget);
     expect(find.textContaining('Allergie'), findsWidgets);
     expect(find.text('Jetzt prüfen'), findsOneWidget);
-    expect(find.text('Aktive Medikamente', skipOffstage: false), findsOneWidget);
+    expect(find.text('Sprachführung'), findsOneWidget);
+    expect(find.text('Vorlesen'), findsOneWidget);
+    expect(
+      find.text('Aktive Medikamente', skipOffstage: false),
+      findsOneWidget,
+    );
 
     await tester.scrollUntilVisible(
       find.text('Sprache'),

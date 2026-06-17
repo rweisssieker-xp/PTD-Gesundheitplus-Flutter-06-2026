@@ -8,6 +8,7 @@ import '../../../core/storage/database_provider.dart';
 import '../../../shared_ui/gp_colors.dart';
 import '../../../shared_ui/gp_icons.dart';
 import '../../../shared_ui/gp_screen.dart';
+import '../../../shared_ui/gp_voice_navigation.dart';
 import '../data/medication_repository.dart';
 import '../domain/medication.dart';
 import '../domain/medication_text_parser.dart';
@@ -58,6 +59,10 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen> {
                   const _AllergyInteractionCheckCard(),
                   const SizedBox(height: 16),
                   _MedicationSummary(activeCount: activeCount),
+                  const SizedBox(height: 14),
+                  GpVoiceNavigation(
+                    content: _medicationVoiceContent(medications),
+                  ),
                   const SizedBox(height: 14),
                   _MedicationActionRow(
                     showInactive: _showInactive,
@@ -254,6 +259,39 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen> {
       reminderTimes: medication.reminderTimes,
     );
   }
+}
+
+String _medicationVoiceContent(List<Medication> medications) {
+  if (medications.isEmpty) {
+    return 'Medikation. Es sind noch keine Medikamente gespeichert.';
+  }
+  final active = medications.where((medication) => medication.active).toList();
+  final reminderCount = active
+      .where((medication) => medication.reminderEnabled)
+      .length;
+  final buffer = StringBuffer(
+    'Medikation. ${medications.length} Medikamente gespeichert. ${active.length} aktive Medikamente. ',
+  );
+  if (reminderCount > 0) {
+    buffer.write('$reminderCount Medikamente mit Erinnerung. ');
+  }
+  for (final medication in active.take(8)) {
+    buffer
+      ..write(medication.name)
+      ..write(', ')
+      ..write(medication.dosage)
+      ..write(', ')
+      ..write(medication.frequency)
+      ..write('. ');
+    final reason = medication.reason;
+    if (reason != null && reason.trim().isNotEmpty) {
+      buffer
+        ..write('Grund: ')
+        ..write(reason.trim())
+        ..write('. ');
+    }
+  }
+  return buffer.toString();
 }
 
 class _MedicationPageTitle extends StatelessWidget {

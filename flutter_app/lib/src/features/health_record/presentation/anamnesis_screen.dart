@@ -6,6 +6,7 @@ import '../../../core/storage/database_provider.dart';
 import '../../../shared_ui/gp_colors.dart';
 import '../../../shared_ui/gp_icons.dart';
 import '../../../shared_ui/gp_screen.dart';
+import '../../../shared_ui/gp_voice_navigation.dart';
 import '../data/health_record_repository.dart';
 import '../domain/anamnesis_payload_builder.dart';
 import '../domain/health_record.dart';
@@ -43,9 +44,11 @@ class _AnamnesisScreenState extends ConsumerState<AnamnesisScreen> {
                     title: 'Krankengeschichte',
                     subtitle: 'Ihre medizinische Anamnese',
                     actionLabel: 'Bearbeiten',
-                    icon: Icons.description_outlined,
+                    icon: GpIcons.anamnesis,
                     onPressed: () => _openEditor(repo),
                   ),
+                  const SizedBox(height: 16),
+                  GpVoiceNavigation(content: _anamnesisVoiceContent(entries)),
                   const SizedBox(height: 16),
                   _AnamnesisQrCard(
                     entries: entries,
@@ -342,4 +345,32 @@ class _AnamnesisEditorState extends State<_AnamnesisEditor> {
 String? _emptyToNull(String value) {
   final trimmed = value.trim();
   return trimmed.isEmpty ? null : trimmed;
+}
+
+String _anamnesisVoiceContent(List<MedicalHistoryEntry> entries) {
+  if (entries.isEmpty) {
+    return 'Ihre Krankengeschichte. Es sind noch keine medizinischen Einträge gespeichert. Lebensstil: Rauchen, Nichtraucher.';
+  }
+
+  final activeEntries = entries.where((entry) => entry.active).length;
+  final buffer = StringBuffer(
+    'Ihre Krankengeschichte. ${entries.length} Einträge gespeichert. ',
+  );
+  if (activeEntries > 0) {
+    buffer.write('$activeEntries aktive Einträge. ');
+  }
+  for (final entry in entries.take(5)) {
+    buffer
+      ..write(entry.category)
+      ..write(': ')
+      ..write(entry.title)
+      ..write('. ');
+    final details = entry.details;
+    if (details != null && details.trim().isNotEmpty) {
+      buffer
+        ..write(details.trim())
+        ..write('. ');
+    }
+  }
+  return buffer.toString();
 }
