@@ -17,9 +17,9 @@
 | Gewicht | `/vitals/weight` | Vital values | implemented | User can log weight locally and see BMI per entry when height is present. |
 | Impfpass | `/prevention/vaccination` | Prevention and vaccination | implemented | User can create and list local vaccination records with optional booster due date. |
 | Vorsorge | `/prevention/care` | Prevention and vaccination | implemented | User can create native local preventive-care reminders and mark them done. |
-| Notfallprofil | `/emergency/profile` | Emergency | implemented | User sees a QR-backed emergency profile built from local profile, diagnosis, medication, allergy, and contact records. |
+| Notfallprofil | `/emergency/profile` | Emergency | implemented | User sees a QR-backed emergency profile built from local records and can use native phone/SMS handoff for emergency contacts. |
 | Notfall-Einrichtung | `/emergency/setup` | Emergency | implemented | User can create, verify, list, and delete local emergency contacts. |
-| Offline-Notfall | `/emergency/offline` | Emergency | implemented | Emergency screen renders local medication, allergy, contact, and QR payload data without backend access. |
+| Offline-Notfall | `/emergency/offline` | Emergency | implemented | Emergency screen renders local medication, allergy, contact, QR payload, and native contact handoff without backend access. |
 | Dokumenten-Scan | `/documents/scan` | Documents and scanning | implemented | User can capture or attach document images and store metadata locally. |
 | Gescannte-Dokumente | `/documents` | Documents and scanning | implemented | User can list and delete locally stored documents. |
 | Daten-Export | `/export` | Local export and sharing | implemented | User can export local health record JSON and share the generated file. |

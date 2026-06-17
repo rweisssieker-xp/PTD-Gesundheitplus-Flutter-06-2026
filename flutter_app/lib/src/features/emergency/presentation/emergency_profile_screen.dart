@@ -8,6 +8,7 @@ import '../../../shared_ui/gp_icons.dart';
 import '../data/emergency_repository.dart';
 import '../domain/emergency_payload_builder.dart';
 import '../domain/emergency_profile.dart';
+import 'emergency_contact_actions.dart';
 
 class EmergencyProfileScreen extends ConsumerWidget {
   const EmergencyProfileScreen({super.key});
@@ -60,14 +61,7 @@ class EmergencyProfileScreen extends ConsumerWidget {
                     values: profile.allergies,
                     empty: 'Keine Allergien gespeichert',
                   ),
-                  _Section(
-                    title: 'Notfallkontakte',
-                    icon: GpIcons.family,
-                    values: profile.contacts
-                        .map((contact) => '${contact.name}: ${contact.phone}')
-                        .toList(),
-                    empty: 'Keine Kontakte mit Telefonnummer',
-                  ),
+                  EmergencyContactsSection(contacts: profile.contacts),
                 ],
               );
             },

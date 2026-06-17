@@ -42,6 +42,7 @@ All rows are implemented and the router no longer uses placeholder feature shell
 - Medication, appointment, preventive-care, and dementia-support reminders are scheduled as native local notifications on-device.
 - The notification center shows system notification permission state and links blocked users to app settings.
 - The iOS bundle display name is set to `Gesundheit Plus`.
+- Emergency contacts expose native phone and SMS handoff actions from the emergency profile and offline emergency views.
 
 ## Remaining production gates
 

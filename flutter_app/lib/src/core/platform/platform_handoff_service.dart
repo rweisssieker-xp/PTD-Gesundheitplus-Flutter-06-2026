@@ -1,6 +1,8 @@
 import 'package:url_launcher/url_launcher.dart';
 
 class PlatformHandoffService {
+  const PlatformHandoffService();
+
   static Uri smsUri(String phone, String body) =>
       Uri(scheme: 'sms', path: phone, queryParameters: {'body': body});
 
