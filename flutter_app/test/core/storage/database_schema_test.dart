@@ -9,6 +9,7 @@ void main() {
       containsAll([
         'local_profiles',
         'medications',
+        'medication_logs',
         'appointments',
         'allergies',
         'emergency_contacts',

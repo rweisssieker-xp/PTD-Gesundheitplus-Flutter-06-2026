@@ -45,12 +45,54 @@ class AppDatabase {
         dosage TEXT,
         frequency TEXT,
         active INTEGER NOT NULL DEFAULT 1,
+        schedule TEXT,
         start_date TEXT,
+        end_date TEXT,
+        prescribed_by TEXT,
+        reason TEXT,
+        reminder_enabled INTEGER NOT NULL DEFAULT 1,
+        reminder_times_json TEXT NOT NULL DEFAULT '[]',
         supply_duration_days INTEGER,
         refill_reminder_days INTEGER,
+        notes TEXT,
         created_at TEXT NOT NULL,
         updated_at TEXT NOT NULL
       );
+    ''');
+    _ensureColumn('medications', 'schedule', 'TEXT');
+    _ensureColumn('medications', 'end_date', 'TEXT');
+    _ensureColumn('medications', 'prescribed_by', 'TEXT');
+    _ensureColumn('medications', 'reason', 'TEXT');
+    _ensureColumn(
+      'medications',
+      'reminder_enabled',
+      'INTEGER NOT NULL DEFAULT 1',
+    );
+    _ensureColumn(
+      'medications',
+      'reminder_times_json',
+      "TEXT NOT NULL DEFAULT '[]'",
+    );
+    _ensureColumn('medications', 'notes', 'TEXT');
+    _db.execute('''
+      CREATE TABLE IF NOT EXISTS medication_logs (
+        id TEXT PRIMARY KEY,
+        medication_id TEXT NOT NULL,
+        medication_name TEXT NOT NULL,
+        scheduled_time TEXT NOT NULL,
+        dosage_taken TEXT,
+        status TEXT NOT NULL DEFAULT 'pending',
+        date TEXT NOT NULL,
+        taken_at TEXT,
+        notes TEXT,
+        confirmed_by_voice INTEGER NOT NULL DEFAULT 0,
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+      );
+    ''');
+    _db.execute('''
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_medication_logs_unique_slot
+      ON medication_logs (medication_id, date, scheduled_time);
     ''');
     _db.execute('''
       CREATE TABLE IF NOT EXISTS appointments (
@@ -106,5 +148,13 @@ class AppDatabase {
         updated_at TEXT NOT NULL
       );
     ''');
+  }
+
+  void _ensureColumn(String table, String column, String definition) {
+    final columns = _db.select('PRAGMA table_info($table)');
+    final exists = columns.any((row) => row['name'] == column);
+    if (!exists) {
+      _db.execute('ALTER TABLE $table ADD COLUMN $column $definition');
+    }
   }
 }

@@ -7,8 +7,8 @@
 | Anamnese | `/health/anamnesis` | Health record | not started | User can create and edit medical history. |
 | Behandlungshistorie | `/health/treatments` | Health record | not started | User can create, edit, delete, and sort treatments by date. |
 | Heilberufe | `/health/professionals` | Health record | not started | User can manage healthcare professionals. |
-| Medikation | `/medication` | Medication management | implemented | Medication domain model, local repository, test coverage, and native route exist. |
-| Medikamenten-Tagesplan | `/medication/daily-plan` | Medication management | not started | User can mark daily medication intake. |
+| Medikation | `/medication` | Medication management | implemented | User can add, edit, deactivate, delete, and list local medications with reminder times. |
+| Medikamenten-Tagesplan | `/medication/daily-plan` | Medication management | implemented | User can generate daily medication logs and mark intake as taken or skipped. |
 | Medikations-Interaktionen | `/medication/interactions` | Medication safety and interactions | not started | User can review stored interaction guidance. |
 | Wechselwirkungen-Checker | `/medication/interaction-checker` | Medication safety and interactions | not started | User can run an AI-supported interaction check after consent. |
 | Blutdruck | `/vitals/blood-pressure` | Vital values | not started | User can log systolic, diastolic, and pulse values. |

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../shared_ui/gp_action_tile.dart';
 import '../../../shared_ui/gp_colors.dart';
@@ -48,27 +49,33 @@ class DashboardScreen extends StatelessWidget {
                       label: 'KI-Coach',
                       icon: GpIcons.aiCoach,
                       colors: GpColors.purplePink,
-                      onTap: () {},
+                      onTap: () => context.go('/ai/coach'),
                     ),
                     GpActionTile(
                       label: 'Scan',
                       icon: GpIcons.scan,
                       colors: GpColors.indigo,
-                      onTap: () {},
+                      onTap: () => context.go('/documents/scan'),
                     ),
                     GpActionTile(
                       label: 'Tagesplan',
                       icon: GpIcons.dailyPlan,
                       colors: GpColors.orange,
-                      onTap: () {},
+                      onTap: () => context.go('/medication/daily-plan'),
                     ),
                     GpActionTile(
                       label: 'KI-Chat',
                       icon: GpIcons.chat,
                       colors: GpColors.purplePink,
-                      onTap: () {},
+                      onTap: () => context.go('/ai/coach'),
                     ),
                   ],
+                ),
+                const SizedBox(height: 12),
+                FilledButton.icon(
+                  onPressed: () => context.go('/medication'),
+                  icon: const Icon(GpIcons.medication),
+                  label: const Text('Medikation verwalten'),
                 ),
               ],
             ),

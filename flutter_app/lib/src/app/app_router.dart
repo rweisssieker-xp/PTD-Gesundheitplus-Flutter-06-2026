@@ -4,6 +4,7 @@ import '../features/dashboard/presentation/dashboard_screen.dart';
 import '../features/emergency/domain/emergency_payload_builder.dart';
 import '../features/emergency/domain/emergency_profile.dart';
 import '../features/emergency/presentation/emergency_profile_screen.dart';
+import '../features/medication/presentation/medication_daily_plan_screen.dart';
 import '../features/medication/presentation/medication_screen.dart';
 import '../shared_ui/feature_shell_screen.dart';
 
@@ -35,8 +36,7 @@ final appRouter = GoRouter(
     ),
     GoRoute(
       path: '/medication/daily-plan',
-      builder: (context, state) =>
-          const FeatureShellScreen(title: 'Medikamenten-Tagesplan'),
+      builder: (context, state) => const MedicationDailyPlanScreen(),
     ),
     GoRoute(
       path: '/medication/interactions',

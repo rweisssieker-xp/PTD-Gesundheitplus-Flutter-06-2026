@@ -9,6 +9,7 @@ class AppTables {
 
   static const localProfiles = AppTable('local_profiles');
   static const medications = AppTable('medications');
+  static const medicationLogs = AppTable('medication_logs');
   static const appointments = AppTable('appointments');
   static const allergies = AppTable('allergies');
   static const emergencyContacts = AppTable('emergency_contacts');
@@ -18,6 +19,7 @@ class AppTables {
   static const all = [
     localProfiles,
     medications,
+    medicationLogs,
     appointments,
     allergies,
     emergencyContacts,
