@@ -4,7 +4,7 @@
 | --- | --- | --- | --- | --- |
 | Home | `/` | Dashboard and navigation | implemented | User can reach primary dashboard actions from a native dashboard that mirrors the PWA mobile layout, colors, icons, and shell controls. |
 | Gesundheits-Dashboard | `/dashboard/health` | Dashboard and navigation | implemented | User sees local summary cards for medication, appointments, vital values, and alerts. |
-| Anamnese | `/health/anamnesis` | Health record | implemented | User can create, list, and delete local medical history entries. |
+| Anamnese | `/health/anamnesis` | Health record | implemented | User can create, list, delete, and share local medical history entries through an offline-readable QR payload. |
 | Behandlungshistorie | `/health/treatments` | Health record | implemented | User can create, list, delete, and sort treatments by date. |
 | Heilberufe | `/health/professionals` | Health record | implemented | User can create, list, and delete local healthcare professionals. |
 | Allergien | `/health/allergies` | Health record | implemented | User can create, edit, group, list, and delete local allergies with severity warnings. |

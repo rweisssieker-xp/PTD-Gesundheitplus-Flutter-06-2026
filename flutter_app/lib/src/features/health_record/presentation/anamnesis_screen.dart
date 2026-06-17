@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../../core/storage/database_provider.dart';
 import '../../../shared_ui/gp_colors.dart';
 import '../../../shared_ui/gp_icons.dart';
 import '../../../shared_ui/gp_screen.dart';
 import '../data/health_record_repository.dart';
+import '../domain/anamnesis_payload_builder.dart';
 import '../domain/health_record.dart';
 
 class AnamnesisScreen extends ConsumerStatefulWidget {
@@ -17,6 +19,7 @@ class AnamnesisScreen extends ConsumerStatefulWidget {
 
 class _AnamnesisScreenState extends ConsumerState<AnamnesisScreen> {
   int _reload = 0;
+  bool _showQrCode = false;
 
   @override
   Widget build(BuildContext context) {
@@ -44,6 +47,12 @@ class _AnamnesisScreenState extends ConsumerState<AnamnesisScreen> {
                 padding: const EdgeInsets.all(16),
                 children: [
                   _HealthRecordHeader(count: entries.length, title: 'Anamnese'),
+                  const SizedBox(height: 16),
+                  _AnamnesisQrCard(
+                    entries: entries,
+                    visible: _showQrCode,
+                    onToggle: () => setState(() => _showQrCode = !_showQrCode),
+                  ),
                   const SizedBox(height: 16),
                   if (entries.isEmpty)
                     const Card(
@@ -94,6 +103,74 @@ class _AnamnesisScreenState extends ConsumerState<AnamnesisScreen> {
       builder: (context) => _AnamnesisEditor(repo: repo),
     );
     if (saved == true) setState(() => _reload++);
+  }
+}
+
+class _AnamnesisQrCard extends StatelessWidget {
+  const _AnamnesisQrCard({
+    required this.entries,
+    required this.visible,
+    required this.onToggle,
+  });
+
+  final List<MedicalHistoryEntry> entries;
+  final bool visible;
+  final VoidCallback onToggle;
+
+  @override
+  Widget build(BuildContext context) {
+    final payload = AnamnesisPayloadBuilder().build(entries);
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.qr_code_2, color: GpColors.emergencyRed),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'QR-Code für Weitergabe',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            FilledButton.icon(
+              onPressed: entries.isEmpty ? null : onToggle,
+              icon: const Icon(Icons.qr_code_2),
+              label: Text(
+                visible ? 'QR-Code ausblenden' : 'QR-Code generieren',
+              ),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Ärzte können Ihre Anamnese mit dem QR-Code einlesen. Teilen Sie ihn nur mit medizinischem Fachpersonal.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: GpColors.textSecondary, fontSize: 12),
+            ),
+            if (visible) ...[
+              const SizedBox(height: 16),
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  border: Border.all(color: GpColors.border, width: 2),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: QrImageView(data: payload, size: 210),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
   }
 }
 
