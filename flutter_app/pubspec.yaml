@@ -42,9 +42,9 @@ dependencies:
   qr_flutter: ^4.1.0
   share_plus: ^10.1.2
   sqlite3: ^2.9.4
+  sqlcipher_flutter_libs: ^0.6.8
   url_launcher: ^6.3.1
   uuid: ^4.5.1
-  sqlite3_flutter_libs: ^0.6.0+eol
 
 dev_dependencies:
   flutter_test:

@@ -7,7 +7,7 @@ Date: 2026-06-17
 - `flutter doctor -v`: no issues after installing Android SDK command-line tools and accepting Android licenses.
 - `dart format lib test`: clean.
 - `flutter analyze`: no issues.
-- `flutter test`: 47 tests passed.
+- `flutter test`: 48 tests passed.
 - `flutter build apk --debug`: built successfully.
 - `flutter build apk --release`: built successfully with local release keystore.
 - `flutter build appbundle --release`: built successfully with local release keystore.
@@ -32,6 +32,13 @@ Keep a secure backup of the generated upload keystore and passwords before publi
 
 The authoritative feature matrix is `docs/superpowers/tracking/flutter-feature-matrix.md`.
 All rows are implemented and the router no longer uses placeholder feature shells.
+
+## Local data protection
+
+- Structured health data is stored in a SQLCipher-backed local SQLite database.
+- The database encryption key is generated on-device and stored through `flutter_secure_storage`, backed by iOS Keychain / Android Keystore.
+- App access is protected by local PIN and optional device biometric unlock where supported.
+- Document files copied into app storage are removed during the privacy data wipe before their metadata rows are deleted.
 
 ## Remaining production gates
 

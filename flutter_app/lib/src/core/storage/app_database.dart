@@ -3,13 +3,18 @@ import 'package:sqlite3/sqlite3.dart';
 import 'tables.dart';
 
 class AppDatabase {
-  AppDatabase._(this._db) {
+  AppDatabase._(this._db, {String? encryptionKey}) {
+    if (encryptionKey != null) {
+      _db.execute("PRAGMA key = '${_escapePragmaString(encryptionKey)}';");
+      _db.select('SELECT count(*) FROM sqlite_master');
+    }
     _migrate();
   }
 
   factory AppDatabase.memory() => AppDatabase._(sqlite3.openInMemory());
 
-  factory AppDatabase.local(String path) => AppDatabase._(sqlite3.open(path));
+  factory AppDatabase.local(String path, {required String encryptionKey}) =>
+      AppDatabase._(sqlite3.open(path), encryptionKey: encryptionKey);
 
   final Database _db;
 
@@ -369,4 +374,7 @@ class AppDatabase {
       _db.execute('ALTER TABLE $table ADD COLUMN $column $definition');
     }
   }
+
+  static String _escapePragmaString(String value) =>
+      value.replaceAll("'", "''");
 }
