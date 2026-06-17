@@ -9,6 +9,7 @@ import '../../../shared_ui/gp_voice_navigation.dart';
 import '../data/appointment_repository.dart';
 import '../domain/healthcare_professional.dart';
 import '../domain/healthcare_professional_directory.dart';
+import '../domain/healthcare_professional_text_parser.dart';
 
 class HealthcareProfessionalsScreen extends ConsumerStatefulWidget {
   const HealthcareProfessionalsScreen({super.key});
@@ -22,12 +23,16 @@ class _HealthcareProfessionalsScreenState
     extends ConsumerState<HealthcareProfessionalsScreen> {
   final _directory = const HealthcareProfessionalDirectory();
   final _directorySearch = TextEditingController();
+  final _assistantText = TextEditingController();
+  HealthcareProfessionalTextSuggestion? _assistantSuggestion;
+  String? _assistantError;
   var _directoryQuery = '';
   int _reload = 0;
 
   @override
   void dispose() {
     _directorySearch.dispose();
+    _assistantText.dispose();
     super.dispose();
   }
 
@@ -60,6 +65,16 @@ class _HealthcareProfessionalsScreenState
                   const SizedBox(height: 12),
                   GpVoiceNavigation(
                     content: _professionalsVoiceContent(professionals),
+                  ),
+                  const SizedBox(height: 16),
+                  _ProfessionalTextAssistantCard(
+                    controller: _assistantText,
+                    suggestion: _assistantSuggestion,
+                    error: _assistantError,
+                    onParse: _parseAssistantText,
+                    onSave: _assistantSuggestion?.isComplete == true
+                        ? () => _saveAssistantSuggestion(repo)
+                        : null,
                   ),
                   const SizedBox(height: 16),
                   _DoctorSearchCard(
@@ -140,6 +155,52 @@ class _HealthcareProfessionalsScreenState
     });
   }
 
+  void _parseAssistantText() {
+    final input = _assistantText.text.trim();
+    if (input.isEmpty) {
+      setState(() {
+        _assistantSuggestion = null;
+        _assistantError = 'Bitte beschreiben Sie den Behandler zuerst.';
+      });
+      return;
+    }
+    final suggestion = const HealthcareProfessionalTextParser().parse(input);
+    setState(() {
+      _assistantSuggestion = suggestion;
+      _assistantError = suggestion.isComplete
+          ? null
+          : 'Fehlt noch: ${suggestion.missingFields.join(', ')}';
+    });
+  }
+
+  Future<void> _saveAssistantSuggestion(AppointmentRepository repo) async {
+    final suggestion = _assistantSuggestion;
+    if (suggestion == null || !suggestion.isComplete) {
+      _parseAssistantText();
+      return;
+    }
+    await repo.saveProfessional(
+      repo.newProfessional(
+        name: suggestion.name!.trim(),
+        specialty: suggestion.specialty!.trim(),
+        address: suggestion.address,
+        phone: suggestion.phone,
+        email: suggestion.email,
+        notes: 'Aus lokaler Texteingabe erstellt: ${suggestion.originalText}',
+      ),
+    );
+    if (!mounted) return;
+    _assistantText.clear();
+    setState(() {
+      _assistantSuggestion = null;
+      _assistantError = null;
+      _reload++;
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Behandler aus Texteingabe gespeichert.')),
+    );
+  }
+
   Future<void> _addSuggestedProfessional(
     AppointmentRepository repo,
     HealthcareProfessionalSuggestion suggestion,
@@ -173,6 +234,180 @@ class _HealthcareProfessionalsScreenState
       context,
     ).showSnackBar(SnackBar(content: Text('${suggestion.name} übernommen')));
     _refresh();
+  }
+}
+
+class _ProfessionalTextAssistantCard extends StatelessWidget {
+  const _ProfessionalTextAssistantCard({
+    required this.controller,
+    required this.suggestion,
+    required this.error,
+    required this.onParse,
+    required this.onSave,
+  });
+
+  final TextEditingController controller;
+  final HealthcareProfessionalTextSuggestion? suggestion;
+  final String? error;
+  final VoidCallback onParse;
+  final VoidCallback? onSave;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: const Color(0xFFF0FDF4),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+        side: const BorderSide(color: Color(0xFFBBF7D0), width: 2),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.mic_outlined, color: Color(0xFF16A34A)),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Lokale Behandler-Eingabe',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Beschreiben Sie Name, Fachrichtung und Kontaktdaten wie gesprochen. Die App erkennt die Daten direkt auf dem Gerät.',
+              style: TextStyle(color: GpColors.textSecondary, fontSize: 13),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: controller,
+              minLines: 2,
+              maxLines: 4,
+              decoration: const InputDecoration(
+                labelText: 'Behandler beschreiben',
+                hintText:
+                    'Dr. Schmidt Kardiologe in Hauptstrasse 4 Telefon 030 123456',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            if (suggestion != null) ...[
+              const SizedBox(height: 12),
+              _ProfessionalSuggestionPreview(suggestion: suggestion!),
+            ],
+            if (error != null) ...[
+              const SizedBox(height: 10),
+              Text(
+                error!,
+                style: const TextStyle(
+                  color: GpColors.emergencyRed,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: onParse,
+                    icon: const Icon(Icons.auto_fix_high_outlined),
+                    label: const Text('Erkennen'),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: FilledButton.icon(
+                    onPressed: onSave,
+                    icon: const Icon(Icons.check),
+                    label: const Text('Speichern'),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ProfessionalSuggestionPreview extends StatelessWidget {
+  const _ProfessionalSuggestionPreview({required this.suggestion});
+
+  final HealthcareProfessionalTextSuggestion suggestion;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: GpColors.border, width: 2),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Erkannter Vorschlag',
+              style: TextStyle(fontWeight: FontWeight.w800),
+            ),
+            const SizedBox(height: 8),
+            _ParsedProfessionalLine(
+              icon: Icons.person_outline,
+              label: suggestion.name ?? 'Name fehlt',
+            ),
+            _ParsedProfessionalLine(
+              icon: Icons.local_hospital_outlined,
+              label: suggestion.specialty ?? 'Fachrichtung fehlt',
+            ),
+            if ((suggestion.address ?? '').isNotEmpty)
+              _ParsedProfessionalLine(
+                icon: Icons.place_outlined,
+                label: suggestion.address!,
+              ),
+            if ((suggestion.phone ?? '').isNotEmpty)
+              _ParsedProfessionalLine(
+                icon: Icons.phone_outlined,
+                label: suggestion.phone!,
+              ),
+            if ((suggestion.email ?? '').isNotEmpty)
+              _ParsedProfessionalLine(
+                icon: Icons.email_outlined,
+                label: suggestion.email!,
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ParsedProfessionalLine extends StatelessWidget {
+  const _ParsedProfessionalLine({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 4),
+      child: Row(
+        children: [
+          Icon(icon, size: 17, color: GpColors.textSecondary),
+          const SizedBox(width: 6),
+          Expanded(child: Text(label)),
+        ],
+      ),
+    );
   }
 }
 
