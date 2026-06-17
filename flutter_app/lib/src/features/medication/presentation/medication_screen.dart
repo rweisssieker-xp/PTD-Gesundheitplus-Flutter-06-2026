@@ -11,6 +11,7 @@ import '../../../shared_ui/gp_screen.dart';
 import '../../../shared_ui/gp_voice_navigation.dart';
 import '../data/medication_repository.dart';
 import '../domain/medication.dart';
+import '../domain/medication_text_parser.dart';
 
 class MedicationScreen extends ConsumerStatefulWidget {
   const MedicationScreen({super.key});
@@ -23,6 +24,15 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen> {
   bool _showInactive = false;
   int _reload = 0;
   final _notifications = NativeNotificationService();
+  final _assistantText = TextEditingController();
+  MedicationTextSuggestion? _assistantSuggestion;
+  String? _assistantError;
+
+  @override
+  void dispose() {
+    _assistantText.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,6 +64,16 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen> {
                   const SizedBox(height: 12),
                   GpVoiceNavigation(
                     content: _medicationVoiceContent(medications),
+                  ),
+                  const SizedBox(height: 12),
+                  _MedicationTextAssistantCard(
+                    controller: _assistantText,
+                    suggestion: _assistantSuggestion,
+                    error: _assistantError,
+                    onParse: _parseAssistantText,
+                    onSave: _assistantSuggestion?.isComplete == true
+                        ? () => _saveAssistantSuggestion(repo)
+                        : null,
                   ),
                   const SizedBox(height: 12),
                   SwitchListTile(
@@ -143,6 +163,77 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen> {
     });
   }
 
+  void _parseAssistantText() {
+    final input = _assistantText.text.trim();
+    if (input.isEmpty) {
+      setState(() {
+        _assistantSuggestion = null;
+        _assistantError = 'Bitte beschreiben Sie das Medikament zuerst.';
+      });
+      return;
+    }
+    final suggestion = const MedicationTextParser().parse(input);
+    setState(() {
+      _assistantSuggestion = suggestion;
+      _assistantError = suggestion.isComplete
+          ? null
+          : 'Fehlt noch: ${suggestion.missingFields.join(', ')}';
+    });
+  }
+
+  Future<void> _saveAssistantSuggestion(MedicationRepository repo) async {
+    final suggestion = _assistantSuggestion;
+    if (suggestion == null || !suggestion.isComplete) {
+      _parseAssistantText();
+      return;
+    }
+    final medication = Medication(
+      id: const Uuid().v4(),
+      name: suggestion.name!.trim(),
+      dosage: suggestion.dosage!.trim(),
+      frequency: suggestion.frequency!.trim(),
+      schedule: suggestion.reminderTimes.isEmpty
+          ? suggestion.frequency!.trim()
+          : 'Erinnerung ${suggestion.reminderTimes.join(', ')}',
+      startDate: DateTime.now(),
+      endDate: null,
+      prescribedBy: suggestion.prescribedBy,
+      reason: suggestion.reason,
+      reminderEnabled: suggestion.reminderTimes.isNotEmpty,
+      reminderTimes: suggestion.reminderTimes.isEmpty
+          ? const ['08:00']
+          : suggestion.reminderTimes,
+      supplyDurationDays: null,
+      refillReminderDays: 7,
+      notes: 'Aus lokaler Texteingabe erstellt: ${suggestion.originalText}',
+      active: true,
+    );
+    await repo.save(medication);
+    try {
+      await _scheduleMedication(medication);
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Medikament gespeichert, Benachrichtigung konnte nicht geplant werden.',
+            ),
+          ),
+        );
+      }
+    }
+    if (!mounted) return;
+    _assistantText.clear();
+    setState(() {
+      _assistantSuggestion = null;
+      _assistantError = null;
+      _reload++;
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Medikament aus Texteingabe gespeichert.')),
+    );
+  }
+
   Future<void> _scheduleMedication(Medication medication) async {
     if (!medication.active || !medication.reminderEnabled) return;
     final reminders = NotificationScheduler().medicationReminders(
@@ -166,6 +257,184 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen> {
     return _notifications.cancelMedicationReminders(
       medicationId: medication.id,
       reminderTimes: medication.reminderTimes,
+    );
+  }
+}
+
+class _MedicationTextAssistantCard extends StatelessWidget {
+  const _MedicationTextAssistantCard({
+    required this.controller,
+    required this.suggestion,
+    required this.error,
+    required this.onParse,
+    required this.onSave,
+  });
+
+  final TextEditingController controller;
+  final MedicationTextSuggestion? suggestion;
+  final String? error;
+  final VoidCallback onParse;
+  final VoidCallback? onSave;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: const Color(0xFFFFF7ED),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+        side: const BorderSide(color: Color(0xFFFED7AA), width: 2),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.mic_outlined, color: Color(0xFFEA580C)),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Lokale Medikamenteneingabe',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Beschreiben Sie Name, Dosierung und Einnahme wie gesprochen. Die App erkennt die Daten direkt auf dem Gerät.',
+              style: TextStyle(color: GpColors.textSecondary, fontSize: 13),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: controller,
+              minLines: 2,
+              maxLines: 4,
+              decoration: const InputDecoration(
+                labelText: 'Medikament beschreiben',
+                hintText:
+                    'Ramipril 5mg einmal taeglich morgens wegen Blutdruck',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            if (suggestion != null) ...[
+              const SizedBox(height: 12),
+              _MedicationSuggestionPreview(suggestion: suggestion!),
+            ],
+            if (error != null) ...[
+              const SizedBox(height: 10),
+              Text(
+                error!,
+                style: const TextStyle(
+                  color: GpColors.emergencyRed,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: onParse,
+                    icon: const Icon(Icons.auto_fix_high_outlined),
+                    label: const Text('Erkennen'),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: FilledButton.icon(
+                    onPressed: onSave,
+                    icon: const Icon(Icons.check),
+                    label: const Text('Speichern'),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _MedicationSuggestionPreview extends StatelessWidget {
+  const _MedicationSuggestionPreview({required this.suggestion});
+
+  final MedicationTextSuggestion suggestion;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: GpColors.border, width: 2),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Erkannter Vorschlag',
+              style: TextStyle(fontWeight: FontWeight.w800),
+            ),
+            const SizedBox(height: 8),
+            _SuggestionLine(
+              icon: Icons.medication_outlined,
+              label: suggestion.name ?? 'Medikament fehlt',
+            ),
+            _SuggestionLine(
+              icon: Icons.science_outlined,
+              label: suggestion.dosage ?? 'Dosierung fehlt',
+            ),
+            _SuggestionLine(
+              icon: Icons.repeat_outlined,
+              label: suggestion.frequency ?? 'Haeufigkeit fehlt',
+            ),
+            if ((suggestion.reason ?? '').isNotEmpty)
+              _SuggestionLine(
+                icon: Icons.info_outline,
+                label: suggestion.reason!,
+              ),
+            if ((suggestion.prescribedBy ?? '').isNotEmpty)
+              _SuggestionLine(
+                icon: Icons.person_outline,
+                label: suggestion.prescribedBy!,
+              ),
+            if (suggestion.reminderTimes.isNotEmpty)
+              _SuggestionLine(
+                icon: Icons.notifications_outlined,
+                label: 'Erinnerung ${suggestion.reminderTimes.join(', ')}',
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SuggestionLine extends StatelessWidget {
+  const _SuggestionLine({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 4),
+      child: Row(
+        children: [
+          Icon(icon, size: 17, color: GpColors.textSecondary),
+          const SizedBox(width: 6),
+          Expanded(child: Text(label)),
+        ],
+      ),
     );
   }
 }
