@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import '../../../core/storage/app_database.dart';
 
 class LocalPrivacyRepository {
@@ -41,6 +43,15 @@ class LocalPrivacyRepository {
   }
 
   Future<void> clearAllLocalData() async {
+    final documentRows = _db.select('SELECT local_path FROM health_documents');
+    for (final row in documentRows) {
+      final path = row['local_path'] as String?;
+      if (path == null || path.isEmpty) continue;
+      final file = File(path);
+      if (file.existsSync()) {
+        await file.delete();
+      }
+    }
     for (final table in _db.allTables.reversed) {
       _db.execute('DELETE FROM ${table.actualTableName}');
     }
