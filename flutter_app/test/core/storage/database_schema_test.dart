@@ -11,6 +11,7 @@ void main() {
         'medications',
         'medication_logs',
         'appointments',
+        'healthcare_professionals',
         'allergies',
         'emergency_contacts',
         'notifications',

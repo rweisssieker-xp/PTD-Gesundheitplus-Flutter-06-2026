@@ -101,7 +101,45 @@ class AppDatabase {
         starts_at TEXT NOT NULL,
         location TEXT,
         professional_id TEXT,
+        doctor_name TEXT,
+        specialty TEXT,
+        date TEXT,
+        time TEXT,
+        reason TEXT,
+        reminder_enabled INTEGER NOT NULL DEFAULT 1,
+        reminder_hours_before INTEGER NOT NULL DEFAULT 24,
+        notes TEXT,
         status TEXT NOT NULL DEFAULT 'Geplant',
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+      );
+    ''');
+    _ensureColumn('appointments', 'doctor_name', 'TEXT');
+    _ensureColumn('appointments', 'specialty', 'TEXT');
+    _ensureColumn('appointments', 'date', 'TEXT');
+    _ensureColumn('appointments', 'time', 'TEXT');
+    _ensureColumn('appointments', 'reason', 'TEXT');
+    _ensureColumn(
+      'appointments',
+      'reminder_enabled',
+      'INTEGER NOT NULL DEFAULT 1',
+    );
+    _ensureColumn(
+      'appointments',
+      'reminder_hours_before',
+      'INTEGER NOT NULL DEFAULT 24',
+    );
+    _ensureColumn('appointments', 'notes', 'TEXT');
+    _db.execute('''
+      CREATE TABLE IF NOT EXISTS healthcare_professionals (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        specialty TEXT NOT NULL,
+        address TEXT,
+        phone TEXT,
+        email TEXT,
+        notes TEXT,
+        treating_since TEXT,
         created_at TEXT NOT NULL,
         updated_at TEXT NOT NULL
       );

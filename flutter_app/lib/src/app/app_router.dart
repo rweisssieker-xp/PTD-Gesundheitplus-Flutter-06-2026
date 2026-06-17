@@ -1,6 +1,8 @@
 import 'package:go_router/go_router.dart';
 
 import '../features/dashboard/presentation/dashboard_screen.dart';
+import '../features/appointments/presentation/appointments_screen.dart';
+import '../features/appointments/presentation/healthcare_professionals_screen.dart';
 import '../features/emergency/domain/emergency_payload_builder.dart';
 import '../features/emergency/domain/emergency_profile.dart';
 import '../features/emergency/presentation/emergency_profile_screen.dart';
@@ -27,8 +29,11 @@ final appRouter = GoRouter(
     ),
     GoRoute(
       path: '/health/professionals',
-      builder: (context, state) =>
-          const FeatureShellScreen(title: 'Heilberufe'),
+      builder: (context, state) => const HealthcareProfessionalsScreen(),
+    ),
+    GoRoute(
+      path: '/appointments',
+      builder: (context, state) => const AppointmentsScreen(),
     ),
     GoRoute(
       path: '/medication',

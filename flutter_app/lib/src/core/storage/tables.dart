@@ -11,6 +11,7 @@ class AppTables {
   static const medications = AppTable('medications');
   static const medicationLogs = AppTable('medication_logs');
   static const appointments = AppTable('appointments');
+  static const healthcareProfessionals = AppTable('healthcare_professionals');
   static const allergies = AppTable('allergies');
   static const emergencyContacts = AppTable('emergency_contacts');
   static const notifications = AppTable('notifications');
@@ -21,6 +22,7 @@ class AppTables {
     medications,
     medicationLogs,
     appointments,
+    healthcareProfessionals,
     allergies,
     emergencyContacts,
     notifications,

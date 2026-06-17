@@ -77,6 +77,18 @@ class DashboardScreen extends StatelessWidget {
                   icon: const Icon(GpIcons.medication),
                   label: const Text('Medikation verwalten'),
                 ),
+                const SizedBox(height: 8),
+                OutlinedButton.icon(
+                  onPressed: () => context.go('/appointments'),
+                  icon: const Icon(GpIcons.appointments),
+                  label: const Text('Termine verwalten'),
+                ),
+                const SizedBox(height: 8),
+                OutlinedButton.icon(
+                  onPressed: () => context.go('/health/professionals'),
+                  icon: const Icon(GpIcons.healthcare),
+                  label: const Text('Heilberufe verwalten'),
+                ),
               ],
             ),
           ),
