@@ -71,4 +71,43 @@ void main() {
 
     db.close();
   });
+
+  test('stores voice-confirmed intake note', () async {
+    final db = AppDatabase.memory();
+    final repo = MedicationRepository(db);
+    await repo.save(
+      const Medication(
+        id: 'm1',
+        name: 'Ramipril',
+        dosage: '5mg',
+        frequency: '1x taeglich',
+        schedule: 'morgens',
+        startDate: null,
+        endDate: null,
+        prescribedBy: null,
+        reason: null,
+        reminderEnabled: true,
+        reminderTimes: ['08:00'],
+        supplyDurationDays: null,
+        refillReminderDays: 7,
+        notes: null,
+        active: true,
+      ),
+    );
+
+    final logs = await repo.ensureDailyLogs(DateTime(2026, 6, 17));
+    await repo.updateLogStatus(
+      logs.single.id,
+      MedicationLogStatus.taken,
+      takenAt: DateTime(2026, 6, 17, 8, 1),
+      notes: 'Ja, eingenommen',
+      confirmedByVoice: true,
+    );
+
+    final updated = await repo.listLogs(DateTime(2026, 6, 17));
+    expect(updated.single.confirmedByVoice, isTrue);
+    expect(updated.single.notes, 'Ja, eingenommen');
+
+    db.close();
+  });
 }

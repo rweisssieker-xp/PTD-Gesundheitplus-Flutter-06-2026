@@ -53,15 +53,15 @@ class _StorageModeChoice extends StatelessWidget {
   Widget build(BuildContext context) {
     return _StorageGateScaffold(
       child: ListView(
-        padding: const EdgeInsets.fromLTRB(24, 28, 24, 32),
+        padding: const EdgeInsets.fromLTRB(24, 18, 24, 24),
         children: [
           const Text(
             'Gesundheit Plus',
             textAlign: TextAlign.center,
             style: TextStyle(
               color: GpColors.textPrimary,
-              fontSize: 24,
-              fontWeight: FontWeight.w900,
+              fontSize: 22,
+              fontWeight: FontWeight.w800,
             ),
           ),
           const SizedBox(height: 4),
@@ -74,25 +74,29 @@ class _StorageModeChoice extends StatelessWidget {
           const Icon(
             Icons.shield_outlined,
             color: GpColors.emergencyRed,
-            size: 44,
+            size: 42,
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: 14),
           const Text(
             'Wo sollen Ihre Daten gespeichert werden?',
             textAlign: TextAlign.center,
             style: TextStyle(
               color: GpColors.textPrimary,
-              fontSize: 20,
-              fontWeight: FontWeight.w900,
+              fontSize: 19,
+              fontWeight: FontWeight.w800,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
           const Text(
             'Diese Entscheidung können Sie später in den Einstellungen ändern.',
             textAlign: TextAlign.center,
-            style: TextStyle(color: GpColors.textSecondary, fontSize: 14),
+            style: TextStyle(
+              color: GpColors.textSecondary,
+              fontSize: 13,
+              height: 1.35,
+            ),
           ),
-          const SizedBox(height: 28),
+          const SizedBox(height: 18),
           _ModeCard(
             borderColor: const Color(0xFF86EFAC),
             iconColor: const Color(0xFF16A34A),
@@ -115,7 +119,7 @@ class _StorageModeChoice extends StatelessWidget {
             buttonColors: const [Color(0xFF16A34A), Color(0xFF16A34A)],
             onPressed: onSelectLocal,
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: 14),
           _ModeCard(
             borderColor: const Color(0xFFBFDBFE),
             iconColor: const Color(0xFF2563EB),
@@ -231,7 +235,7 @@ class _ModeCard extends StatelessWidget {
         ],
       ),
       child: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.fromLTRB(24, 24, 24, 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -255,8 +259,8 @@ class _ModeCard extends StatelessWidget {
                         title,
                         style: TextStyle(
                           color: titleColor,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w900,
+                          fontSize: 17,
+                          fontWeight: FontWeight.w800,
                         ),
                       ),
                       const SizedBox(height: 2),
@@ -264,7 +268,7 @@ class _ModeCard extends StatelessWidget {
                         subtitle,
                         style: TextStyle(
                           color: subtitleColor,
-                          fontSize: 13,
+                          fontSize: 12,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -273,7 +277,7 @@ class _ModeCard extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 14),
+            const SizedBox(height: 12),
             for (final feature in features)
               Padding(
                 padding: const EdgeInsets.only(bottom: 7),
@@ -291,7 +295,8 @@ class _ModeCard extends StatelessWidget {
                         feature,
                         style: const TextStyle(
                           color: GpColors.textPrimary,
-                          fontSize: 14,
+                          fontSize: 13,
+                          height: 1.2,
                         ),
                       ),
                     ),
@@ -309,17 +314,17 @@ class _ModeCard extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.all(10),
                   child: Text(
-                    '⚠ $warning',
+                    '⚠️ $warning',
                     style: const TextStyle(
                       color: Color(0xFFB45309),
-                      fontSize: 12,
+                      fontSize: 11,
                       height: 1.25,
                     ),
                   ),
                 ),
               ),
             ],
-            const SizedBox(height: 16),
+            const SizedBox(height: 14),
             _GradientChoiceButton(
               label: buttonLabel,
               icon: buttonIcon,
@@ -366,7 +371,7 @@ class _GradientChoiceButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(6),
           onTap: onPressed,
           child: SizedBox(
-            height: 48,
+            height: 40,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -379,7 +384,7 @@ class _GradientChoiceButton extends StatelessWidget {
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 14,
-                      fontWeight: FontWeight.w900,
+                      fontWeight: FontWeight.w800,
                     ),
                   ),
                 ),

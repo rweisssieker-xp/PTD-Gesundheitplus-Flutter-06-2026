@@ -5,6 +5,7 @@ import '../../../core/storage/database_provider.dart';
 import '../../../shared_ui/gp_colors.dart';
 import '../../../shared_ui/gp_screen.dart';
 import '../data/medication_repository.dart';
+import '../domain/medication_intake_text_parser.dart';
 import '../domain/medication.dart';
 
 class MedicationDailyPlanScreen extends ConsumerStatefulWidget {
@@ -19,6 +20,15 @@ class _MedicationDailyPlanScreenState
     extends ConsumerState<MedicationDailyPlanScreen> {
   DateTime _selectedDate = DateTime.now();
   int _reload = 0;
+  final _voiceConfirmationText = TextEditingController();
+  MedicationLog? _voiceConfirmationLog;
+  String? _voiceConfirmationError;
+
+  @override
+  void dispose() {
+    _voiceConfirmationText.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -123,8 +133,21 @@ class _MedicationDailyPlanScreenState
                       (log) => _MedicationLogCard(
                         log: log,
                         onStatus: (status) => _setStatus(repo, log, status),
+                        onVoiceConfirm: _isToday(_selectedDate)
+                            ? () => _openVoiceConfirmation(log)
+                            : null,
                       ),
                     ),
+                  if (_voiceConfirmationLog != null) ...[
+                    const SizedBox(height: 8),
+                    _VoiceConfirmationCard(
+                      log: _voiceConfirmationLog!,
+                      controller: _voiceConfirmationText,
+                      error: _voiceConfirmationError,
+                      onCancel: _closeVoiceConfirmation,
+                      onConfirm: () => _submitVoiceConfirmation(repo),
+                    ),
+                  ],
                 ],
               );
             },
@@ -145,6 +168,54 @@ class _MedicationDailyPlanScreenState
       takenAt: status == MedicationLogStatus.taken ? DateTime.now() : null,
     );
     setState(() {
+      _reload++;
+    });
+  }
+
+  void _openVoiceConfirmation(MedicationLog log) {
+    setState(() {
+      _voiceConfirmationLog = log;
+      _voiceConfirmationText.clear();
+      _voiceConfirmationError = null;
+    });
+  }
+
+  void _closeVoiceConfirmation() {
+    setState(() {
+      _voiceConfirmationLog = null;
+      _voiceConfirmationText.clear();
+      _voiceConfirmationError = null;
+    });
+  }
+
+  Future<void> _submitVoiceConfirmation(MedicationRepository repo) async {
+    final log = _voiceConfirmationLog;
+    if (log == null) return;
+    final result = const MedicationIntakeTextParser().parse(
+      _voiceConfirmationText.text,
+    );
+    if (result.decision == MedicationIntakeDecision.unknown) {
+      setState(() {
+        _voiceConfirmationError =
+            'Bitte "eingenommen" oder "nicht eingenommen" eingeben.';
+      });
+      return;
+    }
+
+    final status = result.decision == MedicationIntakeDecision.taken
+        ? MedicationLogStatus.taken
+        : MedicationLogStatus.skipped;
+    await repo.updateLogStatus(
+      log.id,
+      status,
+      takenAt: status == MedicationLogStatus.taken ? DateTime.now() : null,
+      notes: result.note.isEmpty ? null : result.note,
+      confirmedByVoice: status == MedicationLogStatus.taken,
+    );
+    setState(() {
+      _voiceConfirmationLog = null;
+      _voiceConfirmationText.clear();
+      _voiceConfirmationError = null;
       _reload++;
     });
   }
@@ -207,10 +278,15 @@ class _StatCard extends StatelessWidget {
 }
 
 class _MedicationLogCard extends StatelessWidget {
-  const _MedicationLogCard({required this.log, required this.onStatus});
+  const _MedicationLogCard({
+    required this.log,
+    required this.onStatus,
+    required this.onVoiceConfirm,
+  });
 
   final MedicationLog log;
   final ValueChanged<MedicationLogStatus> onStatus;
+  final VoidCallback? onVoiceConfirm;
 
   @override
   Widget build(BuildContext context) {
@@ -244,6 +320,25 @@ class _MedicationLogCard extends StatelessWidget {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
+                  if (log.confirmedByVoice)
+                    const Padding(
+                      padding: EdgeInsets.only(top: 4),
+                      child: Chip(
+                        avatar: Icon(Icons.mic_outlined, size: 16),
+                        label: Text('Per Sprache'),
+                      ),
+                    ),
+                  if ((log.notes ?? '').isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: Text(
+                        log.notes!,
+                        style: const TextStyle(
+                          color: GpColors.textSecondary,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
                 ],
               ),
             ),
@@ -255,6 +350,11 @@ class _MedicationLogCard extends StatelessWidget {
                   Icons.check_circle_outline,
                   color: Colors.green,
                 ),
+              ),
+              IconButton(
+                tooltip: 'Sprache',
+                onPressed: onVoiceConfirm,
+                icon: const Icon(Icons.mic_outlined, color: Colors.purple),
               ),
               IconButton(
                 tooltip: 'Ueberspringen',
@@ -291,6 +391,100 @@ class _MedicationLogCard extends StatelessWidget {
         Colors.grey,
       ),
     };
+  }
+}
+
+class _VoiceConfirmationCard extends StatelessWidget {
+  const _VoiceConfirmationCard({
+    required this.log,
+    required this.controller,
+    required this.error,
+    required this.onCancel,
+    required this.onConfirm,
+  });
+
+  final MedicationLog log;
+  final TextEditingController controller;
+  final String? error;
+  final VoidCallback onCancel;
+  final VoidCallback onConfirm;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: const Color(0xFFFAF5FF),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+        side: const BorderSide(color: Color(0xFFD8B4FE), width: 2),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.mic_outlined, color: Color(0xFF7E22CE)),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Lokale Einnahme-Bestätigung',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '${log.medicationName} um ${log.scheduledTime} Uhr',
+              style: const TextStyle(fontWeight: FontWeight.w800),
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: controller,
+              minLines: 2,
+              maxLines: 3,
+              decoration: const InputDecoration(
+                labelText: 'Antwort eingeben',
+                hintText: 'Ja, eingenommen / Nein, nicht eingenommen',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            if (error != null) ...[
+              const SizedBox(height: 8),
+              Text(
+                error!,
+                style: const TextStyle(
+                  color: GpColors.emergencyRed,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: onCancel,
+                    child: const Text('Abbrechen'),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: FilledButton.icon(
+                    onPressed: onConfirm,
+                    icon: const Icon(Icons.check),
+                    label: const Text('Auswerten'),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 
