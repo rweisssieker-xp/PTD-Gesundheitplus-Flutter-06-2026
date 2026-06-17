@@ -39,6 +39,12 @@ class LocalPrivacyRepository {
       [allowed ? 1 : 0, allowed ? now : null, now],
     );
   }
+
+  Future<void> clearAllLocalData() async {
+    for (final table in _db.allTables.reversed) {
+      _db.execute('DELETE FROM ${table.actualTableName}');
+    }
+  }
 }
 
 class LocalPrivacySnapshot {

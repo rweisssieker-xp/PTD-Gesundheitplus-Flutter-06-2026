@@ -27,8 +27,8 @@
 | Demenz-Unterstuetzung | `/dementia` | Dementia support | implemented | User can log hydration, meals, and reminders locally. |
 | KI-Gesundheitscoach | `/ai/coach` | AI coach | implemented | User can ask a local consent-gated coach and keep the message history on-device. |
 | Benachrichtigungen | `/notifications` | Notification center | implemented | User can view and mark local notifications as read. |
-| Datenschutz | `/privacy` | Privacy and storage settings | implemented | User can view local storage count and manage AI context consent. |
-| Speicher-Modus | `/privacy/storage` | Privacy and storage settings | implemented | User sees local-only storage mode and per-table local record counts. |
+| Datenschutz | `/privacy` | Privacy and storage settings | implemented | User can view local storage count, manage AI context consent, export data, and delete all local data after confirmation. |
+| Speicher-Modus | `/privacy/storage` | Privacy and storage settings | implemented | User sees local-only storage mode, per-table local record counts, and can clear local data after confirmation. |
 | Telegram-Setup | `/settings/telegram` | Communication settings | implemented | User can configure local Telegram handoff preference. |
 | Twilio-Setup | `/settings/sms` | Communication settings | implemented | User sees and stores native SMS handoff configuration without Twilio backend dependency. |
 | Onboarding | `/onboarding` | Local profile and security setup | implemented | User completes local profile, PIN, and AI consent setup on-device. |

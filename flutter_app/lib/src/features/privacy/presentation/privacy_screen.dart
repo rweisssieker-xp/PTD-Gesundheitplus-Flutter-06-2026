@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/storage/database_provider.dart';
 import '../../../shared_ui/gp_colors.dart';
@@ -89,12 +90,69 @@ class _PrivacyScreenState extends ConsumerState<PrivacyScreen> {
                       ),
                     ),
                   ),
+                  Card(
+                    child: ListTile(
+                      leading: const Icon(Icons.download_outlined),
+                      title: const Text('Daten exportieren'),
+                      subtitle: const Text(
+                        'Lokale Gesundheitsakte als JSON-Datei sichern.',
+                      ),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () => context.go('/export'),
+                    ),
+                  ),
+                  Card(
+                    color: const Color(0xFFFEF2F2),
+                    child: ListTile(
+                      leading: const Icon(
+                        Icons.delete_forever_outlined,
+                        color: GpColors.emergencyRed,
+                      ),
+                      title: const Text('Alle lokalen Daten löschen'),
+                      subtitle: const Text(
+                        'Entfernt Gesundheitsdaten, Kontakte, Dokument-Metadaten, Einstellungen und Nachrichten von diesem Gerät.',
+                      ),
+                      onTap: data == null ? null : () => _confirmClear(repo),
+                    ),
+                  ),
                 ],
               );
             },
           );
         },
       ),
+    );
+  }
+
+  Future<void> _confirmClear(LocalPrivacyRepository repo) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Alle lokalen Daten löschen?'),
+        content: const Text(
+          'Diese Aktion kann nicht rückgängig gemacht werden. Exportiere die Daten vorher, wenn du eine Sicherung behalten möchtest.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Abbrechen'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: GpColors.emergencyRed,
+            ),
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Löschen'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    await repo.clearAllLocalData();
+    if (!mounted) return;
+    setState(() => _reload++);
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Lokale Daten wurden gelöscht.')),
     );
   }
 }
