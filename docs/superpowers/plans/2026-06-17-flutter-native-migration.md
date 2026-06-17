@@ -66,7 +66,7 @@ dependencies:
   geolocator: ^13.0.2
   go_router: ^14.6.2
   image_picker: ^1.1.2
-  intl: ^0.19.0
+  intl: ^0.20.2
   json_annotation: ^4.9.0
   local_auth: ^2.3.0
   path: ^1.9.0
