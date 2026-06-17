@@ -28,7 +28,7 @@ class DashboardScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                    onPressed: () {},
+                    onPressed: () => context.go('/emergency/offline'),
                     icon: const Icon(GpIcons.emergency),
                     label: const Text(
                       'SOS Notfall',
@@ -112,6 +112,12 @@ class DashboardScreen extends StatelessWidget {
                   onPressed: () => context.go('/prevention/care'),
                   icon: const Icon(GpIcons.prevention),
                   label: const Text('Vorsorge planen'),
+                ),
+                const SizedBox(height: 8),
+                OutlinedButton.icon(
+                  onPressed: () => context.go('/emergency/setup'),
+                  icon: const Icon(GpIcons.emergency),
+                  label: const Text('Notfallkontakte verwalten'),
                 ),
               ],
             ),

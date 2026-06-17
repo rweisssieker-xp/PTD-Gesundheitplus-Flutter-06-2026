@@ -17,8 +17,8 @@
 | Impfpass | `/prevention/vaccination` | Prevention and vaccination | implemented | User can create and list local vaccination records with optional booster due date. |
 | Vorsorge | `/prevention/care` | Prevention and vaccination | implemented | User can create local preventive care reminders and mark them done. |
 | Notfallprofil | `/emergency/profile` | Emergency | implemented | Offline emergency payload builder, QR screen, route, and test coverage exist. |
-| Notfall-Einrichtung | `/emergency/setup` | Emergency | not started | User can manage emergency contacts. |
-| Offline-Notfall | `/emergency/offline` | Emergency | not started | Emergency screen works with airplane mode enabled. |
+| Notfall-Einrichtung | `/emergency/setup` | Emergency | implemented | User can create, verify, list, and delete local emergency contacts. |
+| Offline-Notfall | `/emergency/offline` | Emergency | implemented | Emergency screen renders local medication, allergy, contact, and QR payload data without backend access. |
 | Dokumenten-Scan | `/documents/scan` | Documents and scanning | not started | User can capture or attach document images. |
 | Gescannte-Dokumente | `/documents` | Documents and scanning | not started | User can list and inspect stored documents. |
 | Daten-Export | `/export` | Local export and sharing | not started | User can export local health record and share file. |

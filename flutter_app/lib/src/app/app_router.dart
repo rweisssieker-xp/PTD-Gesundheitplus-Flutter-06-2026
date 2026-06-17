@@ -5,7 +5,9 @@ import '../features/appointments/presentation/appointments_screen.dart';
 import '../features/appointments/presentation/healthcare_professionals_screen.dart';
 import '../features/emergency/domain/emergency_payload_builder.dart';
 import '../features/emergency/domain/emergency_profile.dart';
+import '../features/emergency/presentation/emergency_offline_screen.dart';
 import '../features/emergency/presentation/emergency_profile_screen.dart';
+import '../features/emergency/presentation/emergency_setup_screen.dart';
 import '../features/medication/presentation/medication_daily_plan_screen.dart';
 import '../features/medication/presentation/medication_screen.dart';
 import '../features/prevention/presentation/preventive_care_screen.dart';
@@ -80,13 +82,11 @@ final appRouter = GoRouter(
     ),
     GoRoute(
       path: '/emergency/setup',
-      builder: (context, state) =>
-          const FeatureShellScreen(title: 'Notfall-Einrichtung'),
+      builder: (context, state) => const EmergencySetupScreen(),
     ),
     GoRoute(
       path: '/emergency/offline',
-      builder: (context, state) =>
-          const FeatureShellScreen(title: 'Offline-Notfall'),
+      builder: (context, state) => const EmergencyOfflineScreen(),
     ),
     GoRoute(
       path: '/documents/scan',
