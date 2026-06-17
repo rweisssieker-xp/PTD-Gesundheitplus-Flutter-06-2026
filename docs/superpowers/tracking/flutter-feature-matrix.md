@@ -9,7 +9,7 @@
 | Heilberufe | `/health/professionals` | Health record | implemented | User can search local specialty/provider suggestions, add a suggestion to local healthcare professionals, create, list, delete, and hear a native read-aloud summary. |
 | Allergien | `/health/allergies` | Health record | implemented | User can create, edit, group, list, hear a native read-aloud summary, and delete local allergies with severity warnings. |
 | Termine | `/appointments` | Appointments | implemented | User can create, list, complete, delete, hear a native read-aloud summary, schedule native local reminders, and export appointments as local `.ics` calendar files. |
-| Medikation | `/medication` | Medication management | implemented | User can add, edit, deactivate, delete, list, and hear a native read-aloud summary of local medications with native local reminder scheduling. |
+| Medikation | `/medication` | Medication management | implemented | User can add, edit, deactivate, delete, list, capture local supply/refill metadata, and hear a native read-aloud summary of local medications with native local reminder scheduling and proactive refill alerts. |
 | Medikamenten-Tagesplan | `/medication/daily-plan` | Medication management | implemented | User can generate daily medication logs and mark intake as taken or skipped. |
 | Medikations-Interaktionen | `/medication/interactions` | Medication safety and interactions | implemented | User can create and review stored local interaction guidance. |
 | Wechselwirkungen-Checker | `/medication/interaction-checker` | Medication safety and interactions | implemented | User can run a local consent-gated interaction check against active medication. |
@@ -26,7 +26,7 @@
 | Familien-Kreis | `/family` | Family circle | implemented | User can manage local family members and send local safety check-ins with optional note and current-device location text. |
 | Demenz-Unterstuetzung | `/dementia` | Dementia support | implemented | User can log hydration, meals, and reminders locally with follow-up native local reminders. |
 | KI-Gesundheitscoach | `/ai/coach` | AI coach | implemented | User can ask a local consent-gated coach and keep the message history on-device. |
-| Benachrichtigungen | `/notifications` | Notification center | implemented | User can view and mark local notifications as read. |
+| Benachrichtigungen | `/notifications` | Notification center | implemented | User can view and mark local notifications as read, including deduplicated proactive local alerts for refills, interaction risk, emergency contacts, and incomplete emergency profile data. |
 | Datenschutz | `/privacy` | Privacy and storage settings | implemented | User can view local storage count, manage AI context consent, export data, and delete all local data after confirmation. |
 | Speicher-Modus | `/privacy/storage` | Privacy and storage settings | implemented | User sees local-only storage mode, per-table local record counts, and can clear local data after confirmation. |
 | Telegram-Setup | `/settings/telegram` | Communication settings | implemented | User can configure local Telegram handoff preference. |

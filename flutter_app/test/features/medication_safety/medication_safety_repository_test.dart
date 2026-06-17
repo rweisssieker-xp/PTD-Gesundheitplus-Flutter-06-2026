@@ -54,6 +54,7 @@ Medication _medication({required String id, required String name}) {
     reason: null,
     reminderEnabled: false,
     reminderTimes: const [],
+    supplyDurationDays: null,
     refillReminderDays: null,
     notes: null,
     active: true,

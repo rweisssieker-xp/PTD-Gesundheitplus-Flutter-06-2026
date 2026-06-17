@@ -415,6 +415,8 @@ class _MedicationEditorState extends State<_MedicationEditor> {
   final _prescribedBy = TextEditingController();
   final _notes = TextEditingController();
   final _reminderTimes = TextEditingController(text: '08:00');
+  final _supplyDurationDays = TextEditingController();
+  final _refillReminderDays = TextEditingController(text: '7');
   bool _active = true;
   bool _reminderEnabled = true;
 
@@ -431,6 +433,8 @@ class _MedicationEditorState extends State<_MedicationEditor> {
       _prescribedBy.text = med.prescribedBy ?? '';
       _notes.text = med.notes ?? '';
       _reminderTimes.text = med.reminderTimes.join(', ');
+      _supplyDurationDays.text = med.supplyDurationDays?.toString() ?? '';
+      _refillReminderDays.text = med.refillReminderDays?.toString() ?? '7';
       _active = med.active;
       _reminderEnabled = med.reminderEnabled;
     }
@@ -498,6 +502,20 @@ class _MedicationEditorState extends State<_MedicationEditor> {
               ),
             ),
             TextField(
+              controller: _supplyDurationDays,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Vorrat reicht fuer Tage',
+              ),
+            ),
+            TextField(
+              controller: _refillReminderDays,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Rezept-Erinnerung Tage vorher',
+              ),
+            ),
+            TextField(
               controller: _notes,
               decoration: const InputDecoration(labelText: 'Notizen'),
               maxLines: 2,
@@ -550,7 +568,7 @@ class _MedicationEditorState extends State<_MedicationEditor> {
       dosage: _dosage.text.trim(),
       frequency: _frequency.text.trim(),
       schedule: _schedule.text.trim(),
-      startDate: existing?.startDate,
+      startDate: existing?.startDate ?? DateTime.now(),
       endDate: existing?.endDate,
       prescribedBy: _prescribedBy.text.trim(),
       reason: _reason.text.trim(),
@@ -560,7 +578,8 @@ class _MedicationEditorState extends State<_MedicationEditor> {
           .map((value) => value.trim())
           .where((value) => value.isNotEmpty)
           .toList(),
-      refillReminderDays: existing?.refillReminderDays ?? 7,
+      supplyDurationDays: int.tryParse(_supplyDurationDays.text),
+      refillReminderDays: int.tryParse(_refillReminderDays.text) ?? 7,
       notes: _notes.text.trim(),
       active: _active,
     );

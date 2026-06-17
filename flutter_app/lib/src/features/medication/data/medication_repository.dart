@@ -18,9 +18,9 @@ class MedicationRepository {
       INSERT INTO medications (
         id, name, dosage, frequency, active, schedule, start_date, end_date,
         prescribed_by, reason, reminder_enabled, reminder_times_json,
-        refill_reminder_days, notes, created_at, updated_at
+        supply_duration_days, refill_reminder_days, notes, created_at, updated_at
       )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT(id) DO UPDATE SET
         name = excluded.name,
         dosage = excluded.dosage,
@@ -33,6 +33,7 @@ class MedicationRepository {
         reason = excluded.reason,
         reminder_enabled = excluded.reminder_enabled,
         reminder_times_json = excluded.reminder_times_json,
+        supply_duration_days = excluded.supply_duration_days,
         refill_reminder_days = excluded.refill_reminder_days,
         notes = excluded.notes,
         updated_at = excluded.updated_at;
@@ -50,6 +51,7 @@ class MedicationRepository {
         medication.reason,
         medication.reminderEnabled ? 1 : 0,
         jsonEncode(medication.reminderTimes),
+        medication.supplyDurationDays,
         medication.refillReminderDays,
         medication.notes,
         now,
@@ -67,7 +69,7 @@ class MedicationRepository {
     final rows = _db.select('''
       SELECT id, name, dosage, frequency, schedule, start_date, end_date,
              prescribed_by, reason, reminder_enabled, reminder_times_json,
-             refill_reminder_days, notes, active
+             supply_duration_days, refill_reminder_days, notes, active
       FROM medications
       ${includeInactive ? '' : 'WHERE active = 1'}
       ORDER BY active DESC, name COLLATE NOCASE
@@ -167,6 +169,7 @@ class MedicationRepository {
       reason: row['reason'] as String?,
       reminderEnabled: (row['reminder_enabled'] as int? ?? 1) == 1,
       reminderTimes: reminderTimes,
+      supplyDurationDays: row['supply_duration_days'] as int?,
       refillReminderDays: row['refill_reminder_days'] as int?,
       notes: row['notes'] as String?,
       active: (row['active'] as int) == 1,

@@ -20,6 +20,7 @@ void main() {
         reason: 'Blutdruck',
         reminderEnabled: true,
         reminderTimes: ['08:00'],
+        supplyDurationDays: 30,
         refillReminderDays: 7,
         notes: 'Mit Wasser',
         active: true,
@@ -28,6 +29,7 @@ void main() {
     final meds = await repo.listActive();
     expect(meds.single.name, 'Ramipril');
     expect(meds.single.reminderTimes, ['08:00']);
+    expect(meds.single.supplyDurationDays, 30);
     db.close();
   });
 
@@ -47,6 +49,7 @@ void main() {
         reason: null,
         reminderEnabled: true,
         reminderTimes: ['08:00', '20:00'],
+        supplyDurationDays: null,
         refillReminderDays: 7,
         notes: null,
         active: true,

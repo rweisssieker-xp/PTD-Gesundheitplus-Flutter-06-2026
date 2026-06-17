@@ -11,6 +11,7 @@ class Medication {
     required this.reason,
     required this.reminderEnabled,
     required this.reminderTimes,
+    required this.supplyDurationDays,
     required this.refillReminderDays,
     required this.notes,
     required this.active,
@@ -27,6 +28,7 @@ class Medication {
   final String? reason;
   final bool reminderEnabled;
   final List<String> reminderTimes;
+  final int? supplyDurationDays;
   final int? refillReminderDays;
   final String? notes;
   final bool active;
@@ -43,6 +45,7 @@ class Medication {
     String? reason,
     bool? reminderEnabled,
     List<String>? reminderTimes,
+    int? supplyDurationDays,
     int? refillReminderDays,
     String? notes,
     bool? active,
@@ -59,6 +62,7 @@ class Medication {
       reason: reason ?? this.reason,
       reminderEnabled: reminderEnabled ?? this.reminderEnabled,
       reminderTimes: reminderTimes ?? this.reminderTimes,
+      supplyDurationDays: supplyDurationDays ?? this.supplyDurationDays,
       refillReminderDays: refillReminderDays ?? this.refillReminderDays,
       notes: notes ?? this.notes,
       active: active ?? this.active,

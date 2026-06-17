@@ -4,10 +4,13 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/localization/app_language.dart';
 import '../../../core/localization/app_language_controller.dart';
+import '../../../core/storage/app_database.dart';
+import '../../../core/storage/database_provider.dart';
 import '../../../shared_ui/gp_colors.dart';
 import '../../../shared_ui/gp_footer.dart';
 import '../../../shared_ui/gp_header.dart';
 import '../../../shared_ui/gp_icons.dart';
+import '../../notifications/data/notification_center_repository.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -19,6 +22,7 @@ class DashboardScreen extends ConsumerStatefulWidget {
 class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   late final PageController _pageController;
   int _currentIndex = 0;
+  var _proactiveChecksStarted = false;
   static const _featuredItemCount = 10;
 
   List<_DashboardItem> _featuredItems(AppLanguage language) => [
@@ -130,6 +134,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   Widget build(BuildContext context) {
     final language =
         ref.watch(appLanguageControllerProvider).valueOrNull ?? AppLanguage.de;
+    ref.listen<AsyncValue<AppDatabase>>(appDatabaseProvider, (_, next) {
+      next.whenData(_runProactiveChecks);
+    });
     final featuredItems = _featuredItems(language);
     if (_currentIndex >= featuredItems.length) {
       _currentIndex = 0;
@@ -328,6 +335,18 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       duration: const Duration(milliseconds: 260),
       curve: Curves.easeOut,
     );
+  }
+
+  void _runProactiveChecks(AppDatabase db) {
+    if (_proactiveChecksStarted) return;
+    _proactiveChecksStarted = true;
+    Future<void>.microtask(() async {
+      try {
+        await NotificationCenterRepository(db).runProactiveHealthChecks();
+      } catch (_) {
+        // Proactive checks must never block the dashboard.
+      }
+    });
   }
 }
 

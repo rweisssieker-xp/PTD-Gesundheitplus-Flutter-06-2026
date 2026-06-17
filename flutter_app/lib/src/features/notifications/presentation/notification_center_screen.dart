@@ -67,7 +67,9 @@ class _NotificationCenterScreenState
                                 : GpColors.emergencyRed,
                           ),
                           title: Text(item.title),
-                          subtitle: Text('${item.category} • ${item.body}'),
+                          subtitle: Text(
+                            '${item.category} • ${item.displayBody}',
+                          ),
                           trailing: item.read
                               ? null
                               : IconButton(
