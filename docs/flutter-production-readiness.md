@@ -40,6 +40,8 @@ All rows are implemented and the router no longer uses placeholder feature shell
 - App access is protected by local PIN and optional device biometric unlock where supported.
 - Document files copied into app storage are removed during the privacy data wipe before their metadata rows are deleted.
 - Medication, appointment, preventive-care, and dementia-support reminders are scheduled as native local notifications on-device.
+- The notification center shows system notification permission state and links blocked users to app settings.
+- The iOS bundle display name is set to `Gesundheit Plus`.
 
 ## Remaining production gates
 
