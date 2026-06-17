@@ -11,4 +11,15 @@ void main() {
     final uri = PlatformHandoffService.telUri('+491234');
     expect(uri.toString(), 'tel:+491234');
   });
+
+  test('builds whatsapp app URI with normalized phone', () {
+    final uri = PlatformHandoffService.whatsappUri(
+      '+49 176 123456',
+      'Ich brauche Hilfe',
+    );
+    expect(
+      uri.toString(),
+      'whatsapp://send?phone=49176123456&text=Ich+brauche+Hilfe',
+    );
+  });
 }

@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../../core/platform/location_service.dart';
 import '../../../core/platform/platform_handoff_service.dart';
 import '../../../shared_ui/gp_colors.dart';
 import '../domain/emergency_profile.dart';
+
+typedef EmergencyMessageShare = Future<void> Function(String text);
 
 class EmergencyContactsSection extends StatelessWidget {
   const EmergencyContactsSection({
@@ -13,14 +16,17 @@ class EmergencyContactsSection extends StatelessWidget {
     this.empty = 'Keine Kontakte mit Telefonnummer',
     PlatformHandoffService? handoff,
     LocationService? location,
+    EmergencyMessageShare? shareMessage,
   }) : _handoff = handoff ?? const PlatformHandoffService(),
-       _location = location ?? const LocationService();
+       _location = location ?? const LocationService(),
+       _shareMessage = shareMessage ?? _defaultShareMessage;
 
   final List<EmergencyContactSummary> contacts;
   final String title;
   final String empty;
   final PlatformHandoffService _handoff;
   final LocationService _location;
+  final EmergencyMessageShare _shareMessage;
 
   @override
   Widget build(BuildContext context) {
@@ -75,6 +81,23 @@ class EmergencyContactsSection extends StatelessWidget {
                         icon: const Icon(Icons.my_location_outlined),
                         onPressed: () => _shareLocation(context, contact.phone),
                       ),
+                      IconButton(
+                        tooltip: 'WhatsApp',
+                        icon: const Icon(Icons.chat_outlined),
+                        onPressed: () => _launch(
+                          context,
+                          PlatformHandoffService.whatsappUri(
+                            contact.phone,
+                            _emergencyMessage,
+                          ),
+                          'WhatsApp konnte nicht geoeffnet werden. Nutzen Sie Teilen oder SMS.',
+                        ),
+                      ),
+                      IconButton(
+                        tooltip: 'Teilen',
+                        icon: const Icon(Icons.ios_share_outlined),
+                        onPressed: () => _shareEmergencyText(context),
+                      ),
                     ],
                   ),
                 ),
@@ -94,6 +117,17 @@ class EmergencyContactsSection extends StatelessWidget {
     final launched = await _handoff.launch(uri);
     if (!launched) {
       messenger.showSnackBar(SnackBar(content: Text(failureText)));
+    }
+  }
+
+  Future<void> _shareEmergencyText(BuildContext context) async {
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      await _shareMessage(_emergencyMessage);
+    } catch (_) {
+      messenger.showSnackBar(
+        const SnackBar(content: Text('Teilen konnte nicht geoeffnet werden.')),
+      );
     }
   }
 
@@ -123,3 +157,8 @@ class EmergencyContactsSection extends StatelessWidget {
     }
   }
 }
+
+const _emergencyMessage =
+    'Ich brauche Hilfe. Bitte rufen Sie mich an. Gesendet aus Gesundheit Plus.';
+
+Future<void> _defaultShareMessage(String text) => Share.share(text);

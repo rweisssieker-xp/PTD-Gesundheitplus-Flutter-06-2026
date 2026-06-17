@@ -49,7 +49,7 @@ The native Flutter shell now mirrors the PWA layout pattern with the first-run s
 - The dashboard runs local proactive health checks on startup and writes deduplicated on-device alerts for medication refills, high-risk interaction checks, missing/unverified emergency contacts, and incomplete local emergency profile data.
 - The iOS bundle display name is set to `Gesundheit Plus`.
 - The PWA language switcher is backed by a local on-device preference and translates the native dashboard entry points for German, English, Turkish, Arabic, and Ukrainian.
-- Emergency contacts expose native phone, SMS, and current-location SMS handoff actions from the emergency profile and offline emergency views.
+- Emergency contacts expose native phone, SMS, WhatsApp, system share, and current-location SMS handoff actions from the emergency profile and offline emergency views with visible failure messages when a target app is unavailable.
 - Emergency contacts can be imported from the device address book after explicit contact permission and remain stored locally.
 - Healthcare professionals expose a local Facharzt search with on-device provider suggestions and direct local add, replacing the PWA internet/LLM doctor search with a local-only workflow.
 - Healthcare professionals can be drafted from spoken-style German text using a deterministic on-device parser for name, specialty, address, phone, and email.
