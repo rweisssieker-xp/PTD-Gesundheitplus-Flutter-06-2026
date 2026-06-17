@@ -90,6 +90,7 @@ Data linked to user:
 Required screenshots should be captured on real devices or reliable simulators/emulators after selecting local-device storage:
 
 - Storage-mode first launch
+- Onboarding with local reminder permission setup
 - Home dashboard with emergency button, action grid, carousel, and footer
 - Medication list and daily plan
 - Appointments

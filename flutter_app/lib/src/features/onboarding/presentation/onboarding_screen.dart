@@ -3,13 +3,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/security/security_providers.dart';
 import '../../../core/storage/database_provider.dart';
+import '../../../core/platform/permission_service.dart';
 import '../../../shared_ui/gp_colors.dart';
 import '../../../shared_ui/gp_screen.dart';
 import '../../privacy/data/local_privacy_repository.dart';
 import '../data/local_profile_repository.dart';
 
+typedef NotificationPermissionRequest = Future<bool> Function();
+
 class OnboardingScreen extends ConsumerStatefulWidget {
-  const OnboardingScreen({super.key});
+  const OnboardingScreen({super.key, this.requestNotifications});
+
+  final NotificationPermissionRequest? requestNotifications;
 
   @override
   ConsumerState<OnboardingScreen> createState() => _OnboardingScreenState();
@@ -23,6 +28,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   bool _biometricsAvailable = false;
   bool _biometricEnabled = false;
   bool _saved = false;
+  bool? _notificationsAllowed;
 
   @override
   void initState() {
@@ -86,6 +92,15 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   : 'Auf diesem Gerät nicht verfügbar.',
             ),
           ),
+          const Card(
+            child: ListTile(
+              leading: Icon(Icons.notifications_active_outlined),
+              title: Text('Lokale Erinnerungen erlauben'),
+              subtitle: Text(
+                'Beim Speichern fragen wir nach der Systemberechtigung fuer Medikamenten-, Termin- und Vorsorge-Erinnerungen.',
+              ),
+            ),
+          ),
           const SizedBox(height: 16),
           FilledButton.icon(
             onPressed: dbAsync.hasValue ? _save : null,
@@ -103,6 +118,16 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 ),
               ),
             ),
+            if (_notificationsAllowed == false)
+              const Card(
+                child: ListTile(
+                  leading: Icon(Icons.notifications_off_outlined),
+                  title: Text('Erinnerungen noch nicht erlaubt'),
+                  subtitle: Text(
+                    'Sie koennen lokale Benachrichtigungen spaeter im Benachrichtigungsbereich oder in den Systemeinstellungen erlauben.',
+                  ),
+                ),
+              ),
           ],
         ],
       ),
@@ -130,7 +155,15 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       db,
     ).saveProfile(fullName: name, notes: _emptyToNull(_notes.text));
     await LocalPrivacyRepository(db).setAiContextAllowed(_aiConsent);
-    if (mounted) setState(() => _saved = true);
+    final notificationsAllowed =
+        await (widget.requestNotifications ??
+            const PermissionService().ensureNotifications)();
+    if (mounted) {
+      setState(() {
+        _saved = true;
+        _notificationsAllowed = notificationsAllowed;
+      });
+    }
   }
 
   Future<void> _loadBiometricState() async {

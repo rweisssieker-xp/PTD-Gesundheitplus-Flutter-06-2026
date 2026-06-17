@@ -41,6 +41,7 @@ Android embedding disables Impeller explicitly for this emulator-tested build pa
 
 - Structured health data is stored in a SQLCipher-backed local SQLite database.
 - First launch shows a PWA-parity storage choice; selecting local persists the local-device mode on-device before opening the dashboard.
+- Onboarding saves the local profile, PIN/biometric preference, AI consent, and requests native notification permission for local reminders with a visible recovery hint if permission is not granted.
 - The database encryption key is generated on-device and stored through `flutter_secure_storage`, backed by iOS Keychain / Android Keystore.
 - App access is protected by local PIN and optional device biometric unlock where supported.
 - The app-lock bootstrap shows a visible light loading state and times out stalled secure-storage reads before opening the local shell.
