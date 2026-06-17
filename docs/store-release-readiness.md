@@ -24,6 +24,8 @@ Health data is stored locally in an encrypted SQLite database. Documents are enc
 
 The AI coach is local by default. Health context is only summarized after explicit consent, and optional online AI processing must fail with a visible recovery message without changing local health records.
 
+Online AI is enabled only when the release build is configured with `GESUNDHEIT_PLUS_AI_ENDPOINT`. Without that build setting, the AI coach uses the local-only fallback.
+
 Gesundheit Plus is not a medical diagnosis tool and does not replace professional medical advice.
 
 ## Permission Rationale
@@ -103,3 +105,4 @@ Required screenshots should be captured on real devices or reliable simulators/e
 - Final store privacy questionnaires must be completed in the store consoles.
 - Final screenshots must be captured from real rendered devices because the current local Android emulator exposes the Flutter UI through accessibility hierarchy but returns a black hardware screenshot surface.
 - Final medical disclaimer/legal text should be reviewed before public distribution.
+- If online AI is enabled in a store build, final privacy answers must name the selected AI endpoint/provider and its data handling terms.

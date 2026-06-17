@@ -70,11 +70,13 @@ Android embedding disables Impeller explicitly for this emulator-tested build pa
 - Anamnesis, allergies, treatment history, healthcare professionals, appointments, medication, and vaccination screens expose native text-to-speech read-aloud summaries.
 - Scanned documents expose local rule-based medical insights, urgency labels, recognized medical areas, and suggested actions without sending document data off-device.
 - The AI coach remains local by default, labels local-only answers, builds consent-gated bounded local context only after explicit consent, and stores a visible recovery answer when an optional configured online responder fails without changing health records.
+- Optional online AI can be enabled at build time with `--dart-define=GESUNDHEIT_PLUS_AI_ENDPOINT=https://...`; when omitted, the AI coach stays local-only.
 
 ## Remaining production gates
 
 1. iOS build verification and generated Privacy Report review require macOS with Xcode. The Windows Flutter toolchain in this workspace does not expose an iOS build subcommand.
 2. App Store and Play Store release metadata, screenshots, privacy labels, and final store account configuration still need to be completed in the store consoles. Draft copy and privacy answers are tracked in `docs/store-release-readiness.md`.
+3. If online AI is enabled for a release build, configure `GESUNDHEIT_PLUS_AI_ENDPOINT` through CI or store build settings and re-run the AI consent/failure tests against the selected endpoint contract.
 
 ## iOS verification commands on macOS
 

@@ -5,6 +5,7 @@ import '../../../core/storage/database_provider.dart';
 import '../../../shared_ui/gp_colors.dart';
 import '../../../shared_ui/gp_screen.dart';
 import '../../privacy/data/local_privacy_repository.dart';
+import '../data/ai_coach_responder_config.dart';
 import '../data/ai_coach_repository.dart';
 
 class AiCoachScreen extends ConsumerStatefulWidget {
@@ -27,7 +28,11 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
         error: (error, stackTrace) =>
             Center(child: Text('Datenbankfehler: $error')),
         data: (db) {
-          final repo = AiCoachRepository(db);
+          const aiConfig = AiCoachResponderConfig();
+          final repo = AiCoachRepository(
+            db,
+            responder: aiConfig.buildResponder(),
+          );
           return FutureBuilder<List<Object>>(
             key: ValueKey(_reload),
             future: Future.wait([
@@ -52,7 +57,9 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
                     padding: const EdgeInsets.all(12),
                     child: Text(
                       consent
-                          ? 'KI-Kontextfreigabe ist aktiv. Lokale Gesundheitsdaten werden nur für diese Antwort zusammengefasst; ein Online-KI-Dienst wird nur genutzt, wenn er in der App konfiguriert ist.'
+                          ? aiConfig.isConfigured
+                                ? 'KI-Kontextfreigabe ist aktiv. Lokale Gesundheitsdaten werden nur für diese Antwort zusammengefasst und an den konfigurierten Online-KI-Dienst gesendet.'
+                                : 'KI-Kontextfreigabe ist aktiv. Lokale Gesundheitsdaten werden nur für diese Antwort zusammengefasst; aktuell ist kein Online-KI-Dienst konfiguriert.'
                           : 'KI-Kontextfreigabe ist aus. Fragen werden lokal gespeichert, Gesundheitskontext bleibt gesperrt.',
                     ),
                   ),
