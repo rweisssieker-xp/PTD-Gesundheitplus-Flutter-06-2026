@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/storage/database_provider.dart';
 import '../../../shared_ui/gp_colors.dart';
+import '../../../shared_ui/gp_screen.dart';
 import '../../privacy/data/local_privacy_repository.dart';
 import '../data/ai_coach_repository.dart';
 
@@ -20,8 +21,7 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
   @override
   Widget build(BuildContext context) {
     final dbAsync = ref.watch(appDatabaseProvider);
-    return Scaffold(
-      appBar: AppBar(title: const Text('KI-Gesundheitscoach')),
+    return GpScreen(
       body: dbAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stackTrace) =>

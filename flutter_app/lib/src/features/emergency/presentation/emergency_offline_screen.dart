@@ -5,6 +5,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 import '../../../core/storage/database_provider.dart';
 import '../../../shared_ui/gp_colors.dart';
 import '../../../shared_ui/gp_icons.dart';
+import '../../../shared_ui/gp_screen.dart';
 import '../data/emergency_repository.dart';
 import '../domain/emergency_payload_builder.dart';
 import '../domain/emergency_profile.dart';
@@ -16,8 +17,7 @@ class EmergencyOfflineScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final dbAsync = ref.watch(appDatabaseProvider);
-    return Scaffold(
-      appBar: AppBar(title: const Text('Offline-Notfall')),
+    return GpScreen(
       body: dbAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stackTrace) =>

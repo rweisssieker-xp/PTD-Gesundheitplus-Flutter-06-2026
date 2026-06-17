@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/storage/database_provider.dart';
 import '../../../shared_ui/gp_colors.dart';
 import '../../../shared_ui/gp_icons.dart';
+import '../../../shared_ui/gp_screen.dart';
 import '../data/document_repository.dart';
 import '../domain/health_document.dart';
 
@@ -22,8 +23,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
   @override
   Widget build(BuildContext context) {
     final dbAsync = ref.watch(appDatabaseProvider);
-    return Scaffold(
-      appBar: AppBar(title: const Text('Gescannte Dokumente')),
+    return GpScreen(
       body: dbAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stackTrace) =>

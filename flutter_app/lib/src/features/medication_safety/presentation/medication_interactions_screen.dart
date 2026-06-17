@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/storage/database_provider.dart';
 import '../../../shared_ui/gp_colors.dart';
 import '../../../shared_ui/gp_icons.dart';
+import '../../../shared_ui/gp_screen.dart';
 import '../data/medication_safety_repository.dart';
 import '../domain/medication_safety.dart';
 
@@ -22,8 +23,7 @@ class _MedicationInteractionsScreenState
   @override
   Widget build(BuildContext context) {
     final dbAsync = ref.watch(appDatabaseProvider);
-    return Scaffold(
-      appBar: AppBar(title: const Text('Medikations-Interaktionen')),
+    return GpScreen(
       floatingActionButton: FloatingActionButton.extended(
         onPressed: dbAsync.hasValue
             ? () =>

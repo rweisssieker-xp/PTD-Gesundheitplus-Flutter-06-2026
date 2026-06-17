@@ -7,7 +7,7 @@ Date: 2026-06-17
 - `flutter doctor -v`: no issues after installing Android SDK command-line tools and accepting Android licenses.
 - `dart format lib test`: clean.
 - `flutter analyze`: no issues.
-- `flutter test`: 55 tests passed.
+- `flutter test`: 56 tests passed.
 - `flutter build apk --debug`: built successfully.
 - `flutter build apk --release`: built successfully with local release keystore.
 - `flutter build appbundle --release`: built successfully with local release keystore.
@@ -32,6 +32,7 @@ Keep a secure backup of the generated upload keystore and passwords before publi
 
 The authoritative feature matrix is `docs/superpowers/tracking/flutter-feature-matrix.md`.
 All rows are implemented and the router no longer uses placeholder feature shells.
+The native Flutter shell now mirrors the PWA layout pattern with a white header, red divider, local-mode badge, back/home controls on feature pages, and a constrained mobile content column.
 
 ## Local data protection
 
@@ -42,7 +43,7 @@ All rows are implemented and the router no longer uses placeholder feature shell
 - Medication, appointment, preventive-care, and dementia-support reminders are scheduled as native local notifications on-device.
 - The notification center shows system notification permission state and links blocked users to app settings.
 - The iOS bundle display name is set to `Gesundheit Plus`.
-- Emergency contacts expose native phone and SMS handoff actions from the emergency profile and offline emergency views.
+- Emergency contacts expose native phone, SMS, and current-location SMS handoff actions from the emergency profile and offline emergency views.
 
 ## Remaining production gates
 

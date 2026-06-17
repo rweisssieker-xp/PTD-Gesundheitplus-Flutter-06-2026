@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/storage/database_provider.dart';
 import '../../../shared_ui/gp_colors.dart';
 import '../../../shared_ui/gp_icons.dart';
+import '../../../shared_ui/gp_screen.dart';
 import '../data/care_repository.dart';
 import '../domain/care.dart';
 
@@ -20,8 +21,7 @@ class _FamilyCircleScreenState extends ConsumerState<FamilyCircleScreen> {
   @override
   Widget build(BuildContext context) {
     final dbAsync = ref.watch(appDatabaseProvider);
-    return Scaffold(
-      appBar: AppBar(title: const Text('Familien-Kreis')),
+    return GpScreen(
       floatingActionButton: FloatingActionButton.extended(
         onPressed: dbAsync.hasValue
             ? () => _openMemberEditor(CareRepository(dbAsync.requireValue))

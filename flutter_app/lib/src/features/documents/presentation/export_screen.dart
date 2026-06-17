@@ -8,6 +8,7 @@ import 'package:share_plus/share_plus.dart';
 import '../../../core/storage/database_provider.dart';
 import '../../../shared_ui/gp_colors.dart';
 import '../../../shared_ui/gp_icons.dart';
+import '../../../shared_ui/gp_screen.dart';
 import '../data/document_repository.dart';
 
 class ExportScreen extends ConsumerStatefulWidget {
@@ -24,8 +25,7 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
   @override
   Widget build(BuildContext context) {
     final dbAsync = ref.watch(appDatabaseProvider);
-    return Scaffold(
-      appBar: AppBar(title: const Text('Daten-Export')),
+    return GpScreen(
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [

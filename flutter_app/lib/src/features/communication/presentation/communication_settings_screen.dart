@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/storage/database_provider.dart';
 import '../../../shared_ui/gp_colors.dart';
+import '../../../shared_ui/gp_screen.dart';
 import '../data/communication_preferences_repository.dart';
 
 class CommunicationSettingsScreen extends ConsumerStatefulWidget {
@@ -31,8 +32,7 @@ class _CommunicationSettingsScreenState
   @override
   Widget build(BuildContext context) {
     final dbAsync = ref.watch(appDatabaseProvider);
-    return Scaffold(
-      appBar: AppBar(title: Text(widget.title)),
+    return GpScreen(
       body: dbAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stackTrace) =>

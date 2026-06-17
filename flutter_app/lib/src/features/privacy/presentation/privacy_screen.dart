@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/storage/database_provider.dart';
 import '../../../shared_ui/gp_colors.dart';
+import '../../../shared_ui/gp_screen.dart';
 import '../data/local_privacy_repository.dart';
 
 class PrivacyScreen extends ConsumerStatefulWidget {
@@ -19,8 +20,7 @@ class _PrivacyScreenState extends ConsumerState<PrivacyScreen> {
   @override
   Widget build(BuildContext context) {
     final dbAsync = ref.watch(appDatabaseProvider);
-    return Scaffold(
-      appBar: AppBar(title: const Text('Datenschutz')),
+    return GpScreen(
       body: dbAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stackTrace) =>

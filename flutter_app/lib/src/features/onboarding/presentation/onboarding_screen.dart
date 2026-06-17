@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/security/security_providers.dart';
 import '../../../core/storage/database_provider.dart';
 import '../../../shared_ui/gp_colors.dart';
+import '../../../shared_ui/gp_screen.dart';
 import '../../privacy/data/local_privacy_repository.dart';
 import '../data/local_profile_repository.dart';
 
@@ -32,8 +33,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     final dbAsync = ref.watch(appDatabaseProvider);
-    return Scaffold(
-      appBar: AppBar(title: const Text('Onboarding')),
+    return GpScreen(
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [

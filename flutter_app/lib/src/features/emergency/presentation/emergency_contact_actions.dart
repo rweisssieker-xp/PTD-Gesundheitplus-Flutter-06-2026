@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/platform/location_service.dart';
 import '../../../core/platform/platform_handoff_service.dart';
 import '../../../shared_ui/gp_colors.dart';
 import '../domain/emergency_profile.dart';
@@ -11,12 +12,15 @@ class EmergencyContactsSection extends StatelessWidget {
     this.title = 'Notfallkontakte',
     this.empty = 'Keine Kontakte mit Telefonnummer',
     PlatformHandoffService? handoff,
-  }) : _handoff = handoff ?? const PlatformHandoffService();
+    LocationService? location,
+  }) : _handoff = handoff ?? const PlatformHandoffService(),
+       _location = location ?? const LocationService();
 
   final List<EmergencyContactSummary> contacts;
   final String title;
   final String empty;
   final PlatformHandoffService _handoff;
+  final LocationService _location;
 
   @override
   Widget build(BuildContext context) {
@@ -66,6 +70,11 @@ class EmergencyContactsSection extends StatelessWidget {
                           'SMS-App konnte nicht geoeffnet werden.',
                         ),
                       ),
+                      IconButton(
+                        tooltip: 'Standort per SMS',
+                        icon: const Icon(Icons.my_location_outlined),
+                        onPressed: () => _shareLocation(context, contact.phone),
+                      ),
                     ],
                   ),
                 ),
@@ -85,6 +94,32 @@ class EmergencyContactsSection extends StatelessWidget {
     final launched = await _handoff.launch(uri);
     if (!launched) {
       messenger.showSnackBar(SnackBar(content: Text(failureText)));
+    }
+  }
+
+  Future<void> _shareLocation(BuildContext context, String phone) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final location = await _location.currentEmergencyLocation();
+    if (location == null) {
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Standort nicht verfuegbar. Bitte Berechtigung und GPS pruefen.',
+          ),
+        ),
+      );
+      return;
+    }
+    final launched = await _handoff.launch(
+      PlatformHandoffService.smsUri(
+        phone,
+        'Ich brauche Hilfe. Mein aktueller Standort: ${location.mapsUrl}',
+      ),
+    );
+    if (!launched) {
+      messenger.showSnackBar(
+        const SnackBar(content: Text('SMS-App konnte nicht geoeffnet werden.')),
+      );
     }
   }
 }

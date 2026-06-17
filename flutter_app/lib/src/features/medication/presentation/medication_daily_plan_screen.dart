@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/storage/database_provider.dart';
 import '../../../shared_ui/gp_colors.dart';
+import '../../../shared_ui/gp_screen.dart';
 import '../data/medication_repository.dart';
 import '../domain/medication.dart';
 
@@ -25,8 +26,7 @@ class _MedicationDailyPlanScreenState
     final dateLabel = MaterialLocalizations.of(
       context,
     ).formatMediumDate(_selectedDate);
-    return Scaffold(
-      appBar: AppBar(title: const Text('Medikamenten-Tagesplan')),
+    return GpScreen(
       body: dbAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stackTrace) =>

@@ -5,6 +5,7 @@ import '../../../core/notifications/native_notification_service.dart';
 import '../../../core/notifications/notification_scheduler.dart';
 import '../../../core/storage/database_provider.dart';
 import '../../../shared_ui/gp_colors.dart';
+import '../../../shared_ui/gp_screen.dart';
 import '../data/care_repository.dart';
 import '../domain/care.dart';
 
@@ -23,8 +24,7 @@ class _DementiaSupportScreenState extends ConsumerState<DementiaSupportScreen> {
   @override
   Widget build(BuildContext context) {
     final dbAsync = ref.watch(appDatabaseProvider);
-    return Scaffold(
-      appBar: AppBar(title: const Text('Demenz-Unterstuetzung')),
+    return GpScreen(
       body: dbAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stackTrace) =>

@@ -1,6 +1,8 @@
 import 'package:permission_handler/permission_handler.dart';
 
 class PermissionService {
+  const PermissionService();
+
   Future<PermissionStatus> notificationStatus() {
     return Permission.notification.status;
   }

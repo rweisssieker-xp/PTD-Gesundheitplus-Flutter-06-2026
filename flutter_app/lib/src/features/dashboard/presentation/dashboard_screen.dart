@@ -216,7 +216,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ),
                       const SizedBox(height: 12),
                       _ExportButton(onTap: () => context.go('/export')),
-                      const SizedBox(height: 18),
+                      const SizedBox(height: 14),
                       _FeatureCarousel(
                         controller: _pageController,
                         item: _featuredItems[_currentIndex],
@@ -232,7 +232,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         ),
                         itemCount: _featuredItems.length,
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 24),
                       _PageDots(
                         count: _featuredItems.length,
                         index: _currentIndex,
@@ -387,17 +387,13 @@ class _EmergencyButton extends StatelessWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(
-                        Icons.warning_amber_rounded,
-                        color: Colors.white,
-                        size: 38,
-                      ),
+                      Icon(Icons.error_outline, color: Colors.white, size: 40),
                       SizedBox(height: 6),
                       Text(
-                        'NOTFALL',
+                        '🚨 NOTFALL',
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 19,
+                          fontSize: 20,
                           fontWeight: FontWeight.w900,
                         ),
                       ),
@@ -650,7 +646,7 @@ class _FeatureCarousel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 400,
+      height: 430,
       child: Stack(
         alignment: Alignment.center,
         children: [
@@ -661,11 +657,11 @@ class _FeatureCarousel extends StatelessWidget {
             itemBuilder: itemBuilder,
           ),
           Positioned(
-            left: 8,
+            left: 2,
             child: _RoundNavButton(icon: Icons.chevron_left, onTap: onPrevious),
           ),
           Positioned(
-            right: 8,
+            right: 2,
             child: _RoundNavButton(icon: Icons.chevron_right, onTap: onNext),
           ),
         ],
@@ -709,13 +705,13 @@ class _FeatureCard extends StatelessWidget {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 74, vertical: 28),
+              padding: const EdgeInsets.symmetric(horizontal: 74, vertical: 32),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Container(
-                    width: 84,
-                    height: 84,
+                    width: 96,
+                    height: 96,
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         begin: Alignment.topLeft,
@@ -731,15 +727,15 @@ class _FeatureCard extends StatelessWidget {
                         ),
                       ],
                     ),
-                    child: Icon(item.icon, color: Colors.white, size: 42),
+                    child: Icon(item.icon, color: Colors.white, size: 48),
                   ),
-                  const SizedBox(height: 18),
+                  const SizedBox(height: 22),
                   Text(
                     item.title,
                     textAlign: TextAlign.center,
                     style: const TextStyle(
                       color: GpColors.textPrimary,
-                      fontSize: 28,
+                      fontSize: 30,
                       fontWeight: FontWeight.w900,
                     ),
                   ),
@@ -761,7 +757,7 @@ class _FeatureCard extends StatelessWidget {
                       fontSize: 14,
                     ),
                   ),
-                  const SizedBox(height: 18),
+                  const SizedBox(height: 22),
                   _GradientSurface(
                     colors: item.colors,
                     radius: 8,
@@ -769,7 +765,7 @@ class _FeatureCard extends StatelessWidget {
                     child: const Padding(
                       padding: EdgeInsets.symmetric(
                         horizontal: 34,
-                        vertical: 14,
+                        vertical: 15,
                       ),
                       child: Text(
                         'Öffnen',
@@ -810,9 +806,9 @@ class _RoundNavButton extends StatelessWidget {
         customBorder: const CircleBorder(),
         onTap: onTap,
         child: SizedBox(
-          width: 58,
-          height: 58,
-          child: Icon(icon, size: 34, color: Color(0xFF374151)),
+          width: 64,
+          height: 64,
+          child: Icon(icon, size: 36, color: Color(0xFF374151)),
         ),
       ),
     );

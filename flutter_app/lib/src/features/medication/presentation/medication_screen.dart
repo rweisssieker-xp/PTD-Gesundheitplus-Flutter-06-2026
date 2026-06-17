@@ -7,6 +7,7 @@ import '../../../core/notifications/notification_scheduler.dart';
 import '../../../core/storage/database_provider.dart';
 import '../../../shared_ui/gp_colors.dart';
 import '../../../shared_ui/gp_icons.dart';
+import '../../../shared_ui/gp_screen.dart';
 import '../data/medication_repository.dart';
 import '../domain/medication.dart';
 
@@ -25,8 +26,7 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen> {
   @override
   Widget build(BuildContext context) {
     final dbAsync = ref.watch(appDatabaseProvider);
-    return Scaffold(
-      appBar: AppBar(title: const Text('Medikation')),
+    return GpScreen(
       floatingActionButton: FloatingActionButton.extended(
         onPressed: dbAsync.hasValue
             ? () => _openEditor(MedicationRepository(dbAsync.requireValue))

@@ -6,6 +6,7 @@ import 'package:path_provider/path_provider.dart';
 import '../../../core/storage/database_provider.dart';
 import '../../../shared_ui/gp_colors.dart';
 import '../../../shared_ui/gp_icons.dart';
+import '../../../shared_ui/gp_screen.dart';
 import '../data/document_repository.dart';
 
 class DocumentScanScreen extends ConsumerStatefulWidget {
@@ -25,8 +26,7 @@ class _DocumentScanScreenState extends ConsumerState<DocumentScanScreen> {
   @override
   Widget build(BuildContext context) {
     final dbAsync = ref.watch(appDatabaseProvider);
-    return Scaffold(
-      appBar: AppBar(title: const Text('Dokumenten-Scan')),
+    return GpScreen(
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
