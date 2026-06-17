@@ -22,6 +22,11 @@ class PermissionService {
     return status.isGranted;
   }
 
+  Future<bool> ensurePhotos() async {
+    final status = await Permission.photos.request();
+    return status.isGranted || status.isLimited;
+  }
+
   Future<bool> openSystemSettings() {
     return openAppSettings();
   }
