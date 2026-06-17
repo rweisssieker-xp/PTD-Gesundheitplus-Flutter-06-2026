@@ -94,4 +94,21 @@ void main() {
     expect(grids.length, greaterThanOrEqualTo(2));
     expect(grids.every((grid) => grid.padding == EdgeInsets.zero), isTrue);
   });
+
+  testWidgets('dashboard footer stays in the scroll flow like the PWA', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      ProviderScope(child: const MaterialApp(home: DashboardScreen())),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Demo / Onboarding starten'), findsNothing);
+
+    await tester.drag(find.byType(ListView), const Offset(0, -1800));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Demo / Onboarding starten'), findsOneWidget);
+    expect(find.text('Eine Initiative für Ihre Gesundheit'), findsOneWidget);
+  });
 }

@@ -165,134 +165,150 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 448),
                   child: ListView(
-                    padding: const EdgeInsets.fromLTRB(24, 16, 24, 20),
+                    padding: EdgeInsets.zero,
                     children: [
-                      _EmergencyButton(
-                        onTap: () => context.go('/emergency/offline'),
-                        onSettingsTap: () => context.go('/emergency/setup'),
-                      ),
-                      const SizedBox(height: 12),
-                      GridView(
-                        shrinkWrap: true,
-                        padding: EdgeInsets.zero,
-                        physics: const NeverScrollableScrollPhysics(),
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 4,
-                              crossAxisSpacing: 12,
-                              mainAxisSpacing: 12,
-                              mainAxisExtent: 80,
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(24, 16, 24, 20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            _EmergencyButton(
+                              onTap: () => context.go('/emergency/offline'),
+                              onSettingsTap: () =>
+                                  context.go('/emergency/setup'),
                             ),
-                        children: [
-                          _GradientActionTile(
-                            label: 'KI-Coach',
-                            icon: GpIcons.aiCoach,
-                            colors: GpColors.purplePink,
-                            onTap: () => context.go('/ai/coach'),
-                          ),
-                          _GradientActionTile(
-                            label: language.t(AppText.scanDocument),
-                            icon: GpIcons.scan,
-                            colors: GpColors.indigo,
-                            onTap: () => context.go('/documents/scan'),
-                          ),
-                          _GradientActionTile(
-                            label: language.t(AppText.dailyPlan),
-                            icon: GpIcons.dailyPlan,
-                            colors: GpColors.orange,
-                            onTap: () => context.go('/medication/daily-plan'),
-                          ),
-                          _GradientActionTile(
-                            label: 'KI-Chat',
-                            icon: GpIcons.chat,
-                            colors: [Color(0xFFEC4899), Color(0xFFDB2777)],
-                            onTap: () => context.go('/ai/coach'),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      GridView(
-                        shrinkWrap: true,
-                        padding: EdgeInsets.zero,
-                        physics: const NeverScrollableScrollPhysics(),
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
+                            const SizedBox(height: 12),
+                            GridView(
+                              shrinkWrap: true,
+                              padding: EdgeInsets.zero,
+                              physics: const NeverScrollableScrollPhysics(),
+                              gridDelegate:
+                                  const SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 4,
+                                    crossAxisSpacing: 12,
+                                    mainAxisSpacing: 12,
+                                    mainAxisExtent: 80,
+                                  ),
+                              children: [
+                                _GradientActionTile(
+                                  label: 'KI-Coach',
+                                  icon: GpIcons.aiCoach,
+                                  colors: GpColors.purplePink,
+                                  onTap: () => context.go('/ai/coach'),
+                                ),
+                                _GradientActionTile(
+                                  label: language.t(AppText.scanDocument),
+                                  icon: GpIcons.scan,
+                                  colors: GpColors.indigo,
+                                  onTap: () => context.go('/documents/scan'),
+                                ),
+                                _GradientActionTile(
+                                  label: language.t(AppText.dailyPlan),
+                                  icon: GpIcons.dailyPlan,
+                                  colors: GpColors.orange,
+                                  onTap: () =>
+                                      context.go('/medication/daily-plan'),
+                                ),
+                                _GradientActionTile(
+                                  label: 'KI-Chat',
+                                  icon: GpIcons.chat,
+                                  colors: [
+                                    Color(0xFFEC4899),
+                                    Color(0xFFDB2777),
+                                  ],
+                                  onTap: () => context.go('/ai/coach'),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            GridView(
+                              shrinkWrap: true,
+                              padding: EdgeInsets.zero,
+                              physics: const NeverScrollableScrollPhysics(),
+                              gridDelegate:
+                                  const SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 2,
+                                    crossAxisSpacing: 12,
+                                    mainAxisSpacing: 12,
+                                    mainAxisExtent: 80,
+                                  ),
+                              children: [
+                                _GradientActionTile(
+                                  label: language.t(AppText.familyCircle),
+                                  icon: GpIcons.family,
+                                  colors: GpColors.teal,
+                                  onTap: () => context.go('/family'),
+                                ),
+                                _GradientActionTile(
+                                  label: language.t(AppText.interactionCheck),
+                                  icon: GpIcons.interactions,
+                                  colors: GpColors.amberOrange,
+                                  onTap: () => context.go(
+                                    '/medication/interaction-checker',
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            _ExportButton(
+                              label: language.t(AppText.healthExport),
+                              onTap: () => context.go('/export'),
+                            ),
+                            const SizedBox(height: 14),
+                            _FeatureCarousel(
+                              controller: _pageController,
+                              item: featuredItems[_currentIndex],
+                              onOpen: () => context.go(
+                                featuredItems[_currentIndex].route,
+                              ),
+                              onPrevious: () => _goToPage(_currentIndex - 1),
+                              onNext: () => _goToPage(_currentIndex + 1),
+                              onChanged: (index) =>
+                                  setState(() => _currentIndex = index),
+                              itemBuilder: (context, index) => _FeatureCard(
+                                item: featuredItems[index],
+                                onOpen: () =>
+                                    context.go(featuredItems[index].route),
+                              ),
+                              itemCount: featuredItems.length,
+                            ),
+                            const SizedBox(height: 24),
+                            _PageDots(
+                              count: featuredItems.length,
+                              index: _currentIndex,
+                              onTap: _goToPage,
+                            ),
+                            const SizedBox(height: 20),
+                            Text(
+                              language.t(AppText.allAreas),
+                              style: const TextStyle(
+                                color: GpColors.textSecondary,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 0.6,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            GridView.count(
                               crossAxisCount: 2,
+                              shrinkWrap: true,
+                              padding: EdgeInsets.zero,
+                              physics: const NeverScrollableScrollPhysics(),
                               crossAxisSpacing: 12,
                               mainAxisSpacing: 12,
-                              mainAxisExtent: 80,
+                              childAspectRatio: 1.28,
+                              children: [
+                                for (final item in featuredItems)
+                                  _AreaCard(
+                                    item: item,
+                                    onTap: () => context.go(item.route),
+                                  ),
+                              ],
                             ),
-                        children: [
-                          _GradientActionTile(
-                            label: language.t(AppText.familyCircle),
-                            icon: GpIcons.family,
-                            colors: GpColors.teal,
-                            onTap: () => context.go('/family'),
-                          ),
-                          _GradientActionTile(
-                            label: language.t(AppText.interactionCheck),
-                            icon: GpIcons.interactions,
-                            colors: GpColors.amberOrange,
-                            onTap: () =>
-                                context.go('/medication/interaction-checker'),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      _ExportButton(
-                        label: language.t(AppText.healthExport),
-                        onTap: () => context.go('/export'),
-                      ),
-                      const SizedBox(height: 14),
-                      _FeatureCarousel(
-                        controller: _pageController,
-                        item: featuredItems[_currentIndex],
-                        onOpen: () =>
-                            context.go(featuredItems[_currentIndex].route),
-                        onPrevious: () => _goToPage(_currentIndex - 1),
-                        onNext: () => _goToPage(_currentIndex + 1),
-                        onChanged: (index) =>
-                            setState(() => _currentIndex = index),
-                        itemBuilder: (context, index) => _FeatureCard(
-                          item: featuredItems[index],
-                          onOpen: () => context.go(featuredItems[index].route),
-                        ),
-                        itemCount: featuredItems.length,
-                      ),
-                      const SizedBox(height: 24),
-                      _PageDots(
-                        count: featuredItems.length,
-                        index: _currentIndex,
-                        onTap: _goToPage,
-                      ),
-                      const SizedBox(height: 20),
-                      Text(
-                        language.t(AppText.allAreas),
-                        style: const TextStyle(
-                          color: GpColors.textSecondary,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: 0.6,
+                            const SizedBox(height: 20),
+                          ],
                         ),
                       ),
-                      const SizedBox(height: 12),
-                      GridView.count(
-                        crossAxisCount: 2,
-                        shrinkWrap: true,
-                        padding: EdgeInsets.zero,
-                        physics: const NeverScrollableScrollPhysics(),
-                        crossAxisSpacing: 12,
-                        mainAxisSpacing: 12,
-                        childAspectRatio: 1.28,
-                        children: [
-                          for (final item in featuredItems)
-                            _AreaCard(
-                              item: item,
-                              onTap: () => context.go(item.route),
-                            ),
-                        ],
-                      ),
-                      const SizedBox(height: 28),
                       const GpFooter(),
                     ],
                   ),
