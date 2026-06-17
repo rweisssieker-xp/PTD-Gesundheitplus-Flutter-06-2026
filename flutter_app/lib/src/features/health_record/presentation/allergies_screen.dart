@@ -56,6 +56,34 @@ class _AllergiesScreenState extends ConsumerState<AllergiesScreen> {
                   _AllergySummary(count: allergies.length),
                   const SizedBox(height: 12),
                   GpVoiceNavigation(content: _allergyVoiceContent(allergies)),
+                  const SizedBox(height: 12),
+                  FutureBuilder<AllergyMedicationCheckResult>(
+                    future: repo.checkMedicationAllergies(),
+                    builder: (context, checkSnapshot) {
+                      final result = checkSnapshot.data;
+                      if (result == null) {
+                        return const Card(
+                          child: Padding(
+                            padding: EdgeInsets.all(16),
+                            child: Row(
+                              children: [
+                                SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                ),
+                                SizedBox(width: 12),
+                                Text('Allergie-Check wird vorbereitet...'),
+                              ],
+                            ),
+                          ),
+                        );
+                      }
+                      return _AllergyMedicationCheckCard(result: result);
+                    },
+                  ),
                   if (severe.isNotEmpty) ...[
                     const SizedBox(height: 12),
                     _SevereAllergyWarning(allergies: severe),
@@ -137,6 +165,185 @@ class _AllergiesScreenState extends ConsumerState<AllergiesScreen> {
       grouped.putIfAbsent(category, () => []).add(allergy);
     }
     return grouped;
+  }
+}
+
+class _AllergyMedicationCheckCard extends StatefulWidget {
+  const _AllergyMedicationCheckCard({required this.result});
+
+  final AllergyMedicationCheckResult result;
+
+  @override
+  State<_AllergyMedicationCheckCard> createState() =>
+      _AllergyMedicationCheckCardState();
+}
+
+class _AllergyMedicationCheckCardState
+    extends State<_AllergyMedicationCheckCard> {
+  var _expanded = true;
+
+  @override
+  Widget build(BuildContext context) {
+    final result = widget.result;
+    final color = result.hasConflicts
+        ? GpColors.emergencyRed
+        : GpColors.green.first;
+    return Card(
+      color: result.hasConflicts
+          ? const Color(0xFFFFF7ED)
+          : const Color(0xFFF0FDF4),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+        side: BorderSide(
+          color: result.hasConflicts
+              ? const Color(0xFFFB923C)
+              : const Color(0xFFBBF7D0),
+          width: 2,
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.shield_outlined, color: color),
+                const SizedBox(width: 8),
+                const Expanded(
+                  child: Text(
+                    'Allergie & Medikamenten-Check',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w900,
+                      color: GpColors.textPrimary,
+                    ),
+                  ),
+                ),
+                if (result.hasConflicts)
+                  IconButton(
+                    tooltip: _expanded ? 'Einklappen' : 'Ausklappen',
+                    onPressed: () => setState(() => _expanded = !_expanded),
+                    icon: Icon(
+                      _expanded
+                          ? Icons.keyboard_arrow_up
+                          : Icons.keyboard_arrow_down,
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Text(
+              '${result.activeMedicationCount} Medikament(e) • ${result.medicationAllergyCount} Medikamenten-Allergie(n)',
+              style: const TextStyle(
+                color: GpColors.textSecondary,
+                fontSize: 12,
+              ),
+            ),
+            const SizedBox(height: 10),
+            DecoratedBox(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: color.withValues(alpha: 0.35)),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(10),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      result.hasConflicts
+                          ? Icons.warning_amber_outlined
+                          : Icons.check_circle_outline,
+                      color: color,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Risiko: ${result.overallRisk}',
+                            style: TextStyle(
+                              color: color,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                          Text(
+                            result.summary,
+                            style: const TextStyle(fontSize: 13),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            if (result.hasConflicts && _expanded) ...[
+              const SizedBox(height: 10),
+              for (final conflict in result.conflicts)
+                _AllergyConflictTile(conflict: conflict),
+            ],
+            const SizedBox(height: 8),
+            const Text(
+              'Diese lokale Prüfung ersetzt keine ärztliche Beratung.',
+              style: TextStyle(color: GpColors.textSecondary, fontSize: 12),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _AllergyConflictTile extends StatelessWidget {
+  const _AllergyConflictTile({required this.conflict});
+
+  final AllergyMedicationConflict conflict;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = conflict.severity == 'Kontraindiziert'
+        ? GpColors.emergencyRed
+        : const Color(0xFFEA580C);
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.report_problem_outlined, color: color, size: 18),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  '${conflict.medicationName} ↔ ${conflict.allergen}',
+                  style: const TextStyle(fontWeight: FontWeight.w800),
+                ),
+              ),
+              _Badge(text: conflict.severity, color: color),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            conflict.description,
+            style: const TextStyle(color: GpColors.textSecondary),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            conflict.recommendation,
+            style: const TextStyle(fontWeight: FontWeight.w700),
+          ),
+        ],
+      ),
+    );
   }
 }
 

@@ -7,7 +7,7 @@
 | Anamnese | `/health/anamnesis` | Health record | implemented | User can create, list, delete, hear a native read-aloud summary, and share local medical history entries through an offline-readable QR payload. |
 | Behandlungshistorie | `/health/treatments` | Health record | implemented | User can create, list, delete, sort treatments by date, and hear a native read-aloud summary. |
 | Heilberufe | `/health/professionals` | Health record | implemented | User can search local specialty/provider suggestions, add a suggestion to local healthcare professionals, create, list, delete, and hear a native read-aloud summary. |
-| Allergien | `/health/allergies` | Health record | implemented | User can create, edit, group, list, hear a native read-aloud summary, and delete local allergies with severity warnings. |
+| Allergien | `/health/allergies` | Health record | implemented | User can create, edit, group, list, hear a native read-aloud summary, run a local medication-allergy conflict check, and delete local allergies with severity warnings. |
 | Termine | `/appointments` | Appointments | implemented | User can create, list, complete, delete, hear a native read-aloud summary, schedule native local reminders, and export appointments as local `.ics` calendar files. |
 | Medikation | `/medication` | Medication management | implemented | User can add, edit, deactivate, delete, list, capture local supply/refill metadata, and hear a native read-aloud summary of local medications with native local reminder scheduling and proactive refill alerts. |
 | Medikamenten-Tagesplan | `/medication/daily-plan` | Medication management | implemented | User can generate daily medication logs and mark intake as taken or skipped. |

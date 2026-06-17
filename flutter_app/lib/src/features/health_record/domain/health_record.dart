@@ -57,3 +57,53 @@ class AllergyRecord {
   final String? diagnosedBy;
   final String? notes;
 }
+
+class AllergyMedicationCheckResult {
+  const AllergyMedicationCheckResult({
+    required this.activeMedicationCount,
+    required this.medicationAllergyCount,
+    required this.conflicts,
+  });
+
+  final int activeMedicationCount;
+  final int medicationAllergyCount;
+  final List<AllergyMedicationConflict> conflicts;
+
+  bool get hasConflicts => conflicts.isNotEmpty;
+
+  String get overallRisk {
+    if (conflicts.any((conflict) => conflict.severity == 'Kontraindiziert')) {
+      return 'kritisch';
+    }
+    if (conflicts.any((conflict) => conflict.severity == 'Schwerwiegend')) {
+      return 'hoch';
+    }
+    if (conflicts.any((conflict) => conflict.severity == 'Moderat')) {
+      return 'moderat';
+    }
+    return 'niedrig';
+  }
+
+  String get summary {
+    if (conflicts.isEmpty) {
+      return 'Keine lokalen Medikamenten-Allergie-Konflikte erkannt.';
+    }
+    return '${conflicts.length} moegliche Medikamenten-Allergie-Konflikte erkannt. Bitte aerztlich oder pharmazeutisch pruefen.';
+  }
+}
+
+class AllergyMedicationConflict {
+  const AllergyMedicationConflict({
+    required this.medicationName,
+    required this.allergen,
+    required this.severity,
+    required this.description,
+    required this.recommendation,
+  });
+
+  final String medicationName;
+  final String allergen;
+  final String severity;
+  final String description;
+  final String recommendation;
+}

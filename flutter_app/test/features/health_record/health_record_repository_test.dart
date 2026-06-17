@@ -1,6 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gesundheitplus/src/core/storage/app_database.dart';
 import 'package:gesundheitplus/src/features/health_record/data/health_record_repository.dart';
+import 'package:gesundheitplus/src/features/medication/data/medication_repository.dart';
+import 'package:gesundheitplus/src/features/medication/domain/medication.dart';
 
 void main() {
   test('stores and deletes anamnesis entries', () async {
@@ -67,4 +69,88 @@ void main() {
     expect(remaining.single.substance, 'Birke');
     db.close();
   });
+
+  test(
+    'checks active medication against medication allergies locally',
+    () async {
+      final db = AppDatabase.memory();
+      addTearDown(db.close);
+      final healthRepo = HealthRecordRepository(db);
+      final medicationRepo = MedicationRepository(db);
+
+      await healthRepo.addAllergy(
+        substance: 'Penicillin',
+        category: 'Medikament',
+        severity: 'Lebensbedrohlich',
+        reaction: 'Atemnot',
+      );
+      await medicationRepo.save(
+        _medication(id: 'm1', name: 'Amoxicillin', active: true),
+      );
+      await medicationRepo.save(
+        _medication(id: 'm2', name: 'Vitamin D', active: true),
+      );
+
+      final result = await healthRepo.checkMedicationAllergies();
+
+      expect(result.activeMedicationCount, 2);
+      expect(result.medicationAllergyCount, 1);
+      expect(result.hasConflicts, isTrue);
+      expect(result.overallRisk, 'kritisch');
+      expect(result.conflicts.single.medicationName, 'Amoxicillin');
+      expect(result.conflicts.single.severity, 'Kontraindiziert');
+    },
+  );
+
+  test(
+    'detects direct medication allergy matches and ignores inactive meds',
+    () async {
+      final db = AppDatabase.memory();
+      addTearDown(db.close);
+      final healthRepo = HealthRecordRepository(db);
+      final medicationRepo = MedicationRepository(db);
+
+      await healthRepo.addAllergy(
+        substance: 'Ibuprofen',
+        category: 'Medikament',
+        severity: 'Mittel',
+      );
+      await medicationRepo.save(
+        _medication(id: 'm1', name: 'Ibuprofen 400', active: true),
+      );
+      await medicationRepo.save(
+        _medication(id: 'm2', name: 'Ibuprofen alt', active: false),
+      );
+
+      final result = await healthRepo.checkMedicationAllergies();
+
+      expect(result.conflicts, hasLength(1));
+      expect(result.conflicts.single.severity, 'Schwerwiegend');
+      expect(result.summary, contains('1 moegliche'));
+    },
+  );
+}
+
+Medication _medication({
+  required String id,
+  required String name,
+  required bool active,
+}) {
+  return Medication(
+    id: id,
+    name: name,
+    dosage: null,
+    frequency: null,
+    schedule: null,
+    startDate: null,
+    endDate: null,
+    prescribedBy: null,
+    reason: null,
+    reminderEnabled: false,
+    reminderTimes: const [],
+    supplyDurationDays: null,
+    refillReminderDays: null,
+    notes: null,
+    active: active,
+  );
 }
