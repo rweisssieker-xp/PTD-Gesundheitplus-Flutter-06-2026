@@ -61,19 +61,53 @@ class EmergencyRepository {
   }
 
   Future<EmergencyProfile> buildLocalProfile() async {
+    final profileRows = _db.select('''
+      SELECT full_name, notes
+      FROM local_profiles
+      WHERE id = 'default'
+      LIMIT 1
+      ''');
     final medicationRows = _db.select(
       "SELECT name FROM medications WHERE active = 1 ORDER BY name ASC LIMIT 20",
     );
-    final allergyRows = _db.select(
-      'SELECT substance FROM allergies ORDER BY substance ASC LIMIT 20',
-    );
+    final allergyRows = _db.select('''
+      SELECT substance, severity
+      FROM allergies
+      ORDER BY
+        CASE severity
+          WHEN 'Lebensbedrohlich' THEN 0
+          WHEN 'Schwer' THEN 1
+          WHEN 'Mittel' THEN 2
+          WHEN 'Leicht' THEN 3
+          ELSE 4
+        END,
+        substance ASC
+      LIMIT 20
+      ''');
+    final diagnosisRows = _db.select('''
+      SELECT title
+      FROM medical_history_entries
+      WHERE active = 1
+      ORDER BY title ASC
+      LIMIT 20
+      ''');
     final contacts = await listContacts();
+    final profileRow = profileRows.isEmpty ? null : profileRows.first;
+    final fullName = (profileRow?['full_name'] as String?)?.trim();
     return EmergencyProfile(
-      fullName: 'Patient',
-      notes: 'Lokal auf diesem Geraet gespeichert',
+      fullName: fullName == null || fullName.isEmpty ? 'Patient' : fullName,
+      notes:
+          (profileRow?['notes'] as String?) ??
+          'Lokal auf diesem Gerät gespeichert',
       medications: medicationRows.map((row) => row['name'] as String).toList(),
-      allergies: allergyRows.map((row) => row['substance'] as String).toList(),
-      diagnoses: const [],
+      allergies: allergyRows.map((row) {
+        final substance = row['substance'] as String;
+        final severity = row['severity'] as String?;
+        return severity == null || severity.isEmpty
+            ? substance
+            : '$substance ($severity)';
+      }).toList(),
+      diagnoses: diagnosisRows.map((row) => row['title'] as String).toList(),
       contacts: contacts
           .where(
             (contact) => contact.phone != null && contact.phone!.isNotEmpty,

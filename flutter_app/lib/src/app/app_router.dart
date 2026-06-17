@@ -11,8 +11,6 @@ import '../features/appointments/presentation/healthcare_professionals_screen.da
 import '../features/documents/presentation/document_scan_screen.dart';
 import '../features/documents/presentation/documents_screen.dart';
 import '../features/documents/presentation/export_screen.dart';
-import '../features/emergency/domain/emergency_payload_builder.dart';
-import '../features/emergency/domain/emergency_profile.dart';
 import '../features/emergency/presentation/emergency_offline_screen.dart';
 import '../features/emergency/presentation/emergency_profile_screen.dart';
 import '../features/emergency/presentation/emergency_setup_screen.dart';
@@ -93,8 +91,7 @@ final appRouter = GoRouter(
     ),
     GoRoute(
       path: '/emergency/profile',
-      builder: (context, state) =>
-          EmergencyProfileScreen(payload: _demoEmergencyPayload()),
+      builder: (context, state) => const EmergencyProfileScreen(),
     ),
     GoRoute(
       path: '/emergency/setup',
@@ -155,16 +152,3 @@ final appRouter = GoRouter(
     ),
   ],
 );
-
-String _demoEmergencyPayload() {
-  return EmergencyPayloadBuilder().build(
-    const EmergencyProfile(
-      fullName: 'Patient',
-      notes: 'Lokales Notfallprofil',
-      medications: [],
-      allergies: [],
-      diagnoses: [],
-      contacts: [],
-    ),
-  );
-}

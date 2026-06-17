@@ -17,7 +17,7 @@
 | Gewicht | `/vitals/weight` | Vital values | implemented | User can log weight locally and see BMI per entry when height is present. |
 | Impfpass | `/prevention/vaccination` | Prevention and vaccination | implemented | User can create and list local vaccination records with optional booster due date. |
 | Vorsorge | `/prevention/care` | Prevention and vaccination | implemented | User can create local preventive care reminders and mark them done. |
-| Notfallprofil | `/emergency/profile` | Emergency | implemented | Offline emergency payload builder, QR screen, route, and test coverage exist. |
+| Notfallprofil | `/emergency/profile` | Emergency | implemented | User sees a QR-backed emergency profile built from local profile, diagnosis, medication, allergy, and contact records. |
 | Notfall-Einrichtung | `/emergency/setup` | Emergency | implemented | User can create, verify, list, and delete local emergency contacts. |
 | Offline-Notfall | `/emergency/offline` | Emergency | implemented | Emergency screen renders local medication, allergy, contact, and QR payload data without backend access. |
 | Dokumenten-Scan | `/documents/scan` | Documents and scanning | implemented | User can capture or attach document images and store metadata locally. |
