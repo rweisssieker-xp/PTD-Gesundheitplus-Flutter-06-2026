@@ -92,4 +92,30 @@ void main() {
 
     expect(reminder, isNull);
   });
+
+  test('builds dementia support reminder for future time', () {
+    final reminder = NotificationScheduler().dementiaSupportReminder(
+      type: 'Trinken',
+      title: 'Trinken nicht vergessen',
+      scheduledAt: DateTime(2026, 6, 17, 10),
+      now: DateTime(2026, 6, 17, 8),
+    );
+
+    expect(reminder, isNotNull);
+    expect(reminder!.id, 'dementia-trinken');
+    expect(reminder.title, 'Trinken nicht vergessen');
+    expect(reminder.category, 'dementia');
+    expect(reminder.scheduledAt, DateTime(2026, 6, 17, 10));
+  });
+
+  test('skips dementia support reminder when time is in the past', () {
+    final reminder = NotificationScheduler().dementiaSupportReminder(
+      type: 'Trinken',
+      title: 'Trinken nicht vergessen',
+      scheduledAt: DateTime(2026, 6, 17, 7),
+      now: DateTime(2026, 6, 17, 8),
+    );
+
+    expect(reminder, isNull);
+  });
 }

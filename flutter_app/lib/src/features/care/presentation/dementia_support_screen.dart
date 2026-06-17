@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/notifications/native_notification_service.dart';
+import '../../../core/notifications/notification_scheduler.dart';
 import '../../../core/storage/database_provider.dart';
 import '../../../shared_ui/gp_colors.dart';
 import '../data/care_repository.dart';
@@ -16,6 +18,7 @@ class DementiaSupportScreen extends ConsumerStatefulWidget {
 
 class _DementiaSupportScreenState extends ConsumerState<DementiaSupportScreen> {
   int _reload = 0;
+  final _notifications = NativeNotificationService();
 
   @override
   Widget build(BuildContext context) {
@@ -108,8 +111,47 @@ class _DementiaSupportScreenState extends ConsumerState<DementiaSupportScreen> {
   }
 
   Future<void> _quickLog(CareRepository repo, String type, String value) async {
+    final messenger = ScaffoldMessenger.of(context);
     await repo.addDementiaLog(type: type, value: value);
+    try {
+      await _scheduleNextSupportReminder(type);
+    } catch (_) {
+      if (mounted) {
+        messenger.showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Log gespeichert, naechste Erinnerung konnte nicht geplant werden.',
+            ),
+          ),
+        );
+      }
+    }
     if (mounted) setState(() => _reload++);
+  }
+
+  Future<void> _scheduleNextSupportReminder(String type) async {
+    final now = DateTime.now();
+    final scheduledAt = switch (type) {
+      'Trinken' => now.add(const Duration(hours: 2)),
+      'Mahlzeit' => now.add(const Duration(hours: 5)),
+      _ => now.add(const Duration(hours: 24)),
+    };
+    final title = switch (type) {
+      'Trinken' => 'Trinken nicht vergessen',
+      'Mahlzeit' => 'Mahlzeit pruefen',
+      _ => 'Alltagserinnerung pruefen',
+    };
+    final reminder = NotificationScheduler().dementiaSupportReminder(
+      type: type,
+      title: title,
+      scheduledAt: scheduledAt,
+      now: now,
+    );
+    if (reminder == null) return;
+    await _notifications.scheduleReminder(
+      reminder,
+      body: 'Lokale Demenz-Unterstuetzung',
+    );
   }
 
   IconData _icon(String type) {

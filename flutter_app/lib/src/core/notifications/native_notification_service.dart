@@ -106,6 +106,7 @@ class NativeNotificationService {
       'medication' => 'Medikation',
       'appointment' => 'Termine',
       'prevention' => 'Vorsorge',
+      'dementia' => 'Demenz-Unterstuetzung',
       _ => 'Gesundheit Plus',
     };
   }

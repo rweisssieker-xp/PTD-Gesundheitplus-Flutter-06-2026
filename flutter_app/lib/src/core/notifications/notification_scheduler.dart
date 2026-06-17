@@ -79,6 +79,21 @@ class NotificationScheduler {
     );
   }
 
+  ScheduledReminder? dementiaSupportReminder({
+    required String type,
+    required String title,
+    required DateTime scheduledAt,
+    required DateTime now,
+  }) {
+    if (!scheduledAt.isAfter(now)) return null;
+    return ScheduledReminder(
+      id: 'dementia-${type.toLowerCase()}',
+      title: title,
+      category: 'dementia',
+      scheduledAt: scheduledAt,
+    );
+  }
+
   ({int hour, int minute})? _parseTime(String value) {
     final match = RegExp(r'^(\d{1,2}):(\d{2})$').firstMatch(value.trim());
     if (match == null) return null;

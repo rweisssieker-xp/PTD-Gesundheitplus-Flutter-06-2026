@@ -24,7 +24,7 @@
 | Gescannte-Dokumente | `/documents` | Documents and scanning | implemented | User can list and delete locally stored documents. |
 | Daten-Export | `/export` | Local export and sharing | implemented | User can export local health record JSON and share the generated file. |
 | Familien-Kreis | `/family` | Family circle | implemented | User can manage local family members and check-ins. |
-| Demenz-Unterstuetzung | `/dementia` | Dementia support | implemented | User can log hydration, meals, and reminders locally. |
+| Demenz-Unterstuetzung | `/dementia` | Dementia support | implemented | User can log hydration, meals, and reminders locally with follow-up native local reminders. |
 | KI-Gesundheitscoach | `/ai/coach` | AI coach | implemented | User can ask a local consent-gated coach and keep the message history on-device. |
 | Benachrichtigungen | `/notifications` | Notification center | implemented | User can view and mark local notifications as read. |
 | Datenschutz | `/privacy` | Privacy and storage settings | implemented | User can view local storage count, manage AI context consent, export data, and delete all local data after confirmation. |
