@@ -7,8 +7,15 @@ import 'package:gesundheitplus/src/core/storage/database_provider.dart';
 import 'package:gesundheitplus/src/core/security/app_lock_service.dart';
 import 'package:gesundheitplus/src/core/security/security_providers.dart';
 import 'package:gesundheitplus/src/features/dashboard/presentation/dashboard_screen.dart';
+import 'package:gesundheitplus/src/shared_ui/gp_icons.dart';
 
 void main() {
+  test('shared icons use the original PWA Lucide style', () {
+    expect(GpIcons.anamnesis.fontFamily, 'Lucide');
+    expect(GpIcons.aiCoach.fontFamily, 'Lucide');
+    expect(GpIcons.settings.fontFamily, 'Lucide');
+  });
+
   testWidgets('renders Gesundheit Plus shell with red header', (tester) async {
     tester.view.physicalSize = const Size(390, 1400);
     tester.view.devicePixelRatio = 1;

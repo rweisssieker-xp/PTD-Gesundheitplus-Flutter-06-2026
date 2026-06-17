@@ -150,12 +150,12 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               IconButton(
                 tooltip: 'Benachrichtigungen',
                 onPressed: () => context.go('/notifications'),
-                icon: const Icon(Icons.notifications_none),
+                icon: const Icon(GpIcons.notifications),
               ),
               IconButton(
                 tooltip: 'Datenschutz',
                 onPressed: () => context.go('/privacy'),
-                icon: const Icon(Icons.settings_outlined),
+                icon: const Icon(GpIcons.settings),
               ),
             ],
           ),
@@ -404,7 +404,7 @@ class _EmergencyButton extends StatelessWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.error_outline, color: Colors.white, size: 40),
+                      Icon(GpIcons.emergency, color: Colors.white, size: 40),
                       SizedBox(height: 6),
                       Text(
                         '🚨 NOTFALL',
@@ -438,7 +438,7 @@ class _EmergencyButton extends StatelessWidget {
               child: const SizedBox(
                 width: 32,
                 height: 32,
-                child: Icon(Icons.settings_outlined, color: Colors.white),
+                child: Icon(GpIcons.settings, color: Colors.white),
               ),
             ),
           ),
@@ -568,11 +568,14 @@ class _FeatureCarousel extends StatelessWidget {
           ),
           Positioned(
             left: 2,
-            child: _RoundNavButton(icon: Icons.chevron_left, onTap: onPrevious),
+            child: _RoundNavButton(
+              icon: GpIcons.chevronLeft,
+              onTap: onPrevious,
+            ),
           ),
           Positioned(
             right: 2,
-            child: _RoundNavButton(icon: Icons.chevron_right, onTap: onNext),
+            child: _RoundNavButton(icon: GpIcons.chevronRight, onTap: onNext),
           ),
         ],
       ),

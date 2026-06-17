@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'gp_colors.dart';
 import 'gp_footer.dart';
 import 'gp_header.dart';
+import 'gp_icons.dart';
 
 class GpScreen extends StatelessWidget {
   const GpScreen({
@@ -71,7 +72,7 @@ class _GpBackHomeButtons extends StatelessWidget {
       children: [
         _GpHeaderButton(
           tooltip: 'Zurueck',
-          icon: Icons.arrow_back,
+          icon: GpIcons.back,
           onPressed: () {
             if (context.canPop()) {
               context.pop();
@@ -83,7 +84,7 @@ class _GpBackHomeButtons extends StatelessWidget {
         const SizedBox(width: 8),
         _GpHeaderButton(
           tooltip: 'Startseite',
-          icon: Icons.home_outlined,
+          icon: GpIcons.home,
           onPressed: () => context.go('/'),
         ),
       ],
@@ -99,7 +100,7 @@ class _GpNotificationButton extends StatelessWidget {
     return IconButton(
       tooltip: 'Benachrichtigungen',
       onPressed: () => context.go('/notifications'),
-      icon: const Icon(Icons.notifications_none),
+      icon: const Icon(GpIcons.notifications),
     );
   }
 }
@@ -112,7 +113,7 @@ class _GpSettingsButton extends StatelessWidget {
     return IconButton(
       tooltip: 'Datenschutz',
       onPressed: () => context.go('/privacy'),
-      icon: const Icon(Icons.settings_outlined),
+      icon: const Icon(GpIcons.settings),
     );
   }
 }
@@ -131,8 +132,8 @@ class _GpHeaderButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 44,
-      height: 44,
+      width: 48,
+      height: 48,
       child: OutlinedButton(
         style: OutlinedButton.styleFrom(
           padding: EdgeInsets.zero,

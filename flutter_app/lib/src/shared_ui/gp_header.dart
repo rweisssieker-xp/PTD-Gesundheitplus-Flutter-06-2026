@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/localization/app_language.dart';
 import '../core/localization/app_language_controller.dart';
 import 'gp_colors.dart';
+import 'gp_icons.dart';
 
 class GpHeader extends StatelessWidget {
   const GpHeader({
@@ -132,7 +133,7 @@ class _LocalBadge extends StatelessWidget {
       child: const Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.shield_outlined, size: 12, color: Color(0xFF15803D)),
+          Icon(GpIcons.shield, size: 12, color: Color(0xFF15803D)),
           SizedBox(width: 3),
           Text(
             'Lokal',
@@ -188,7 +189,7 @@ class GpLanguageButton extends ConsumerWidget {
           },
         ),
       ),
-      icon: const Icon(Icons.language_outlined),
+      icon: const Icon(GpIcons.language),
     );
   }
 }
