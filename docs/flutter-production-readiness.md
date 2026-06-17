@@ -52,6 +52,7 @@ Android embedding disables Impeller explicitly for this emulator-tested build pa
 - Document scanning checks native camera/gallery permissions before opening the picker and links blocked users to app settings.
 - The dashboard runs local proactive health checks on startup and writes deduplicated on-device alerts for medication refills, high-risk interaction checks, missing/unverified emergency contacts, and incomplete local emergency profile data.
 - The iOS bundle display name is set to `Gesundheit Plus`.
+- The iOS Runner target includes `PrivacyInfo.xcprivacy` with no tracking declaration and initial Required Reason API entries for app preferences and file metadata access.
 - The PWA language switcher is backed by a local on-device preference and translates the native dashboard entry points for German, English, Turkish, Arabic, and Ukrainian.
 - Emergency contacts expose native phone, SMS, WhatsApp, system share, and current-location SMS handoff actions from the emergency profile and offline emergency views with visible failure messages when a target app is unavailable.
 - Emergency contacts can be imported from the device address book after explicit contact permission and remain stored locally.
@@ -71,7 +72,7 @@ Android embedding disables Impeller explicitly for this emulator-tested build pa
 
 ## Remaining production gates
 
-1. iOS build verification requires macOS with Xcode. The Windows Flutter toolchain in this workspace does not expose an iOS build subcommand.
+1. iOS build verification and generated Privacy Report review require macOS with Xcode. The Windows Flutter toolchain in this workspace does not expose an iOS build subcommand.
 2. App Store and Play Store release metadata, screenshots, privacy labels, and final store account configuration still need to be completed in the store consoles. Draft copy and privacy answers are tracked in `docs/store-release-readiness.md`.
 
 ## iOS verification commands on macOS

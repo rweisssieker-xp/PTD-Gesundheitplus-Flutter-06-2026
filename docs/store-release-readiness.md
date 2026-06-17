@@ -62,6 +62,8 @@ Security:
 
 ## Apple App Privacy Draft
 
+The iOS target includes `flutter_app/ios/Runner/PrivacyInfo.xcprivacy` as a bundled Runner resource. It declares no tracking and includes initial Required Reason API entries for app preferences/UserDefaults and file metadata access. The final Xcode-generated Privacy Report must still be reviewed before App Store submission.
+
 Potential data types handled by the app:
 
 - Health and fitness data
@@ -94,6 +96,7 @@ Required screenshots should be captured on real devices or reliable simulators/e
 ## External Gates
 
 - iOS build/archive must be verified on macOS with Xcode.
+- The Xcode generated Privacy Report must be checked against `PrivacyInfo.xcprivacy` and any third-party SDK manifests before submission.
 - Final store privacy questionnaires must be completed in the store consoles.
 - Final screenshots must be captured from real rendered devices because the current local Android emulator exposes the Flutter UI through accessibility hierarchy but returns a black hardware screenshot surface.
 - Final medical disclaimer/legal text should be reviewed before public distribution.
