@@ -17,8 +17,18 @@ import '../domain/appointment.dart';
 import '../domain/appointment_ics_builder.dart';
 import '../domain/appointment_text_parser.dart';
 
+typedef AppointmentExportDirectoryProvider = Future<Directory> Function();
+typedef AppointmentFileShare = Future<void> Function(List<XFile> files);
+
 class AppointmentsScreen extends ConsumerStatefulWidget {
-  const AppointmentsScreen({super.key});
+  const AppointmentsScreen({
+    super.key,
+    this.exportDirectoryProvider,
+    this.shareFiles,
+  });
+
+  final AppointmentExportDirectoryProvider? exportDirectoryProvider;
+  final AppointmentFileShare? shareFiles;
 
   @override
   ConsumerState<AppointmentsScreen> createState() => _AppointmentsScreenState();
@@ -269,15 +279,33 @@ class _AppointmentsScreenState extends ConsumerState<AppointmentsScreen> {
       );
       return;
     }
-    final directory = await getTemporaryDirectory();
-    final date = DateTime.now();
-    final fileName =
-        'gesundheit-plus-termine-${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}.ics';
-    final file = File('${directory.path}${Platform.pathSeparator}$fileName');
-    await file.writeAsString(AppointmentIcsBuilder().build(appointments));
-    await Share.shareXFiles([
-      XFile(file.path, mimeType: 'text/calendar', name: fileName),
-    ]);
+    try {
+      final directory =
+          await widget.exportDirectoryProvider?.call() ??
+          await getTemporaryDirectory();
+      final date = DateTime.now();
+      final fileName =
+          'gesundheit-plus-termine-${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}.ics';
+      final file = File('${directory.path}${Platform.pathSeparator}$fileName');
+      await file.writeAsString(AppointmentIcsBuilder().build(appointments));
+      final files = [
+        XFile(file.path, mimeType: 'text/calendar', name: fileName),
+      ];
+      if (widget.shareFiles != null) {
+        await widget.shareFiles!(files);
+      } else {
+        await Share.shareXFiles(files);
+      }
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Termine konnten nicht exportiert werden. Bitte Speicherplatz und Kalenderfreigabe prüfen.',
+          ),
+        ),
+      );
+    }
   }
 }
 

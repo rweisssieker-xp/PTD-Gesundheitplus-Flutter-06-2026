@@ -11,8 +11,21 @@ import '../../../shared_ui/gp_icons.dart';
 import '../../../shared_ui/gp_screen.dart';
 import '../data/document_repository.dart';
 
+typedef HealthRecordExporter = Future<File> Function(String exportDirectory);
+typedef ExportDirectoryProvider = Future<Directory> Function();
+typedef ShareExportFile = Future<void> Function(File file);
+
 class ExportScreen extends ConsumerStatefulWidget {
-  const ExportScreen({super.key});
+  const ExportScreen({
+    super.key,
+    this.exporter,
+    this.directoryProvider,
+    this.shareFile,
+  });
+
+  final HealthRecordExporter? exporter;
+  final ExportDirectoryProvider? directoryProvider;
+  final ShareExportFile? shareFile;
 
   @override
   ConsumerState<ExportScreen> createState() => _ExportScreenState();
@@ -66,7 +79,7 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
               ),
             ),
             OutlinedButton.icon(
-              onPressed: () => Share.shareXFiles([XFile(_exportFile!.path)]),
+              onPressed: _shareExport,
               icon: const Icon(Icons.ios_share_outlined),
               label: const Text('Teilen'),
             ),
@@ -78,13 +91,47 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
 
   Future<void> _createExport() async {
     setState(() => _working = true);
-    final db = ref.read(appDatabaseProvider).requireValue;
-    final dir = await getApplicationDocumentsDirectory();
-    final file = await DocumentRepository(db).exportHealthRecord(dir.path);
-    if (!mounted) return;
-    setState(() {
-      _exportFile = file;
-      _working = false;
-    });
+    try {
+      final dir =
+          await widget.directoryProvider?.call() ??
+          await getApplicationDocumentsDirectory();
+      final file = widget.exporter != null
+          ? await widget.exporter!(dir.path)
+          : await DocumentRepository(
+              ref.read(appDatabaseProvider).requireValue,
+            ).exportHealthRecord(dir.path);
+      if (!mounted) return;
+      setState(() => _exportFile = file);
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Export konnte nicht erstellt werden. Bitte Speicherplatz und Berechtigungen prüfen.',
+          ),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _working = false);
+      }
+    }
+  }
+
+  Future<void> _shareExport() async {
+    final file = _exportFile;
+    if (file == null) return;
+    try {
+      if (widget.shareFile != null) {
+        await widget.shareFile!(file);
+      } else {
+        await Share.shareXFiles([XFile(file.path)]);
+      }
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Export konnte nicht geteilt werden.')),
+      );
+    }
   }
 }

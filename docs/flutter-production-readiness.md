@@ -7,7 +7,7 @@ Date: 2026-06-17
 - `flutter doctor -v`: no issues after installing Android SDK command-line tools and accepting Android licenses.
 - `dart format lib test`: clean.
 - `flutter analyze`: no issues.
-- `flutter test`: 91 tests passed.
+- `flutter test`: 99 tests passed.
 - `flutter build apk --debug`: built successfully.
 - `flutter build apk --release`: built successfully with local release keystore.
 - `flutter build appbundle --release`: built successfully with local release keystore.
@@ -51,6 +51,7 @@ The native Flutter shell now mirrors the PWA layout pattern with the first-run s
 - The PWA language switcher is backed by a local on-device preference and translates the native dashboard entry points for German, English, Turkish, Arabic, and Ukrainian.
 - Emergency contacts expose native phone, SMS, WhatsApp, system share, and current-location SMS handoff actions from the emergency profile and offline emergency views with visible failure messages when a target app is unavailable.
 - Emergency contacts can be imported from the device address book after explicit contact permission and remain stored locally.
+- Local health-record JSON export and appointment `.ics` export show visible recovery messages when local file creation or native sharing fails.
 - Healthcare professionals expose a local Facharzt search with on-device provider suggestions and direct local add, replacing the PWA internet/LLM doctor search with a local-only workflow.
 - Healthcare professionals can be drafted from spoken-style German text using a deterministic on-device parser for name, specialty, address, phone, and email.
 - Allergies expose a local medication conflict check that compares active medications with medication allergies and known local substance-class rules without sending data off-device.
