@@ -5,9 +5,9 @@ class MedicationScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      appBar: AppBar(title: Text('Medikation')),
-      body: Center(child: Text('Medikamente lokal verwalten')),
+    return Scaffold(
+      appBar: AppBar(title: const Text('Medikation')),
+      body: const Center(child: Text('Medikamente lokal verwalten')),
     );
   }
 }
