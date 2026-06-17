@@ -29,6 +29,7 @@ class AppTables {
   static const emergencyContacts = AppTable('emergency_contacts');
   static const notifications = AppTable('notifications');
   static const consentSettings = AppTable('consent_settings');
+  static const aiCoachMessages = AppTable('ai_coach_messages');
   static const communicationPreferences = AppTable('communication_preferences');
   static const familyMembers = AppTable('family_members');
   static const familyCheckIns = AppTable('family_check_ins');
@@ -53,6 +54,7 @@ class AppTables {
     emergencyContacts,
     notifications,
     consentSettings,
+    aiCoachMessages,
     communicationPreferences,
     familyMembers,
     familyCheckIns,

@@ -1,5 +1,6 @@
 import 'package:go_router/go_router.dart';
 
+import '../features/ai_coach/presentation/ai_coach_screen.dart';
 import '../features/care/presentation/dementia_support_screen.dart';
 import '../features/care/presentation/family_circle_screen.dart';
 import '../features/communication/presentation/communication_settings_screen.dart';
@@ -22,13 +23,13 @@ import '../features/medication/presentation/medication_screen.dart';
 import '../features/medication_safety/presentation/interaction_checker_screen.dart';
 import '../features/medication_safety/presentation/medication_interactions_screen.dart';
 import '../features/notifications/presentation/notification_center_screen.dart';
+import '../features/onboarding/presentation/onboarding_screen.dart';
 import '../features/prevention/presentation/preventive_care_screen.dart';
 import '../features/prevention/presentation/vaccination_screen.dart';
 import '../features/privacy/presentation/privacy_screen.dart';
 import '../features/privacy/presentation/storage_mode_screen.dart';
 import '../features/vitals/presentation/blood_pressure_screen.dart';
 import '../features/vitals/presentation/weight_screen.dart';
-import '../shared_ui/feature_shell_screen.dart';
 
 final appRouter = GoRouter(
   routes: [
@@ -117,8 +118,7 @@ final appRouter = GoRouter(
     ),
     GoRoute(
       path: '/ai/coach',
-      builder: (context, state) =>
-          const FeatureShellScreen(title: 'KI-Gesundheitscoach'),
+      builder: (context, state) => const AiCoachScreen(),
     ),
     GoRoute(
       path: '/notifications',
@@ -146,8 +146,7 @@ final appRouter = GoRouter(
     ),
     GoRoute(
       path: '/onboarding',
-      builder: (context, state) =>
-          const FeatureShellScreen(title: 'Onboarding'),
+      builder: (context, state) => const OnboardingScreen(),
     ),
   ],
 );
