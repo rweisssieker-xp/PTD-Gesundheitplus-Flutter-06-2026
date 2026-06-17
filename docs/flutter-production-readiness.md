@@ -17,6 +17,7 @@ Date: 2026-06-17
 - Debug APK: `flutter_app/build/app/outputs/flutter-apk/app-debug.apk`
 - Release APK: `flutter_app/build/app/outputs/flutter-apk/app-release.apk`
 - Release AAB: `flutter_app/build/app/outputs/bundle/release/app-release.aab`
+- Store-facing metadata and privacy drafts: `docs/store-release-readiness.md`
 
 ## Android release signing
 
@@ -71,7 +72,7 @@ Android embedding disables Impeller explicitly for this emulator-tested build pa
 ## Remaining production gates
 
 1. iOS build verification requires macOS with Xcode. The Windows Flutter toolchain in this workspace does not expose an iOS build subcommand.
-2. App Store and Play Store release metadata, screenshots, privacy labels, and final store account configuration still need to be completed outside the codebase.
+2. App Store and Play Store release metadata, screenshots, privacy labels, and final store account configuration still need to be completed in the store consoles. Draft copy and privacy answers are tracked in `docs/store-release-readiness.md`.
 
 ## iOS verification commands on macOS
 
