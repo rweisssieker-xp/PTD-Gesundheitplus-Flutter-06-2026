@@ -9,7 +9,14 @@ import '../../../shared_ui/gp_screen.dart';
 import '../data/notification_center_repository.dart';
 
 class NotificationCenterScreen extends ConsumerStatefulWidget {
-  const NotificationCenterScreen({super.key});
+  const NotificationCenterScreen({
+    super.key,
+    this.permissionStatus,
+    this.openSettings,
+  });
+
+  final Future<PermissionStatus> Function()? permissionStatus;
+  final Future<bool> Function()? openSettings;
 
   @override
   ConsumerState<NotificationCenterScreen> createState() =>
@@ -40,8 +47,11 @@ class _NotificationCenterScreenState
                 padding: const EdgeInsets.all(16),
                 children: [
                   _NotificationPermissionCard(
-                    permissionStatus: _permissions.notificationStatus(),
-                    onOpenSettings: _permissions.openSystemSettings,
+                    permissionStatus:
+                        widget.permissionStatus?.call() ??
+                        _permissions.notificationStatus(),
+                    onOpenSettings:
+                        widget.openSettings ?? _permissions.openSystemSettings,
                   ),
                   const SizedBox(height: 12),
                   if (items.isEmpty)
@@ -67,9 +77,7 @@ class _NotificationCenterScreenState
                                 : GpColors.emergencyRed,
                           ),
                           title: Text(item.title),
-                          subtitle: Text(
-                            '${item.category} • ${item.displayBody}',
-                          ),
+                          subtitle: _NotificationItemSubtitle(item: item),
                           trailing: item.read
                               ? null
                               : IconButton(
@@ -88,6 +96,97 @@ class _NotificationCenterScreenState
             },
           );
         },
+      ),
+    );
+  }
+}
+
+class _NotificationItemSubtitle extends StatelessWidget {
+  const _NotificationItemSubtitle({required this.item});
+
+  final LocalNotificationItem item;
+
+  @override
+  Widget build(BuildContext context) {
+    final status = item.status;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('${item.category} • ${item.displayBody}'),
+        const SizedBox(height: 6),
+        Wrap(
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: 8,
+          runSpacing: 4,
+          children: [
+            _NotificationStatusChip(status: status),
+            if (item.statusDetail != null && item.statusDetail!.isNotEmpty)
+              Text(
+                item.statusDetail!,
+                style: const TextStyle(
+                  color: GpColors.textSecondary,
+                  fontSize: 12,
+                ),
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _NotificationStatusChip extends StatelessWidget {
+  const _NotificationStatusChip({required this.status});
+
+  final LocalNotificationStatus status;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = switch (status) {
+      LocalNotificationStatus.active => const Color(0xFF16A34A),
+      LocalNotificationStatus.permissionMissing => const Color(0xFFCA8A04),
+      LocalNotificationStatus.systemBlocked => GpColors.emergencyRed,
+      LocalNotificationStatus.needsReschedule => const Color(0xFF2563EB),
+      LocalNotificationStatus.inactive => GpColors.textSecondary,
+    };
+    final background = switch (status) {
+      LocalNotificationStatus.active => const Color(0xFFF0FDF4),
+      LocalNotificationStatus.permissionMissing => const Color(0xFFFFFBEB),
+      LocalNotificationStatus.systemBlocked => GpColors.redSurface,
+      LocalNotificationStatus.needsReschedule => const Color(0xFFEFF6FF),
+      LocalNotificationStatus.inactive => const Color(0xFFF9FAFB),
+    };
+    final icon = switch (status) {
+      LocalNotificationStatus.active => Icons.check_circle_outline,
+      LocalNotificationStatus.permissionMissing =>
+        Icons.notifications_off_outlined,
+      LocalNotificationStatus.systemBlocked => Icons.block_outlined,
+      LocalNotificationStatus.needsReschedule => Icons.update_outlined,
+      LocalNotificationStatus.inactive => Icons.pause_circle_outline,
+    };
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: background,
+        border: Border.all(color: color.withValues(alpha: 0.35)),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 13, color: color),
+            const SizedBox(width: 4),
+            Text(
+              status.label,
+              style: TextStyle(
+                color: color,
+                fontSize: 12,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

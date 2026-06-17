@@ -303,9 +303,13 @@ class AppDatabase {
         category TEXT NOT NULL,
         read INTEGER NOT NULL DEFAULT 0,
         scheduled_at TEXT,
+        status TEXT NOT NULL DEFAULT 'active',
+        status_detail TEXT,
         created_at TEXT NOT NULL
       );
     ''');
+    _ensureColumn('notifications', 'status', "TEXT NOT NULL DEFAULT 'active'");
+    _ensureColumn('notifications', 'status_detail', 'TEXT');
     _db.execute('''
       CREATE TABLE IF NOT EXISTS consent_settings (
         id TEXT PRIMARY KEY,

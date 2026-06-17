@@ -14,11 +14,16 @@ class NotificationCenterRepository {
     required String body,
     required String category,
     DateTime? scheduledAt,
+    LocalNotificationStatus status = LocalNotificationStatus.active,
+    String? statusDetail,
   }) async {
     _db.execute(
       '''
-      INSERT INTO notifications (id, title, body, category, read, scheduled_at, created_at)
-      VALUES (?, ?, ?, ?, 0, ?, ?)
+      INSERT INTO notifications (
+        id, title, body, category, read, scheduled_at, status, status_detail,
+        created_at
+      )
+      VALUES (?, ?, ?, ?, 0, ?, ?, ?, ?)
       ''',
       [
         _uuid.v4(),
@@ -26,6 +31,8 @@ class NotificationCenterRepository {
         body,
         category,
         scheduledAt?.toIso8601String(),
+        status.storageValue,
+        statusDetail,
         DateTime.now().toIso8601String(),
       ],
     );
@@ -46,6 +53,7 @@ class NotificationCenterRepository {
   Future<List<LocalNotificationItem>> listNotifications() async {
     final rows = _db.select('''
       SELECT id, title, body, category, read, scheduled_at, created_at
+           , status, status_detail
       FROM notifications
       ORDER BY created_at DESC
       ''');
@@ -58,6 +66,10 @@ class NotificationCenterRepository {
             category: row['category'] as String,
             read: row['read'] == 1,
             scheduledAt: _date(row['scheduled_at']),
+            status: LocalNotificationStatus.fromStorage(
+              row['status'] as String?,
+            ),
+            statusDetail: row['status_detail'] as String?,
             createdAt: DateTime.parse(row['created_at'] as String),
           ),
         )
@@ -212,6 +224,8 @@ class LocalNotificationItem {
     required this.body,
     required this.category,
     required this.read,
+    this.status = LocalNotificationStatus.active,
+    this.statusDetail,
     this.scheduledAt,
     required this.createdAt,
   });
@@ -221,8 +235,30 @@ class LocalNotificationItem {
   final String body;
   final String category;
   final bool read;
+  final LocalNotificationStatus status;
+  final String? statusDetail;
   final DateTime? scheduledAt;
   final DateTime createdAt;
 
   String get displayBody => body.replaceFirst(RegExp(r'\s*\[[^\]]+\]$'), '');
+}
+
+enum LocalNotificationStatus {
+  active('active', 'Aktiv'),
+  permissionMissing('permission_missing', 'Berechtigung fehlt'),
+  systemBlocked('system_blocked', 'System blockiert'),
+  needsReschedule('needs_reschedule', 'Neu planen'),
+  inactive('inactive', 'Inaktiv');
+
+  const LocalNotificationStatus(this.storageValue, this.label);
+
+  final String storageValue;
+  final String label;
+
+  static LocalNotificationStatus fromStorage(String? value) {
+    return LocalNotificationStatus.values.firstWhere(
+      (status) => status.storageValue == value,
+      orElse: () => LocalNotificationStatus.active,
+    );
+  }
 }

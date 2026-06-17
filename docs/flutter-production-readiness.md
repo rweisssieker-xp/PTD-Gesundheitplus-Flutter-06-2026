@@ -7,7 +7,7 @@ Date: 2026-06-17
 - `flutter doctor -v`: no issues after installing Android SDK command-line tools and accepting Android licenses.
 - `dart format lib test`: clean.
 - `flutter analyze`: no issues.
-- `flutter test`: 99 tests passed.
+- `flutter test`: 101 tests passed.
 - `flutter build apk --debug`: built successfully.
 - `flutter build apk --release`: built successfully with local release keystore.
 - `flutter build appbundle --release`: built successfully with local release keystore.
@@ -44,7 +44,7 @@ The native Flutter shell now mirrors the PWA layout pattern with the first-run s
 - Medication, appointment, preventive-care, and dementia-support reminders are scheduled as native local notifications on-device.
 - Medications can be drafted from spoken-style German text using a deterministic on-device parser for medication name, dosage, frequency, prescribing doctor, reason, and reminder times.
 - Medication daily-plan intake can be confirmed from spoken-style German text on-device and stores the local `confirmedByVoice` audit flag.
-- The notification center shows system notification permission state and links blocked users to app settings.
+- The notification center shows system notification permission state, links blocked users to app settings, and surfaces per-notification states for active, permission-missing, system-blocked, needs-reschedule, and inactive reminders.
 - Document scanning checks native camera/gallery permissions before opening the picker and links blocked users to app settings.
 - The dashboard runs local proactive health checks on startup and writes deduplicated on-device alerts for medication refills, high-risk interaction checks, missing/unverified emergency contacts, and incomplete local emergency profile data.
 - The iOS bundle display name is set to `Gesundheit Plus`.

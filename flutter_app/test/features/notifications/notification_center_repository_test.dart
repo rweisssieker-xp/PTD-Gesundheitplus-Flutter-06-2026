@@ -13,9 +13,13 @@ void main() {
       title: 'Medikation',
       body: 'ASS einnehmen',
       category: 'medication',
+      status: LocalNotificationStatus.needsReschedule,
+      statusDetail: 'Zeit liegt in der Vergangenheit',
     );
     final created = await repo.listNotifications();
     expect(created.single.read, isFalse);
+    expect(created.single.status, LocalNotificationStatus.needsReschedule);
+    expect(created.single.statusDetail, 'Zeit liegt in der Vergangenheit');
     await repo.markRead(created.single.id);
     final read = await repo.listNotifications();
     expect(read.single.read, isTrue);

@@ -66,4 +66,14 @@ void main() {
     expect(columns, contains('location_text'));
     db.close();
   });
+
+  test('notifications include visible state fields', () {
+    final db = AppDatabase.memory();
+    final columns = db
+        .select('PRAGMA table_info(notifications)')
+        .map((row) => row['name'])
+        .toSet();
+    expect(columns, containsAll(['status', 'status_detail']));
+    db.close();
+  });
 }
