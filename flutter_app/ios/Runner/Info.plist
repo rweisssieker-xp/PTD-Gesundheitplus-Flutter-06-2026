@@ -24,6 +24,14 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>Gesundheit Plus nutzt die Kamera, um Gesundheitsdokumente lokal zu erfassen.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Gesundheit Plus kann Dokumentbilder aus der Mediathek lokal in der App speichern.</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>Gesundheit Plus nutzt Face ID zum lokalen Entsperren der Gesundheitsakte.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Gesundheit Plus kann den Standort fuer lokale Notfallfunktionen verwenden.</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
