@@ -36,6 +36,7 @@ Gesundheit Plus is not a medical diagnosis tool and does not replace professiona
 | Notifications | Android, iOS | Schedule local reminders for medication, appointments, preventive care, and support tasks. |
 | Location while in use | Android, iOS | Add current-device location to emergency SMS and family check-ins when the user explicitly requests it. |
 | Biometrics / Face ID | Android, iOS | Unlock the local health record with device biometric authentication when enabled by the user. |
+| Internet | Android, iOS | Contact an optional configured online AI responder after explicit AI context consent; local health record features work without network. |
 | Phone/SMS/WhatsApp/Telegram/share handoff | Android, iOS | Let the user contact emergency contacts through native apps. |
 
 ## Google Play Data Safety Draft
@@ -52,6 +53,7 @@ Data sharing:
 - No automatic backend sharing is implemented.
 - User-initiated sharing can happen through native share sheets, phone, SMS, WhatsApp, Telegram, calendar file export, QR payloads, and exported health-record files.
 - Optional AI responder integration is not active by default and is consent-gated.
+- Network access is only needed for the optional configured online AI responder; local health record features do not require a backend.
 
 Security:
 

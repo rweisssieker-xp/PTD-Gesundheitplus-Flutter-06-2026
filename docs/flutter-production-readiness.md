@@ -55,6 +55,7 @@ Android embedding disables Impeller explicitly for this emulator-tested build pa
 - The iOS Runner target includes `PrivacyInfo.xcprivacy` with no tracking declaration and initial Required Reason API entries for app preferences and file metadata access.
 - The PWA language switcher is backed by a local on-device preference and translates the native dashboard entry points for German, English, Turkish, Arabic, and Ukrainian.
 - Emergency contacts expose native phone, SMS, WhatsApp, Telegram, system share, and current-location SMS handoff actions from the emergency profile and offline emergency views with visible failure messages when a target app is unavailable.
+- Android release builds include network permission for the optional configured online AI responder; local health record features remain on-device and work without backend access.
 - Emergency contacts can be imported from the device address book after explicit contact permission and remain stored locally.
 - Local health-record JSON export and appointment `.ics` export show visible recovery messages when local file creation or native sharing fails.
 - Healthcare professionals expose a local Facharzt search with on-device provider suggestions and direct local add, replacing the PWA internet/LLM doctor search with a local-only workflow.

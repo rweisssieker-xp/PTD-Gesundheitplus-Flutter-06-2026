@@ -13,6 +13,14 @@ void main() {
     }
   });
 
+  test('Android release manifest allows optional online AI responder', () {
+    final manifest = File(
+      'android/app/src/main/AndroidManifest.xml',
+    ).readAsStringSync();
+
+    expect(manifest, contains('android:name="android.permission.INTERNET"'));
+  });
+
   test('iOS Info.plist declares third-party handoff query schemes', () {
     final plist = File('ios/Runner/Info.plist').readAsStringSync();
 
