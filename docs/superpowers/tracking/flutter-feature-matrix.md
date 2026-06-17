@@ -3,7 +3,7 @@
 | PWA Page | Flutter Route | Feature Group | Status | Acceptance Signal |
 | --- | --- | --- | --- | --- |
 | Home | `/` | Dashboard and navigation | implemented | User can reach primary dashboard actions from native dashboard. |
-| Gesundheits-Dashboard | `/dashboard/health` | Dashboard and navigation | not started | User sees summary cards for medication, appointments, vital values, and alerts. |
+| Gesundheits-Dashboard | `/dashboard/health` | Dashboard and navigation | implemented | User sees local summary cards for medication, appointments, vital values, and alerts. |
 | Anamnese | `/health/anamnesis` | Health record | implemented | User can create, list, and delete local medical history entries. |
 | Behandlungshistorie | `/health/treatments` | Health record | implemented | User can create, list, delete, and sort treatments by date. |
 | Heilberufe | `/health/professionals` | Health record | implemented | User can create, list, and delete local healthcare professionals. |

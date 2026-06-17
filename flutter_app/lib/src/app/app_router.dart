@@ -1,6 +1,7 @@
 import 'package:go_router/go_router.dart';
 
 import '../features/dashboard/presentation/dashboard_screen.dart';
+import '../features/dashboard/presentation/health_dashboard_screen.dart';
 import '../features/appointments/presentation/appointments_screen.dart';
 import '../features/appointments/presentation/healthcare_professionals_screen.dart';
 import '../features/emergency/domain/emergency_payload_builder.dart';
@@ -26,8 +27,7 @@ final appRouter = GoRouter(
     GoRoute(path: '/', builder: (context, state) => const DashboardScreen()),
     GoRoute(
       path: '/dashboard/health',
-      builder: (context, state) =>
-          const FeatureShellScreen(title: 'Gesundheits-Dashboard'),
+      builder: (context, state) => const HealthDashboardScreen(),
     ),
     GoRoute(
       path: '/health/anamnesis',
