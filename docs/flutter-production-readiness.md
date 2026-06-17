@@ -7,7 +7,7 @@ Date: 2026-06-17
 - `flutter doctor -v`: no issues after installing Android SDK command-line tools and accepting Android licenses.
 - `dart format lib test`: clean.
 - `flutter analyze`: no issues.
-- `flutter test`: 112 tests passed.
+- `flutter test`: 113 tests passed.
 - `flutter build apk --debug`: built successfully.
 - `flutter build apk --release`: built successfully with local release keystore.
 - `flutter build appbundle --release`: built successfully with local release keystore.
@@ -44,7 +44,7 @@ Android embedding disables Impeller explicitly for this emulator-tested build pa
 - The database encryption key is generated on-device and stored through `flutter_secure_storage`, backed by iOS Keychain / Android Keystore.
 - App access is protected by local PIN and optional device biometric unlock where supported.
 - The app-lock bootstrap shows a visible light loading state and times out stalled secure-storage reads before opening the local shell.
-- Document files copied into app storage are removed during the privacy data wipe before their metadata rows are deleted.
+- Document files copied into app storage are encrypted with AES-GCM before being stored; the file encryption metadata is held in the SQLCipher database. Stored document files are removed during the privacy data wipe before their metadata rows are deleted.
 - Medication, appointment, preventive-care, and dementia-support reminders are scheduled as native local notifications on-device.
 - Medications can be drafted from spoken-style German text using a deterministic on-device parser for medication name, dosage, frequency, prescribing doctor, reason, and reminder times.
 - Medication daily-plan intake can be confirmed from spoken-style German text on-device and stores the local `confirmedByVoice` audit flag.

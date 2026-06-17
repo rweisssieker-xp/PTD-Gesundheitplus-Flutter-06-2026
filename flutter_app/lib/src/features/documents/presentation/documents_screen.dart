@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -52,7 +52,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
                       (doc) => Card(
                         margin: const EdgeInsets.only(bottom: 10),
                         child: ExpansionTile(
-                          leading: _DocumentThumb(path: doc.localPath),
+                          leading: _DocumentThumb(repo: repo, document: doc),
                           title: Text(doc.title),
                           subtitle: Text(
                             '${doc.category} • ${_date(doc.capturedAt)}',
@@ -91,20 +91,37 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
 }
 
 class _DocumentThumb extends StatelessWidget {
-  const _DocumentThumb({required this.path});
+  const _DocumentThumb({required this.repo, required this.document});
 
-  final String path;
+  final DocumentRepository repo;
+  final HealthDocument document;
 
   @override
   Widget build(BuildContext context) {
-    final file = File(path);
-    if (file.existsSync() && file.lengthSync() > 0) {
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(6),
-        child: Image.file(file, width: 44, height: 44, fit: BoxFit.cover),
-      );
+    final mimeType = document.mimeType ?? '';
+    if (!mimeType.startsWith('image/')) {
+      return const Icon(GpIcons.scan, color: GpColors.textSecondary);
     }
-    return const Icon(GpIcons.scan, color: GpColors.textSecondary);
+    return FutureBuilder<List<int>>(
+      future: repo.readDocumentBytes(document),
+      builder: (context, snapshot) {
+        final bytes = snapshot.data ?? const [];
+        if (bytes.isEmpty) {
+          return const Icon(GpIcons.scan, color: GpColors.textSecondary);
+        }
+        return ClipRRect(
+          borderRadius: BorderRadius.circular(6),
+          child: Image.memory(
+            Uint8List.fromList(bytes),
+            width: 44,
+            height: 44,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) =>
+                const Icon(GpIcons.scan, color: GpColors.textSecondary),
+          ),
+        );
+      },
+    );
   }
 }
 

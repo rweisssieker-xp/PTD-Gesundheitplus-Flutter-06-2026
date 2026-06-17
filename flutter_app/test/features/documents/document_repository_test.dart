@@ -6,7 +6,7 @@ import 'package:gesundheitplus/src/core/storage/app_database.dart';
 import 'package:gesundheitplus/src/features/documents/data/document_repository.dart';
 
 void main() {
-  test('stores documents locally and deletes copied file', () async {
+  test('stores documents encrypted locally and deletes copied file', () async {
     final db = AppDatabase.memory();
     final temp = await Directory.systemTemp.createTemp('gp_docs_test');
     final source = File('${temp.path}/source.txt')..writeAsStringSync('scan');
@@ -20,7 +20,14 @@ void main() {
       capturedAt: DateTime(2026, 6, 17),
     );
     expect(File(doc.localPath).existsSync(), isTrue);
-    expect((await repo.listDocuments()).single.title, 'Labor');
+    expect(File(doc.localPath).readAsBytesSync(), isNot(utf8.encode('scan')));
+    expect(doc.localPath, endsWith('.gpf'));
+    expect(doc.encrypted, isTrue);
+
+    final stored = (await repo.listDocuments()).single;
+    expect(stored.title, 'Labor');
+    expect(stored.encrypted, isTrue);
+    expect(await repo.readDocumentBytes(stored), utf8.encode('scan'));
     await repo.deleteDocument(doc.id);
     expect(File(doc.localPath).existsSync(), isFalse);
     expect(await repo.listDocuments(), isEmpty);

@@ -52,104 +52,107 @@ class _StorageModeChoice extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _StorageGateScaffold(
-      child: ListView(
+      child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(24, 18, 24, 24),
-        children: [
-          const Text(
-            'Gesundheit Plus',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: GpColors.textPrimary,
-              fontSize: 22,
-              fontWeight: FontWeight.w800,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'Gesundheit Plus',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: GpColors.textPrimary,
+                fontSize: 24,
+                fontWeight: FontWeight.w800,
+              ),
             ),
-          ),
-          const SizedBox(height: 4),
-          const Text(
-            'Ersteinrichtung der Datenspeicherung',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: GpColors.textSecondary, fontSize: 14),
-          ),
-          const SizedBox(height: 18),
-          const Icon(
-            Icons.shield_outlined,
-            color: GpColors.emergencyRed,
-            size: 42,
-          ),
-          const SizedBox(height: 14),
-          const Text(
-            'Wo sollen Ihre Daten gespeichert werden?',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: GpColors.textPrimary,
-              fontSize: 19,
-              fontWeight: FontWeight.w800,
+            const SizedBox(height: 4),
+            const Text(
+              'Ersteinrichtung der Datenspeicherung',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: GpColors.textSecondary, fontSize: 14),
             ),
-          ),
-          const SizedBox(height: 6),
-          const Text(
-            'Diese Entscheidung können Sie später in den Einstellungen ändern.',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: GpColors.textSecondary,
-              fontSize: 13,
-              height: 1.35,
+            const SizedBox(height: 28),
+            const Icon(
+              Icons.shield_outlined,
+              color: GpColors.emergencyRed,
+              size: 48,
             ),
-          ),
-          const SizedBox(height: 18),
-          _ModeCard(
-            borderColor: const Color(0xFF86EFAC),
-            iconColor: const Color(0xFF16A34A),
-            iconBackground: const Color(0xFFDCFCE7),
-            icon: Icons.phone_android_outlined,
-            title: 'Nur auf diesem Gerät',
-            titleColor: const Color(0xFF166534),
-            subtitle: 'Maximaler Datenschutz',
-            subtitleColor: const Color(0xFF16A34A),
-            featureIconColor: const Color(0xFF22C55E),
-            features: const [
-              'Daten verlassen nie Ihr Gerät',
-              'Kein Server-Zugriff auf Gesundheitsdaten',
-              'Funktioniert komplett offline',
-            ],
-            warning:
-                'Bei Geräteverlust oder App-Deinstallation gehen Daten verloren. KI-Features haben eingeschränkten Zugriff.',
-            buttonLabel: 'Lokal speichern wählen',
-            buttonIcon: Icons.phone_android_outlined,
-            buttonColors: const [Color(0xFF16A34A), Color(0xFF16A34A)],
-            onPressed: onSelectLocal,
-          ),
-          const SizedBox(height: 14),
-          _ModeCard(
-            borderColor: const Color(0xFFBFDBFE),
-            iconColor: const Color(0xFF2563EB),
-            iconBackground: const Color(0xFFDBEAFE),
-            icon: Icons.cloud_outlined,
-            title: 'Cloud-Synchronisation',
-            titleColor: const Color(0xFF1E40AF),
-            subtitle: 'Volle Funktionalität',
-            subtitleColor: const Color(0xFF2563EB),
-            featureIconColor: const Color(0xFF3B82F6),
-            features: const [
-              'Auf allen Geräten verfügbar',
-              'KI-Coach & alle Features voll verfügbar',
-              'Automatisches Backup',
-              'DSGVO-konform, Server in Deutschland',
-            ],
-            buttonLabel: 'Cloud-Sync wählen',
-            buttonIcon: Icons.cloud_outlined,
-            buttonColors: const [Color(0xFF2563EB), Color(0xFF4F46E5)],
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text(
-                    'Diese native App speichert Gesundheitsdaten ausschließlich lokal.',
+            const SizedBox(height: 12),
+            const Text(
+              'Wo sollen Ihre Daten gespeichert werden?',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: GpColors.textPrimary,
+                fontSize: 20,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            const SizedBox(height: 4),
+            const Text(
+              'Diese Entscheidung können Sie später in den Einstellungen ändern.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: GpColors.textSecondary,
+                fontSize: 14,
+                height: 1.35,
+              ),
+            ),
+            const SizedBox(height: 24),
+            _ModeCard(
+              borderColor: const Color(0xFFBBF7D0),
+              iconColor: const Color(0xFF16A34A),
+              iconBackground: const Color(0xFFDCFCE7),
+              icon: Icons.phone_android_outlined,
+              title: 'Nur auf diesem Gerät',
+              titleColor: const Color(0xFF166534),
+              subtitle: 'Maximaler Datenschutz',
+              subtitleColor: const Color(0xFF16A34A),
+              featureIconColor: const Color(0xFF22C55E),
+              features: const [
+                'Daten verlassen nie Ihr Gerät',
+                'Kein Server-Zugriff auf Gesundheitsdaten',
+                'Funktioniert komplett offline',
+              ],
+              warning:
+                  'Bei Geräteverlust oder App-Deinstallation gehen Daten verloren. KI-Features haben eingeschränkten Zugriff.',
+              buttonLabel: 'Lokal speichern wählen',
+              buttonIcon: Icons.phone_android_outlined,
+              buttonColors: const [Color(0xFF16A34A), Color(0xFF16A34A)],
+              onPressed: onSelectLocal,
+            ),
+            const SizedBox(height: 16),
+            _ModeCard(
+              borderColor: const Color(0xFFBFDBFE),
+              iconColor: const Color(0xFF2563EB),
+              iconBackground: const Color(0xFFDBEAFE),
+              icon: Icons.cloud_outlined,
+              title: 'Cloud-Synchronisation',
+              titleColor: const Color(0xFF1E40AF),
+              subtitle: 'Volle Funktionalität',
+              subtitleColor: const Color(0xFF2563EB),
+              featureIconColor: const Color(0xFF3B82F6),
+              features: const [
+                'Auf allen Geräten verfügbar',
+                'KI-Coach & alle Features voll verfügbar',
+                'Automatisches Backup',
+                'DSGVO-konform, Server in Deutschland',
+              ],
+              buttonLabel: 'Cloud-Sync wählen',
+              buttonIcon: Icons.cloud_outlined,
+              buttonColors: const [Color(0xFF2563EB), Color(0xFF4F46E5)],
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text(
+                      'Diese native App speichert Gesundheitsdaten ausschließlich lokal.',
+                    ),
                   ),
-                ),
-              );
-            },
-          ),
-        ],
+                );
+              },
+            ),
+          ],
+        ),
       ),
     );
   }

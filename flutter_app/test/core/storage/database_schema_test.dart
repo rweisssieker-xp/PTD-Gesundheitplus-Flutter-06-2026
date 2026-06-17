@@ -76,4 +76,17 @@ void main() {
     expect(columns, containsAll(['status', 'status_detail']));
     db.close();
   });
+
+  test('health documents include encrypted file metadata fields', () {
+    final db = AppDatabase.memory();
+    final columns = db
+        .select('PRAGMA table_info(health_documents)')
+        .map((row) => row['name'])
+        .toSet();
+    expect(
+      columns,
+      containsAll(['file_key', 'file_nonce', 'file_mac', 'encrypted']),
+    );
+    db.close();
+  });
 }

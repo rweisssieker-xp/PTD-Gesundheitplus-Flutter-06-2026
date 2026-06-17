@@ -20,7 +20,7 @@ Gesundheit Plus keeps your personal health record, medications, appointments, em
 
 Gesundheit Plus is a local-first health companion for managing important medical information on your own device. The app helps you maintain medication plans, appointment records, allergies, treatment history, vaccination and preventive-care reminders, emergency contacts, emergency QR information, scanned health documents, family check-ins, and vital values.
 
-Health data is stored locally in an encrypted SQLite database. Documents are copied into app-controlled storage. Local notifications can remind you about medication, appointments, preventive care, and dementia-support tasks. Emergency features can hand off to native phone, SMS, WhatsApp, Telegram, system sharing, and current-location messages when you choose to use them.
+Health data is stored locally in an encrypted SQLite database. Documents are encrypted and copied into app-controlled storage. Local notifications can remind you about medication, appointments, preventive care, and dementia-support tasks. Emergency features can hand off to native phone, SMS, WhatsApp, Telegram, system sharing, and current-location messages when you choose to use them.
 
 The AI coach is local by default. Health context is only summarized after explicit consent, and optional online AI processing must fail with a visible recovery message without changing local health records.
 
@@ -56,6 +56,7 @@ Data sharing:
 Security:
 
 - Structured data is encrypted at rest with SQLCipher.
+- Stored health document files are encrypted with AES-GCM, with file metadata protected by the encrypted database.
 - The database key is stored through platform secure storage.
 - App access can be protected with PIN and optional biometrics.
 - Local data wipe is available in privacy settings.

@@ -276,12 +276,24 @@ class AppDatabase {
         category TEXT NOT NULL,
         local_path TEXT NOT NULL,
         mime_type TEXT,
+        file_key TEXT,
+        file_nonce TEXT,
+        file_mac TEXT,
+        encrypted INTEGER NOT NULL DEFAULT 0,
         captured_at TEXT NOT NULL,
         notes TEXT,
         created_at TEXT NOT NULL,
         updated_at TEXT NOT NULL
       );
     ''');
+    _ensureColumn('health_documents', 'file_key', 'TEXT');
+    _ensureColumn('health_documents', 'file_nonce', 'TEXT');
+    _ensureColumn('health_documents', 'file_mac', 'TEXT');
+    _ensureColumn(
+      'health_documents',
+      'encrypted',
+      'INTEGER NOT NULL DEFAULT 0',
+    );
     _db.execute('''
       CREATE TABLE IF NOT EXISTS emergency_contacts (
         id TEXT PRIMARY KEY,
