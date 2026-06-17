@@ -95,6 +95,29 @@ class AppDatabase {
       ON medication_logs (medication_id, date, scheduled_time);
     ''');
     _db.execute('''
+      CREATE TABLE IF NOT EXISTS medication_interaction_guidance (
+        id TEXT PRIMARY KEY,
+        title TEXT NOT NULL,
+        severity TEXT NOT NULL,
+        description TEXT NOT NULL,
+        action TEXT,
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+      );
+    ''');
+    _db.execute('''
+      CREATE TABLE IF NOT EXISTS medication_interaction_checks (
+        id TEXT PRIMARY KEY,
+        medication_names TEXT NOT NULL,
+        risk_level TEXT NOT NULL,
+        summary TEXT NOT NULL,
+        consent_used INTEGER NOT NULL DEFAULT 0,
+        checked_at TEXT NOT NULL,
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+      );
+    ''');
+    _db.execute('''
       CREATE TABLE IF NOT EXISTS appointments (
         id TEXT PRIMARY KEY,
         title TEXT NOT NULL,

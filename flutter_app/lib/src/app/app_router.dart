@@ -19,6 +19,8 @@ import '../features/health_record/presentation/anamnesis_screen.dart';
 import '../features/health_record/presentation/treatment_history_screen.dart';
 import '../features/medication/presentation/medication_daily_plan_screen.dart';
 import '../features/medication/presentation/medication_screen.dart';
+import '../features/medication_safety/presentation/interaction_checker_screen.dart';
+import '../features/medication_safety/presentation/medication_interactions_screen.dart';
 import '../features/notifications/presentation/notification_center_screen.dart';
 import '../features/prevention/presentation/preventive_care_screen.dart';
 import '../features/prevention/presentation/vaccination_screen.dart';
@@ -61,13 +63,11 @@ final appRouter = GoRouter(
     ),
     GoRoute(
       path: '/medication/interactions',
-      builder: (context, state) =>
-          const FeatureShellScreen(title: 'Medikations-Interaktionen'),
+      builder: (context, state) => const MedicationInteractionsScreen(),
     ),
     GoRoute(
       path: '/medication/interaction-checker',
-      builder: (context, state) =>
-          const FeatureShellScreen(title: 'Wechselwirkungen-Checker'),
+      builder: (context, state) => const InteractionCheckerScreen(),
     ),
     GoRoute(
       path: '/vitals/blood-pressure',

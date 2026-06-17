@@ -10,6 +10,8 @@ void main() {
         'local_profiles',
         'medications',
         'medication_logs',
+        'medication_interaction_guidance',
+        'medication_interaction_checks',
         'appointments',
         'healthcare_professionals',
         'medical_history_entries',

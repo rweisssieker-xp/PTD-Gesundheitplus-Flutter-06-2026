@@ -10,6 +10,12 @@ class AppTables {
   static const localProfiles = AppTable('local_profiles');
   static const medications = AppTable('medications');
   static const medicationLogs = AppTable('medication_logs');
+  static const medicationInteractionGuidance = AppTable(
+    'medication_interaction_guidance',
+  );
+  static const medicationInteractionChecks = AppTable(
+    'medication_interaction_checks',
+  );
   static const appointments = AppTable('appointments');
   static const healthcareProfessionals = AppTable('healthcare_professionals');
   static const medicalHistoryEntries = AppTable('medical_history_entries');
@@ -32,6 +38,8 @@ class AppTables {
     localProfiles,
     medications,
     medicationLogs,
+    medicationInteractionGuidance,
+    medicationInteractionChecks,
     appointments,
     healthcareProfessionals,
     medicalHistoryEntries,

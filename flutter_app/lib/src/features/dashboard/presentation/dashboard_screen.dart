@@ -92,6 +92,13 @@ class DashboardScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 OutlinedButton.icon(
+                  onPressed: () =>
+                      context.go('/medication/interaction-checker'),
+                  icon: const Icon(GpIcons.interactions),
+                  label: const Text('Wechselwirkungen pruefen'),
+                ),
+                const SizedBox(height: 8),
+                OutlinedButton.icon(
                   onPressed: () => context.go('/appointments'),
                   icon: const Icon(GpIcons.appointments),
                   label: const Text('Termine verwalten'),
