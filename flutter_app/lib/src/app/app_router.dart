@@ -8,6 +8,8 @@ import '../features/emergency/domain/emergency_profile.dart';
 import '../features/emergency/presentation/emergency_profile_screen.dart';
 import '../features/medication/presentation/medication_daily_plan_screen.dart';
 import '../features/medication/presentation/medication_screen.dart';
+import '../features/vitals/presentation/blood_pressure_screen.dart';
+import '../features/vitals/presentation/weight_screen.dart';
 import '../shared_ui/feature_shell_screen.dart';
 
 final appRouter = GoRouter(
@@ -55,11 +57,11 @@ final appRouter = GoRouter(
     ),
     GoRoute(
       path: '/vitals/blood-pressure',
-      builder: (context, state) => const FeatureShellScreen(title: 'Blutdruck'),
+      builder: (context, state) => const BloodPressureScreen(),
     ),
     GoRoute(
       path: '/vitals/weight',
-      builder: (context, state) => const FeatureShellScreen(title: 'Gewicht'),
+      builder: (context, state) => const WeightScreen(),
     ),
     GoRoute(
       path: '/prevention/vaccination',

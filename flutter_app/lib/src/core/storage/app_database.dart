@@ -155,6 +155,29 @@ class AppDatabase {
       );
     ''');
     _db.execute('''
+      CREATE TABLE IF NOT EXISTS blood_pressure_logs (
+        id TEXT PRIMARY KEY,
+        systolic INTEGER NOT NULL,
+        diastolic INTEGER NOT NULL,
+        pulse INTEGER,
+        measured_at TEXT NOT NULL,
+        notes TEXT,
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+      );
+    ''');
+    _db.execute('''
+      CREATE TABLE IF NOT EXISTS weight_logs (
+        id TEXT PRIMARY KEY,
+        weight_kg REAL NOT NULL,
+        height_cm REAL,
+        measured_at TEXT NOT NULL,
+        notes TEXT,
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+      );
+    ''');
+    _db.execute('''
       CREATE TABLE IF NOT EXISTS emergency_contacts (
         id TEXT PRIMARY KEY,
         name TEXT NOT NULL,

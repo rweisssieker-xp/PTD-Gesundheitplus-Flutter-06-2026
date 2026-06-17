@@ -13,6 +13,8 @@ void main() {
         'appointments',
         'healthcare_professionals',
         'allergies',
+        'blood_pressure_logs',
+        'weight_logs',
         'emergency_contacts',
         'notifications',
         'consent_settings',

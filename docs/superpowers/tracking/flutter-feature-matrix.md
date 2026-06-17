@@ -12,8 +12,8 @@
 | Medikamenten-Tagesplan | `/medication/daily-plan` | Medication management | implemented | User can generate daily medication logs and mark intake as taken or skipped. |
 | Medikations-Interaktionen | `/medication/interactions` | Medication safety and interactions | not started | User can review stored interaction guidance. |
 | Wechselwirkungen-Checker | `/medication/interaction-checker` | Medication safety and interactions | not started | User can run an AI-supported interaction check after consent. |
-| Blutdruck | `/vitals/blood-pressure` | Vital values | not started | User can log systolic, diastolic, and pulse values. |
-| Gewicht | `/vitals/weight` | Vital values | not started | User can log weight and see BMI trend. |
+| Blutdruck | `/vitals/blood-pressure` | Vital values | implemented | User can log and list systolic, diastolic, and pulse values locally. |
+| Gewicht | `/vitals/weight` | Vital values | implemented | User can log weight locally and see BMI per entry when height is present. |
 | Impfpass | `/prevention/vaccination` | Prevention and vaccination | not started | User can manage vaccinations and health pass entries. |
 | Vorsorge | `/prevention/care` | Prevention and vaccination | not started | User can manage preventive care reminders. |
 | Notfallprofil | `/emergency/profile` | Emergency | implemented | Offline emergency payload builder, QR screen, route, and test coverage exist. |

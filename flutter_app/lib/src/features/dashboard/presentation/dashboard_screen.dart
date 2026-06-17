@@ -89,6 +89,18 @@ class DashboardScreen extends StatelessWidget {
                   icon: const Icon(GpIcons.healthcare),
                   label: const Text('Heilberufe verwalten'),
                 ),
+                const SizedBox(height: 8),
+                OutlinedButton.icon(
+                  onPressed: () => context.go('/vitals/blood-pressure'),
+                  icon: const Icon(GpIcons.bloodPressure),
+                  label: const Text('Blutdruck erfassen'),
+                ),
+                const SizedBox(height: 8),
+                OutlinedButton.icon(
+                  onPressed: () => context.go('/vitals/weight'),
+                  icon: const Icon(GpIcons.weight),
+                  label: const Text('Gewicht erfassen'),
+                ),
               ],
             ),
           ),
