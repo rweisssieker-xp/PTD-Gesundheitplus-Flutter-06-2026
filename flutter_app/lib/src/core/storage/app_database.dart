@@ -349,11 +349,13 @@ class AppDatabase {
         member_name TEXT NOT NULL,
         status TEXT NOT NULL,
         note TEXT,
+        location_text TEXT,
         checked_at TEXT NOT NULL,
         created_at TEXT NOT NULL,
         updated_at TEXT NOT NULL
       );
     ''');
+    _ensureColumn('family_check_ins', 'location_text', 'TEXT');
     _db.execute('''
       CREATE TABLE IF NOT EXISTS dementia_logs (
         id TEXT PRIMARY KEY,

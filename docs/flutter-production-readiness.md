@@ -7,7 +7,7 @@ Date: 2026-06-17
 - `flutter doctor -v`: no issues after installing Android SDK command-line tools and accepting Android licenses.
 - `dart format lib test`: clean.
 - `flutter analyze`: no issues.
-- `flutter test`: 56 tests passed.
+- `flutter test`: 57 tests passed.
 - `flutter build apk --debug`: built successfully.
 - `flutter build apk --release`: built successfully with local release keystore.
 - `flutter build appbundle --release`: built successfully with local release keystore.
@@ -44,6 +44,7 @@ The native Flutter shell now mirrors the PWA layout pattern with a white header,
 - The notification center shows system notification permission state and links blocked users to app settings.
 - The iOS bundle display name is set to `Gesundheit Plus`.
 - Emergency contacts expose native phone, SMS, and current-location SMS handoff actions from the emergency profile and offline emergency views.
+- Family-circle check-ins store local safety status, optional notes, and optional current-device location text on-device.
 
 ## Remaining production gates
 

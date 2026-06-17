@@ -55,4 +55,14 @@ void main() {
     );
     db.close();
   });
+
+  test('family check-ins include location parity field', () {
+    final db = AppDatabase.memory();
+    final columns = db
+        .select('PRAGMA table_info(family_check_ins)')
+        .map((row) => row['name'])
+        .toSet();
+    expect(columns, contains('location_text'));
+    db.close();
+  });
 }

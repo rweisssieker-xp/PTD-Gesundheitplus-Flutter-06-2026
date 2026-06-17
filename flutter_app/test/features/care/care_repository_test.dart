@@ -16,10 +16,15 @@ void main() {
     await repo.addCheckIn(
       memberId: members.single.id,
       memberName: members.single.name,
-      status: 'ok',
+      status: 'safe',
+      note: 'Alles ok',
+      locationText: '52.5200, 13.4050',
       checkedAt: DateTime(2026, 6, 17),
     );
-    expect((await repo.listCheckIns()).single.status, 'ok');
+    final checkIn = (await repo.listCheckIns()).single;
+    expect(checkIn.status, 'safe');
+    expect(checkIn.note, 'Alles ok');
+    expect(checkIn.locationText, '52.5200, 13.4050');
     db.close();
   });
 

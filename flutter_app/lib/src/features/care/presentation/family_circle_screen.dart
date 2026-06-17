@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/platform/location_service.dart';
 import '../../../core/storage/database_provider.dart';
 import '../../../shared_ui/gp_colors.dart';
 import '../../../shared_ui/gp_icons.dart';
@@ -17,6 +18,18 @@ class FamilyCircleScreen extends ConsumerStatefulWidget {
 
 class _FamilyCircleScreenState extends ConsumerState<FamilyCircleScreen> {
   int _reload = 0;
+  final _location = const LocationService();
+  final _message = TextEditingController();
+  final _locationText = TextEditingController();
+  String? _pendingStatus;
+  bool _gettingLocation = false;
+
+  @override
+  void dispose() {
+    _message.dispose();
+    _locationText.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,6 +62,20 @@ class _FamilyCircleScreenState extends ConsumerState<FamilyCircleScreen> {
               return ListView(
                 padding: const EdgeInsets.all(16),
                 children: [
+                  _StatusSummary(checkIns: checkIns),
+                  const SizedBox(height: 12),
+                  _MyCheckInCard(
+                    pendingStatus: _pendingStatus,
+                    message: _message,
+                    locationText: _locationText,
+                    gettingLocation: _gettingLocation,
+                    onStatusSelected: (status) =>
+                        setState(() => _pendingStatus = status),
+                    onGetLocation: _captureLocation,
+                    onCancel: () => setState(() => _pendingStatus = null),
+                    onSubmit: () => _submitOwnCheckIn(repo),
+                  ),
+                  const SizedBox(height: 16),
                   DecoratedBox(
                     decoration: BoxDecoration(
                       gradient: const LinearGradient(
@@ -99,7 +126,7 @@ class _FamilyCircleScreenState extends ConsumerState<FamilyCircleScreen> {
                             await repo.addCheckIn(
                               memberId: member.id,
                               memberName: member.name,
-                              status: 'ok',
+                              status: 'safe',
                               note: 'Manuell bestaetigt',
                             );
                             if (mounted) setState(() => _reload++);
@@ -128,7 +155,16 @@ class _FamilyCircleScreenState extends ConsumerState<FamilyCircleScreen> {
                             leading: const Icon(Icons.done),
                             title: Text(checkIn.memberName),
                             subtitle: Text(
-                              '${checkIn.status} • ${_date(checkIn.checkedAt)}',
+                              [
+                                _statusLabel(checkIn.status),
+                                _date(checkIn.checkedAt),
+                                if ((checkIn.locationText ?? '').isNotEmpty)
+                                  checkIn.locationText!,
+                              ].join(' • '),
+                            ),
+                            trailing: Icon(
+                              _statusIcon(checkIn.status),
+                              color: _statusColor(checkIn.status),
                             ),
                           ),
                         ),
@@ -148,6 +184,361 @@ class _FamilyCircleScreenState extends ConsumerState<FamilyCircleScreen> {
       builder: (context) => _FamilyMemberEditor(repo: repo),
     );
     if (saved == true) setState(() => _reload++);
+  }
+
+  Future<void> _captureLocation() async {
+    setState(() => _gettingLocation = true);
+    final messenger = ScaffoldMessenger.of(context);
+    final location = await _location.currentEmergencyLocation();
+    if (!mounted) return;
+    setState(() => _gettingLocation = false);
+    if (location == null) {
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Standort nicht verfuegbar. Bitte Berechtigung und GPS pruefen.',
+          ),
+        ),
+      );
+      return;
+    }
+    _locationText.text =
+        '${location.latitude.toStringAsFixed(4)}, ${location.longitude.toStringAsFixed(4)}';
+  }
+
+  Future<void> _submitOwnCheckIn(CareRepository repo) async {
+    final status = _pendingStatus;
+    if (status == null) return;
+    await repo.addCheckIn(
+      memberName: 'Ich',
+      status: status,
+      note: _emptyToNull(_message.text),
+      locationText: _emptyToNull(_locationText.text),
+    );
+    _message.clear();
+    _locationText.clear();
+    if (mounted) {
+      setState(() {
+        _pendingStatus = null;
+        _reload++;
+      });
+    }
+  }
+}
+
+class _StatusSummary extends StatelessWidget {
+  const _StatusSummary({required this.checkIns});
+
+  final List<FamilyCheckIn> checkIns;
+
+  @override
+  Widget build(BuildContext context) {
+    final latest = <String, FamilyCheckIn>{};
+    for (final checkIn in checkIns) {
+      latest.putIfAbsent(checkIn.memberId ?? checkIn.memberName, () => checkIn);
+    }
+    final values = latest.values;
+    return Row(
+      children: [
+        Expanded(
+          child: _StatusCountCard(
+            label: 'Sicher',
+            count: values.where((item) => item.status == 'safe').length,
+            color: const Color(0xFF16A34A),
+            background: const Color(0xFFF0FDF4),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: _StatusCountCard(
+            label: 'Hilfe',
+            count: values.where((item) => item.status == 'help_needed').length,
+            color: GpColors.emergencyRed,
+            background: GpColors.redSurface,
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: _StatusCountCard(
+            label: 'Unbekannt',
+            count: values
+                .where(
+                  (item) =>
+                      item.status != 'safe' && item.status != 'help_needed',
+                )
+                .length,
+            color: GpColors.textSecondary,
+            background: const Color(0xFFF9FAFB),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _StatusCountCard extends StatelessWidget {
+  const _StatusCountCard({
+    required this.label,
+    required this.count,
+    required this.color,
+    required this.background,
+  });
+
+  final String label;
+  final int count;
+  final Color color;
+  final Color background;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: background,
+        border: Border.all(color: color.withValues(alpha: 0.25), width: 2),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        child: Column(
+          children: [
+            Text(
+              '$count',
+              style: TextStyle(
+                color: color,
+                fontSize: 28,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+            Text(
+              label,
+              style: TextStyle(
+                color: color,
+                fontSize: 12,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _MyCheckInCard extends StatelessWidget {
+  const _MyCheckInCard({
+    required this.pendingStatus,
+    required this.message,
+    required this.locationText,
+    required this.gettingLocation,
+    required this.onStatusSelected,
+    required this.onGetLocation,
+    required this.onCancel,
+    required this.onSubmit,
+  });
+
+  final String? pendingStatus;
+  final TextEditingController message;
+  final TextEditingController locationText;
+  final bool gettingLocation;
+  final ValueChanged<String> onStatusSelected;
+  final VoidCallback onGetLocation;
+  final VoidCallback onCancel;
+  final VoidCallback onSubmit;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: const Color(0xFFEFF6FF),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+        side: const BorderSide(color: Color(0xFFBFDBFE), width: 2),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Row(
+              children: [
+                Icon(Icons.favorite_border, color: Color(0xFF2563EB)),
+                SizedBox(width: 8),
+                Text(
+                  'Mein Status senden',
+                  style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: _StatusButton(
+                    label: 'Bin sicher',
+                    subtitle: 'Alles OK',
+                    icon: Icons.check_circle_outline,
+                    colors: GpColors.green,
+                    onTap: () => onStatusSelected('safe'),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: _StatusButton(
+                    label: 'Brauche Hilfe',
+                    subtitle: 'Kontaktieren',
+                    icon: Icons.error_outline,
+                    colors: GpColors.redGradient,
+                    onTap: () => onStatusSelected('help_needed'),
+                  ),
+                ),
+              ],
+            ),
+            if (pendingStatus != null) ...[
+              const SizedBox(height: 12),
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  border: Border.all(color: const Color(0xFFBFDBFE), width: 2),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Column(
+                    children: [
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Chip(label: Text(_statusLabel(pendingStatus!))),
+                      ),
+                      TextField(
+                        controller: message,
+                        decoration: const InputDecoration(
+                          labelText: 'Optionale Nachricht',
+                          hintText: 'z.B. Bin beim Arzt',
+                        ),
+                        maxLines: 2,
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: locationText,
+                              decoration: const InputDecoration(
+                                labelText: 'Standort optional',
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          IconButton.outlined(
+                            tooltip: 'Standort erfassen',
+                            onPressed: gettingLocation ? null : onGetLocation,
+                            icon: gettingLocation
+                                ? const SizedBox(
+                                    width: 18,
+                                    height: 18,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : const Icon(Icons.location_on_outlined),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: FilledButton.icon(
+                              onPressed: onSubmit,
+                              icon: const Icon(Icons.send_outlined),
+                              label: const Text('Senden'),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          OutlinedButton(
+                            onPressed: onCancel,
+                            child: const Text('Abbrechen'),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _StatusButton extends StatelessWidget {
+  const _StatusButton({
+    required this.label,
+    required this.subtitle,
+    required this.icon,
+    required this.colors,
+    required this.onTap,
+  });
+
+  final String label;
+  final String subtitle;
+  final IconData icon;
+  final List<Color> colors;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(colors: colors),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(8),
+          onTap: onTap,
+          child: SizedBox(
+            height: 58,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(icon, color: Colors.white),
+                const SizedBox(width: 8),
+                Flexible(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      Text(
+                        subtitle,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
 
@@ -221,6 +612,25 @@ class _FamilyMemberEditorState extends State<_FamilyMemberEditor> {
 }
 
 String _date(DateTime value) => '${value.day}.${value.month}.${value.year}';
+
+String _statusLabel(String status) => switch (status) {
+  'safe' => 'Bin sicher',
+  'help_needed' => 'Brauche Hilfe',
+  'ok' => 'Bin sicher',
+  _ => 'Unbekannt',
+};
+
+IconData _statusIcon(String status) => switch (status) {
+  'safe' || 'ok' => Icons.check_circle_outline,
+  'help_needed' => Icons.error_outline,
+  _ => Icons.help_outline,
+};
+
+Color _statusColor(String status) => switch (status) {
+  'safe' || 'ok' => const Color(0xFF16A34A),
+  'help_needed' => GpColors.emergencyRed,
+  _ => GpColors.textSecondary,
+};
 
 String? _emptyToNull(String value) {
   final trimmed = value.trim();

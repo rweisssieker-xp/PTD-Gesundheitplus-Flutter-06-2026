@@ -47,15 +47,16 @@ class CareRepository {
     required String memberName,
     required String status,
     String? note,
+    String? locationText,
     DateTime? checkedAt,
   }) async {
     final now = DateTime.now().toIso8601String();
     _db.execute(
       '''
       INSERT INTO family_check_ins (
-        id, member_id, member_name, status, note, checked_at, created_at, updated_at
+        id, member_id, member_name, status, note, location_text, checked_at, created_at, updated_at
       )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
       ''',
       [
         _uuid.v4(),
@@ -63,6 +64,7 @@ class CareRepository {
         memberName,
         status,
         note,
+        locationText,
         (checkedAt ?? DateTime.now()).toIso8601String(),
         now,
         now,
@@ -72,7 +74,7 @@ class CareRepository {
 
   Future<List<FamilyCheckIn>> listCheckIns() async {
     final rows = _db.select('''
-      SELECT id, member_id, member_name, status, note, checked_at
+      SELECT id, member_id, member_name, status, note, location_text, checked_at
       FROM family_check_ins
       ORDER BY checked_at DESC
       ''');
@@ -84,6 +86,7 @@ class CareRepository {
             memberName: row['member_name'] as String,
             status: row['status'] as String,
             note: row['note'] as String?,
+            locationText: row['location_text'] as String?,
             checkedAt: DateTime.parse(row['checked_at'] as String),
           ),
         )

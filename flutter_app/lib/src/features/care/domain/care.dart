@@ -21,6 +21,7 @@ class FamilyCheckIn {
     required this.memberName,
     required this.status,
     this.note,
+    this.locationText,
     required this.checkedAt,
   });
 
@@ -29,6 +30,7 @@ class FamilyCheckIn {
   final String memberName;
   final String status;
   final String? note;
+  final String? locationText;
   final DateTime checkedAt;
 }
 
