@@ -6,7 +6,6 @@ import '../../../core/storage/database_provider.dart';
 import '../../../shared_ui/gp_colors.dart';
 import '../../../shared_ui/gp_icons.dart';
 import '../../../shared_ui/gp_screen.dart';
-import '../../../shared_ui/gp_voice_navigation.dart';
 import '../data/health_record_repository.dart';
 import '../domain/anamnesis_payload_builder.dart';
 import '../domain/health_record.dart';
@@ -26,13 +25,6 @@ class _AnamnesisScreenState extends ConsumerState<AnamnesisScreen> {
   Widget build(BuildContext context) {
     final dbAsync = ref.watch(appDatabaseProvider);
     return GpScreen(
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: dbAsync.hasValue
-            ? () => _openEditor(HealthRecordRepository(dbAsync.requireValue))
-            : null,
-        icon: const Icon(Icons.add),
-        label: const Text('Eintrag'),
-      ),
       body: dbAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stackTrace) =>
@@ -45,11 +37,15 @@ class _AnamnesisScreenState extends ConsumerState<AnamnesisScreen> {
             builder: (context, snapshot) {
               final entries = snapshot.data ?? [];
               return ListView(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.fromLTRB(24, 42, 24, 24),
                 children: [
-                  _HealthRecordHeader(count: entries.length, title: 'Anamnese'),
-                  const SizedBox(height: 12),
-                  GpVoiceNavigation(content: _anamnesisVoiceContent(entries)),
+                  _PageTitleAction(
+                    title: 'Krankengeschichte',
+                    subtitle: 'Ihre medizinische Anamnese',
+                    actionLabel: 'Bearbeiten',
+                    icon: Icons.description_outlined,
+                    onPressed: () => _openEditor(repo),
+                  ),
                   const SizedBox(height: 16),
                   _AnamnesisQrCard(
                     entries: entries,
@@ -58,12 +54,7 @@ class _AnamnesisScreenState extends ConsumerState<AnamnesisScreen> {
                   ),
                   const SizedBox(height: 16),
                   if (entries.isEmpty)
-                    const Card(
-                      child: Padding(
-                        padding: EdgeInsets.all(28),
-                        child: Center(child: Text('Noch keine Anamnese')),
-                      ),
-                    )
+                    const _LifestyleCard()
                   else
                     ...entries.map(
                       (entry) => Card(
@@ -109,20 +100,70 @@ class _AnamnesisScreenState extends ConsumerState<AnamnesisScreen> {
   }
 }
 
-String _anamnesisVoiceContent(List<MedicalHistoryEntry> entries) {
-  if (entries.isEmpty) {
-    return 'Anamnese. Es sind noch keine medizinischen Einträge gespeichert.';
+class _PageTitleAction extends StatelessWidget {
+  const _PageTitleAction({
+    required this.title,
+    required this.subtitle,
+    required this.actionLabel,
+    required this.icon,
+    required this.onPressed,
+  });
+
+  final String title;
+  final String subtitle;
+  final String actionLabel;
+  final IconData icon;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  color: GpColors.textPrimary,
+                  fontSize: 24,
+                  fontWeight: FontWeight.w900,
+                  height: 1.05,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                subtitle,
+                style: const TextStyle(
+                  color: GpColors.textSecondary,
+                  fontSize: 16,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(width: 10),
+        FilledButton.icon(
+          style: FilledButton.styleFrom(
+            backgroundColor: const Color(0xFF111111),
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(6),
+            ),
+          ),
+          onPressed: onPressed,
+          icon: Icon(icon, size: 18),
+          label: Text(
+            actionLabel,
+            style: const TextStyle(fontWeight: FontWeight.w800),
+          ),
+        ),
+      ],
+    );
   }
-  final active = entries.where((entry) => entry.active).length;
-  final details = entries
-      .take(6)
-      .map(
-        (entry) =>
-            '${entry.category}: ${entry.title}'
-            '${entry.details == null ? '' : ', ${entry.details}'}',
-      )
-      .join('. ');
-  return 'Anamnese. $active aktive Einträge gespeichert. $details.';
 }
 
 class _AnamnesisQrCard extends StatelessWidget {
@@ -160,7 +201,15 @@ class _AnamnesisQrCard extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             FilledButton.icon(
-              onPressed: entries.isEmpty ? null : onToggle,
+              onPressed: onToggle,
+              style: FilledButton.styleFrom(
+                backgroundColor: const Color(0xFF111111),
+                foregroundColor: Colors.white,
+                minimumSize: const Size.fromHeight(40),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6),
+                ),
+              ),
               icon: const Icon(Icons.qr_code_2),
               label: Text(
                 visible ? 'QR-Code ausblenden' : 'QR-Code generieren',
@@ -186,6 +235,40 @@ class _AnamnesisQrCard extends StatelessWidget {
                 ),
               ),
             ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _LifestyleCard extends StatelessWidget {
+  const _LifestyleCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Card(
+      child: Padding(
+        padding: EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Lebensstil',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+            ),
+            SizedBox(height: 24),
+            Text.rich(
+              TextSpan(
+                children: [
+                  TextSpan(
+                    text: 'Rauchen: ',
+                    style: TextStyle(fontWeight: FontWeight.w800),
+                  ),
+                  TextSpan(text: 'Nichtraucher'),
+                ],
+              ),
+            ),
           ],
         ),
       ),
@@ -253,46 +336,6 @@ class _AnamnesisEditorState extends State<_AnamnesisEditor> {
       details: _emptyToNull(_details.text),
     );
     if (mounted) Navigator.pop(context, true);
-  }
-}
-
-class _HealthRecordHeader extends StatelessWidget {
-  const _HealthRecordHeader({required this.count, required this.title});
-
-  final int count;
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(colors: GpColors.indigo),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Row(
-          children: [
-            const Icon(GpIcons.anamnesis, color: Colors.white, size: 46),
-            const SizedBox(width: 16),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: const TextStyle(color: Colors.white70)),
-                Text(
-                  '$count Eintraege',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 28,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
   }
 }
 

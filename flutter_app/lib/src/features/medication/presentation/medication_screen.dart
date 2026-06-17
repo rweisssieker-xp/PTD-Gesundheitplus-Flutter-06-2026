@@ -8,7 +8,6 @@ import '../../../core/storage/database_provider.dart';
 import '../../../shared_ui/gp_colors.dart';
 import '../../../shared_ui/gp_icons.dart';
 import '../../../shared_ui/gp_screen.dart';
-import '../../../shared_ui/gp_voice_navigation.dart';
 import '../data/medication_repository.dart';
 import '../domain/medication.dart';
 import '../domain/medication_text_parser.dart';
@@ -22,6 +21,7 @@ class MedicationScreen extends ConsumerStatefulWidget {
 
 class _MedicationScreenState extends ConsumerState<MedicationScreen> {
   bool _showInactive = false;
+  bool _showVoiceInput = false;
   int _reload = 0;
   final _notifications = NativeNotificationService();
   final _assistantText = TextEditingController();
@@ -38,13 +38,6 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen> {
   Widget build(BuildContext context) {
     final dbAsync = ref.watch(appDatabaseProvider);
     return GpScreen(
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: dbAsync.hasValue
-            ? () => _openEditor(MedicationRepository(dbAsync.requireValue))
-            : null,
-        icon: const Icon(Icons.add),
-        label: const Text('Hinzufuegen'),
-      ),
       body: dbAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stackTrace) =>
@@ -58,33 +51,35 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen> {
               final medications = snapshot.data ?? [];
               final activeCount = medications.where((med) => med.active).length;
               return ListView(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.fromLTRB(24, 42, 24, 24),
                 children: [
+                  const _MedicationPageTitle(),
+                  const SizedBox(height: 20),
+                  const _AllergyInteractionCheckCard(),
+                  const SizedBox(height: 16),
                   _MedicationSummary(activeCount: activeCount),
-                  const SizedBox(height: 12),
-                  GpVoiceNavigation(
-                    content: _medicationVoiceContent(medications),
+                  const SizedBox(height: 14),
+                  _MedicationActionRow(
+                    showInactive: _showInactive,
+                    onInactiveChanged: (value) =>
+                        setState(() => _showInactive = value),
+                    onVoiceTap: () =>
+                        setState(() => _showVoiceInput = !_showVoiceInput),
+                    onAddTap: () => _openEditor(repo),
                   ),
-                  const SizedBox(height: 12),
-                  _MedicationTextAssistantCard(
-                    controller: _assistantText,
-                    suggestion: _assistantSuggestion,
-                    error: _assistantError,
-                    onParse: _parseAssistantText,
-                    onSave: _assistantSuggestion?.isComplete == true
-                        ? () => _saveAssistantSuggestion(repo)
-                        : null,
-                  ),
-                  const SizedBox(height: 12),
-                  SwitchListTile(
-                    value: _showInactive,
-                    onChanged: (value) => setState(() {
-                      _showInactive = value;
-                    }),
-                    title: const Text('Abgesetzte anzeigen'),
-                    contentPadding: EdgeInsets.zero,
-                  ),
-                  const SizedBox(height: 8),
+                  if (_showVoiceInput) ...[
+                    const SizedBox(height: 12),
+                    _MedicationTextAssistantCard(
+                      controller: _assistantText,
+                      suggestion: _assistantSuggestion,
+                      error: _assistantError,
+                      onParse: _parseAssistantText,
+                      onSave: _assistantSuggestion?.isComplete == true
+                          ? () => _saveAssistantSuggestion(repo)
+                          : null,
+                    ),
+                  ],
+                  const SizedBox(height: 14),
                   if (snapshot.connectionState == ConnectionState.waiting)
                     const Center(
                       child: Padding(
@@ -257,6 +252,194 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen> {
     return _notifications.cancelMedicationReminders(
       medicationId: medication.id,
       reminderTimes: medication.reminderTimes,
+    );
+  }
+}
+
+class _MedicationPageTitle extends StatelessWidget {
+  const _MedicationPageTitle();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Medikation',
+          style: TextStyle(
+            color: GpColors.textPrimary,
+            fontSize: 24,
+            fontWeight: FontWeight.w900,
+            height: 1.05,
+          ),
+        ),
+        SizedBox(height: 4),
+        Text(
+          'Ihr Medikamentenplan',
+          style: TextStyle(color: GpColors.textSecondary, fontSize: 16),
+        ),
+      ],
+    );
+  }
+}
+
+class _AllergyInteractionCheckCard extends StatelessWidget {
+  const _AllergyInteractionCheckCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                const Icon(
+                  Icons.health_and_safety_outlined,
+                  color: Color(0xFF64748B),
+                  size: 18,
+                ),
+                const SizedBox(width: 10),
+                const Expanded(
+                  child: Text(
+                    'Allergie &\nWechselwirkungs-\nCheck',
+                    style: TextStyle(
+                      color: GpColors.textPrimary,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w900,
+                      height: 1.25,
+                    ),
+                  ),
+                ),
+                FilledButton.icon(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: const Color(0xFF2563EB),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                  ),
+                  onPressed: () {},
+                  icon: const Icon(Icons.health_and_safety_outlined, size: 16),
+                  label: const Text(
+                    'Jetzt prüfen',
+                    style: TextStyle(fontWeight: FontWeight.w800),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
+            const Text(
+              '0 Medikament(e) · 0 Medikamenten-Allergie(n)',
+              style: TextStyle(color: GpColors.textSecondary, fontSize: 13),
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              'Klicken Sie auf „Jetzt prüfen“, um Ihre Medikamente automatisch auf Wechselwirkungen und Allergie-Konflikte zu analysieren.',
+              style: TextStyle(color: GpColors.textSecondary, fontSize: 13),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _MedicationActionRow extends StatelessWidget {
+  const _MedicationActionRow({
+    required this.showInactive,
+    required this.onInactiveChanged,
+    required this.onVoiceTap,
+    required this.onAddTap,
+  });
+
+  final bool showInactive;
+  final ValueChanged<bool> onInactiveChanged;
+  final VoidCallback onVoiceTap;
+  final VoidCallback onAddTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Switch(value: showInactive, onChanged: onInactiveChanged),
+        const SizedBox(width: 6),
+        const Expanded(
+          child: Text(
+            'Abgesetzte\nanzeigen',
+            style: TextStyle(fontWeight: FontWeight.w800, height: 1.15),
+          ),
+        ),
+        const SizedBox(width: 8),
+        _DarkActionButton(
+          label: 'Sprache',
+          icon: Icons.mic_none_outlined,
+          colors: const [Color(0xFFA855F7), Color(0xFF9333EA)],
+          onTap: onVoiceTap,
+        ),
+        const SizedBox(width: 8),
+        _DarkActionButton(
+          label: 'Hinzufügen',
+          icon: Icons.add,
+          colors: const [Color(0xFF111111), Color(0xFF111111)],
+          onTap: onAddTap,
+        ),
+      ],
+    );
+  }
+}
+
+class _DarkActionButton extends StatelessWidget {
+  const _DarkActionButton({
+    required this.label,
+    required this.icon,
+    required this.colors,
+    required this.onTap,
+  });
+
+  final String label;
+  final IconData icon;
+  final List<Color> colors;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(colors: colors),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(6),
+          onTap: onTap,
+          child: SizedBox(
+            height: 40,
+            width: 112,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(icon, color: Colors.white, size: 18),
+                const SizedBox(width: 7),
+                Flexible(
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
@@ -439,24 +622,6 @@ class _SuggestionLine extends StatelessWidget {
   }
 }
 
-String _medicationVoiceContent(List<Medication> medications) {
-  final active = medications.where((medication) => medication.active).toList();
-  if (active.isEmpty) {
-    return 'Medikation. Es sind keine aktiven Medikamente gespeichert.';
-  }
-  final details = active
-      .take(8)
-      .map(
-        (medication) =>
-            '${medication.name}'
-            '${medication.dosage == null || medication.dosage!.isEmpty ? '' : ', ${medication.dosage}'}'
-            '${medication.frequency == null || medication.frequency!.isEmpty ? '' : ', ${medication.frequency}'}'
-            '${medication.reminderTimes.isEmpty ? '' : ', Erinnerung um ${medication.reminderTimes.join(' und ')}'}',
-      )
-      .join('. ');
-  return 'Medikation. ${active.length} aktive Medikamente. $details.';
-}
-
 class _MedicationSummary extends StatelessWidget {
   const _MedicationSummary({required this.activeCount});
 
@@ -469,28 +634,40 @@ class _MedicationSummary extends StatelessWidget {
         gradient: const LinearGradient(colors: GpColors.orange),
         borderRadius: BorderRadius.circular(8),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
+      child: SizedBox(
+        height: 112,
         child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Icon(GpIcons.medication, color: Colors.white, size: 46),
-            const SizedBox(width: 16),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Aktive Medikamente',
-                  style: TextStyle(color: Colors.white70),
-                ),
-                Text(
-                  '$activeCount',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 36,
-                    fontWeight: FontWeight.w800,
+            Padding(
+              padding: const EdgeInsets.only(left: 24),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Aktive Medikamente',
+                    style: TextStyle(color: Colors.white, fontSize: 14),
                   ),
-                ),
-              ],
+                  Text(
+                    '$activeCount',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 36,
+                      fontWeight: FontWeight.w900,
+                      height: 1.05,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Padding(
+              padding: EdgeInsets.only(right: 26),
+              child: Icon(
+                GpIcons.medication,
+                color: Color(0xFFFFEDD5),
+                size: 66,
+              ),
             ),
           ],
         ),
@@ -507,6 +684,10 @@ class _EmptyMedicationState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+        side: const BorderSide(color: GpColors.border, width: 2),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(28),
         child: Column(

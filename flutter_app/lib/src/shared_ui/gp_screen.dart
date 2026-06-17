@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import 'gp_colors.dart';
+import 'gp_footer.dart';
 import 'gp_header.dart';
 
 class GpScreen extends StatelessWidget {
@@ -53,6 +54,7 @@ class GpScreen extends StatelessWidget {
               ),
             ),
           ),
+          const GpFooter(),
         ],
       ),
     );
