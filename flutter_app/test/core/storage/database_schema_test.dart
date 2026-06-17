@@ -12,6 +12,8 @@ void main() {
         'medication_logs',
         'appointments',
         'healthcare_professionals',
+        'medical_history_entries',
+        'treatment_records',
         'allergies',
         'blood_pressure_logs',
         'weight_logs',

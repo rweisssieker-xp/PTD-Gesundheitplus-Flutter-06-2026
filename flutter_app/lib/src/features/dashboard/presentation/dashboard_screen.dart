@@ -104,6 +104,18 @@ class DashboardScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 OutlinedButton.icon(
+                  onPressed: () => context.go('/health/anamnesis'),
+                  icon: const Icon(GpIcons.anamnesis),
+                  label: const Text('Anamnese verwalten'),
+                ),
+                const SizedBox(height: 8),
+                OutlinedButton.icon(
+                  onPressed: () => context.go('/health/treatments'),
+                  icon: const Icon(GpIcons.treatmentHistory),
+                  label: const Text('Behandlungen verwalten'),
+                ),
+                const SizedBox(height: 8),
+                OutlinedButton.icon(
                   onPressed: () => context.go('/vitals/blood-pressure'),
                   icon: const Icon(GpIcons.bloodPressure),
                   label: const Text('Blutdruck erfassen'),

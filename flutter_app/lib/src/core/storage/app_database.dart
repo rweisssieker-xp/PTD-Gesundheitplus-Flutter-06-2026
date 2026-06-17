@@ -145,6 +145,31 @@ class AppDatabase {
       );
     ''');
     _db.execute('''
+      CREATE TABLE IF NOT EXISTS medical_history_entries (
+        id TEXT PRIMARY KEY,
+        category TEXT NOT NULL,
+        title TEXT NOT NULL,
+        details TEXT,
+        occurred_at TEXT,
+        active INTEGER NOT NULL DEFAULT 1,
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+      );
+    ''');
+    _db.execute('''
+      CREATE TABLE IF NOT EXISTS treatment_records (
+        id TEXT PRIMARY KEY,
+        title TEXT NOT NULL,
+        provider TEXT,
+        specialty TEXT,
+        treated_at TEXT NOT NULL,
+        outcome TEXT,
+        notes TEXT,
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+      );
+    ''');
+    _db.execute('''
       CREATE TABLE IF NOT EXISTS allergies (
         id TEXT PRIMARY KEY,
         substance TEXT NOT NULL,

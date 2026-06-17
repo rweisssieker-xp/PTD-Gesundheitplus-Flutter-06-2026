@@ -4,8 +4,8 @@
 | --- | --- | --- | --- | --- |
 | Home | `/` | Dashboard and navigation | implemented | User can reach primary dashboard actions from native dashboard. |
 | Gesundheits-Dashboard | `/dashboard/health` | Dashboard and navigation | not started | User sees summary cards for medication, appointments, vital values, and alerts. |
-| Anamnese | `/health/anamnesis` | Health record | not started | User can create and edit medical history. |
-| Behandlungshistorie | `/health/treatments` | Health record | not started | User can create, edit, delete, and sort treatments by date. |
+| Anamnese | `/health/anamnesis` | Health record | implemented | User can create, list, and delete local medical history entries. |
+| Behandlungshistorie | `/health/treatments` | Health record | implemented | User can create, list, delete, and sort treatments by date. |
 | Heilberufe | `/health/professionals` | Health record | implemented | User can create, list, and delete local healthcare professionals. |
 | Termine | `/appointments` | Appointments | implemented | User can create, list, complete, and delete local appointments. |
 | Medikation | `/medication` | Medication management | implemented | User can add, edit, deactivate, delete, and list local medications with reminder times. |

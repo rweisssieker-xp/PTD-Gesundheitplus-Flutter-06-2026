@@ -8,6 +8,8 @@ import '../features/emergency/domain/emergency_profile.dart';
 import '../features/emergency/presentation/emergency_offline_screen.dart';
 import '../features/emergency/presentation/emergency_profile_screen.dart';
 import '../features/emergency/presentation/emergency_setup_screen.dart';
+import '../features/health_record/presentation/anamnesis_screen.dart';
+import '../features/health_record/presentation/treatment_history_screen.dart';
 import '../features/medication/presentation/medication_daily_plan_screen.dart';
 import '../features/medication/presentation/medication_screen.dart';
 import '../features/notifications/presentation/notification_center_screen.dart';
@@ -29,12 +31,11 @@ final appRouter = GoRouter(
     ),
     GoRoute(
       path: '/health/anamnesis',
-      builder: (context, state) => const FeatureShellScreen(title: 'Anamnese'),
+      builder: (context, state) => const AnamnesisScreen(),
     ),
     GoRoute(
       path: '/health/treatments',
-      builder: (context, state) =>
-          const FeatureShellScreen(title: 'Behandlungshistorie'),
+      builder: (context, state) => const TreatmentHistoryScreen(),
     ),
     GoRoute(
       path: '/health/professionals',
