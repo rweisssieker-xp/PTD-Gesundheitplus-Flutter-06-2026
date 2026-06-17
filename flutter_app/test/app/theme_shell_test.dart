@@ -80,4 +80,18 @@ void main() {
 
     expect(find.text('Scan Document'), findsOneWidget);
   });
+
+  testWidgets('dashboard grids keep PWA spacing without implicit padding', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      ProviderScope(child: const MaterialApp(home: DashboardScreen())),
+    );
+    await tester.pumpAndSettle();
+
+    final grids = tester.widgetList<GridView>(find.byType(GridView)).toList();
+
+    expect(grids.length, greaterThanOrEqualTo(2));
+    expect(grids.every((grid) => grid.padding == EdgeInsets.zero), isTrue);
+  });
 }
