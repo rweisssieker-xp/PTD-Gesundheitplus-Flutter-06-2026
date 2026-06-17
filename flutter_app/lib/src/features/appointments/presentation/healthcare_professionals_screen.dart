@@ -8,6 +8,7 @@ import '../../../shared_ui/gp_screen.dart';
 import '../../../shared_ui/gp_voice_navigation.dart';
 import '../data/appointment_repository.dart';
 import '../domain/healthcare_professional.dart';
+import '../domain/healthcare_professional_directory.dart';
 
 class HealthcareProfessionalsScreen extends ConsumerStatefulWidget {
   const HealthcareProfessionalsScreen({super.key});
@@ -19,7 +20,16 @@ class HealthcareProfessionalsScreen extends ConsumerStatefulWidget {
 
 class _HealthcareProfessionalsScreenState
     extends ConsumerState<HealthcareProfessionalsScreen> {
+  final _directory = const HealthcareProfessionalDirectory();
+  final _directorySearch = TextEditingController();
+  var _directoryQuery = '';
   int _reload = 0;
+
+  @override
+  void dispose() {
+    _directorySearch.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,6 +60,16 @@ class _HealthcareProfessionalsScreenState
                   const SizedBox(height: 12),
                   GpVoiceNavigation(
                     content: _professionalsVoiceContent(professionals),
+                  ),
+                  const SizedBox(height: 16),
+                  _DoctorSearchCard(
+                    controller: _directorySearch,
+                    query: _directoryQuery,
+                    results: _directory.search(_directoryQuery),
+                    onChanged: (value) =>
+                        setState(() => _directoryQuery = value),
+                    onAdd: (suggestion) =>
+                        _addSuggestedProfessional(repo, suggestion),
                   ),
                   const SizedBox(height: 16),
                   if (professionals.isEmpty)
@@ -119,6 +139,41 @@ class _HealthcareProfessionalsScreenState
       _reload++;
     });
   }
+
+  Future<void> _addSuggestedProfessional(
+    AppointmentRepository repo,
+    HealthcareProfessionalSuggestion suggestion,
+  ) async {
+    final existing = await repo.listProfessionals();
+    final alreadySaved = existing.any(
+      (item) =>
+          item.name.toLowerCase() == suggestion.name.toLowerCase() &&
+          item.specialty.toLowerCase() == suggestion.specialty.toLowerCase(),
+    );
+    if (alreadySaved) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Dieser Behandler ist bereits gespeichert'),
+        ),
+      );
+      return;
+    }
+    await repo.saveProfessional(
+      repo.newProfessional(
+        name: suggestion.name,
+        specialty: suggestion.specialty,
+        address: suggestion.address,
+        phone: suggestion.phone,
+        notes: suggestion.notes,
+      ),
+    );
+    if (!mounted) return;
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('${suggestion.name} übernommen')));
+    _refresh();
+  }
 }
 
 String _professionalsVoiceContent(List<HealthcareProfessional> professionals) {
@@ -173,6 +228,237 @@ class _ProfessionalSummary extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _DoctorSearchCard extends StatelessWidget {
+  const _DoctorSearchCard({
+    required this.controller,
+    required this.query,
+    required this.results,
+    required this.onChanged,
+    required this.onAdd,
+  });
+
+  final TextEditingController controller;
+  final String query;
+  final List<HealthcareProfessionalSuggestion> results;
+  final ValueChanged<String> onChanged;
+  final ValueChanged<HealthcareProfessionalSuggestion> onAdd;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: const Color(0xFFF0FDF4),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+        side: const BorderSide(color: Color(0xFFBFDBFE), width: 2),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Row(
+              children: [
+                Icon(Icons.search, color: Color(0xFF166534)),
+                SizedBox(width: 8),
+                Text(
+                  'Facharzt-Suche',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: controller,
+              onChanged: onChanged,
+              textInputAction: TextInputAction.search,
+              decoration: InputDecoration(
+                prefixIcon: const Icon(Icons.search),
+                hintText: 'z.B. Kardiologe, Orthopäde...',
+                suffixIcon: query.isEmpty
+                    ? null
+                    : IconButton(
+                        tooltip: 'Suche löschen',
+                        onPressed: () {
+                          controller.clear();
+                          onChanged('');
+                        },
+                        icon: const Icon(Icons.close),
+                      ),
+                border: const OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 10),
+            const Row(
+              children: [
+                Icon(Icons.navigation_outlined, size: 16, color: Colors.green),
+                SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    'Lokale Vorlagen. Keine Standort- oder Internetanfrage.',
+                    style: TextStyle(
+                      color: GpColors.textSecondary,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              query.trim().isEmpty
+                  ? 'Vorschläge:'
+                  : '${results.length} Ergebnisse:',
+              style: const TextStyle(
+                fontWeight: FontWeight.w800,
+                color: GpColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 8),
+            if (results.isEmpty)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 8),
+                child: Text('Keine passende lokale Vorlage gefunden.'),
+              )
+            else
+              for (final suggestion in results)
+                _DoctorSuggestionTile(
+                  suggestion: suggestion,
+                  onAdd: () => onAdd(suggestion),
+                ),
+            const SizedBox(height: 8),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: const Color(0xFFEFF6FF),
+                border: Border.all(color: const Color(0xFFBFDBFE)),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Text(
+                'Tipp: Suche nach Fachrichtung, Beschwerden oder Ort. Die Daten bleiben auf diesem Gerät.',
+                style: TextStyle(color: Color(0xFF1E40AF), fontSize: 12),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _DoctorSuggestionTile extends StatelessWidget {
+  const _DoctorSuggestionTile({required this.suggestion, required this.onAdd});
+
+  final HealthcareProfessionalSuggestion suggestion;
+  final VoidCallback onAdd;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 10),
+      elevation: 1,
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        suggestion.name,
+                        style: const TextStyle(fontWeight: FontWeight.w800),
+                      ),
+                      Text(
+                        suggestion.specialty,
+                        style: const TextStyle(color: GpColors.textSecondary),
+                      ),
+                    ],
+                  ),
+                ),
+                if (suggestion.distanceHint != null)
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.place_outlined,
+                        size: 14,
+                        color: Color(0xFF2563EB),
+                      ),
+                      const SizedBox(width: 3),
+                      Text(
+                        suggestion.distanceHint!,
+                        style: const TextStyle(
+                          color: Color(0xFF2563EB),
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            _SuggestionDetail(
+              icon: Icons.place_outlined,
+              text: suggestion.address,
+            ),
+            _SuggestionDetail(
+              icon: Icons.phone_outlined,
+              text: suggestion.phone,
+            ),
+            if (suggestion.openingHours.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text(
+                  suggestion.openingHours,
+                  style: const TextStyle(
+                    color: GpColors.textSecondary,
+                    fontSize: 12,
+                  ),
+                ),
+              ),
+            const SizedBox(height: 10),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: onAdd,
+                icon: const Icon(Icons.add),
+                label: const Text('Zu meinen Behandlern hinzufügen'),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SuggestionDetail extends StatelessWidget {
+  const _SuggestionDetail({required this.icon, required this.text});
+
+  final IconData icon;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 16, color: GpColors.textSecondary),
+          const SizedBox(width: 6),
+          Expanded(child: Text(text)),
+        ],
       ),
     );
   }

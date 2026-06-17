@@ -7,7 +7,7 @@ Date: 2026-06-17
 - `flutter doctor -v`: no issues after installing Android SDK command-line tools and accepting Android licenses.
 - `dart format lib test`: clean.
 - `flutter analyze`: no issues.
-- `flutter test`: 66 tests passed.
+- `flutter test`: 70 tests passed.
 - `flutter build apk --debug`: built successfully.
 - `flutter build apk --release`: built successfully with local release keystore.
 - `flutter build appbundle --release`: built successfully with local release keystore.
@@ -32,11 +32,12 @@ Keep a secure backup of the generated upload keystore and passwords before publi
 
 The authoritative feature matrix is `docs/superpowers/tracking/flutter-feature-matrix.md`.
 All rows are implemented and the router no longer uses placeholder feature shells.
-The native Flutter shell now mirrors the PWA layout pattern with a white header, red divider, local-mode badge, back/home controls on feature pages, and a constrained mobile content column.
+The native Flutter shell now mirrors the PWA layout pattern with the first-run storage-mode choice, a white header, red divider, local-mode badge, back/home controls on feature pages, and a constrained mobile content column.
 
 ## Local data protection
 
 - Structured health data is stored in a SQLCipher-backed local SQLite database.
+- First launch shows a PWA-parity storage choice; selecting local persists the local-device mode on-device before opening the dashboard.
 - The database encryption key is generated on-device and stored through `flutter_secure_storage`, backed by iOS Keychain / Android Keystore.
 - App access is protected by local PIN and optional device biometric unlock where supported.
 - Document files copied into app storage are removed during the privacy data wipe before their metadata rows are deleted.
@@ -46,6 +47,7 @@ The native Flutter shell now mirrors the PWA layout pattern with a white header,
 - The PWA language switcher is backed by a local on-device preference and translates the native dashboard entry points for German, English, Turkish, Arabic, and Ukrainian.
 - Emergency contacts expose native phone, SMS, and current-location SMS handoff actions from the emergency profile and offline emergency views.
 - Emergency contacts can be imported from the device address book after explicit contact permission and remain stored locally.
+- Healthcare professionals expose a local Facharzt search with on-device provider suggestions and direct local add, replacing the PWA internet/LLM doctor search with a local-only workflow.
 - Anamnesis entries can be encoded into an offline-readable local QR payload for physician handoff.
 - Appointments can be exported on-device as `.ics` calendar files for native calendar app handoff.
 - Family-circle check-ins store local safety status, optional notes, and optional current-device location text on-device.

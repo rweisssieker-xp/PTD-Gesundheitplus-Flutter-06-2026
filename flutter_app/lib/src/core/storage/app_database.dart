@@ -5,6 +5,9 @@ import 'tables.dart';
 class AppDatabase {
   AppDatabase._(this._db, {String? encryptionKey}) {
     if (encryptionKey != null) {
+      if (_db.select('PRAGMA cipher_version;').isEmpty) {
+        throw StateError('SQLCipher library is not available.');
+      }
       _db.execute("PRAGMA key = '${_escapePragmaString(encryptionKey)}';");
       _db.select('SELECT count(*) FROM sqlite_master');
     }

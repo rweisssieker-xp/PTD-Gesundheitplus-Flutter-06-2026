@@ -26,13 +26,18 @@ import '../features/onboarding/presentation/onboarding_screen.dart';
 import '../features/prevention/presentation/preventive_care_screen.dart';
 import '../features/prevention/presentation/vaccination_screen.dart';
 import '../features/privacy/presentation/privacy_screen.dart';
+import '../features/privacy/presentation/storage_gate_screen.dart';
 import '../features/privacy/presentation/storage_mode_screen.dart';
 import '../features/vitals/presentation/blood_pressure_screen.dart';
 import '../features/vitals/presentation/weight_screen.dart';
 
 final appRouter = GoRouter(
   routes: [
-    GoRoute(path: '/', builder: (context, state) => const DashboardScreen()),
+    GoRoute(path: '/', builder: (context, state) => const StorageGateScreen()),
+    GoRoute(
+      path: '/home',
+      builder: (context, state) => const DashboardScreen(),
+    ),
     GoRoute(
       path: '/dashboard/health',
       builder: (context, state) => const HealthDashboardScreen(),

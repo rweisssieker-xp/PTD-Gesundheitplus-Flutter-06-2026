@@ -10,9 +10,13 @@ import 'package:gesundheitplus/src/features/dashboard/presentation/dashboard_scr
 
 void main() {
   testWidgets('renders Gesundheit Plus shell with red header', (tester) async {
+    final db = AppDatabase.memory();
+    addTearDown(db.close);
+
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          appDatabaseProvider.overrideWith((ref) async => db),
           appLockServiceProvider.overrideWithValue(
             AppLockService(
               store: InMemorySecretStore(),
@@ -26,6 +30,12 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Gesundheit Plus'), findsOneWidget);
+    expect(find.text('Nur auf diesem Gerät'), findsOneWidget);
+    await tester.ensureVisible(find.text('Lokal speichern wählen'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Lokal speichern wählen'));
+    await tester.pumpAndSettle();
+
     expect(find.byTooltip('Sprache'), findsOneWidget);
     expect(find.text('Dokument scannen'), findsOneWidget);
     final container = tester.widget<Container>(
@@ -35,6 +45,8 @@ void main() {
   });
 
   testWidgets('locks app shell when PIN exists', (tester) async {
+    final db = AppDatabase.memory();
+    addTearDown(db.close);
     final store = InMemorySecretStore();
     final lock = AppLockService(
       store: store,
@@ -44,7 +56,10 @@ void main() {
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [appLockServiceProvider.overrideWithValue(lock)],
+        overrides: [
+          appDatabaseProvider.overrideWith((ref) async => db),
+          appLockServiceProvider.overrideWithValue(lock),
+        ],
         child: const GesundheitApp(),
       ),
     );
@@ -57,6 +72,7 @@ void main() {
 
     expect(find.text('Gesundheit Plus'), findsOneWidget);
     expect(find.text('Gesundheit Plus entsperren'), findsNothing);
+    expect(find.text('Nur auf diesem Gerät'), findsOneWidget);
   });
 
   testWidgets('language selector persists and translates dashboard labels', (
