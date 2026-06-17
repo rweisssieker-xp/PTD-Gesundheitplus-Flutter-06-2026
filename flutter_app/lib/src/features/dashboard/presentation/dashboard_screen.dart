@@ -70,7 +70,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       subtitle: 'Warnhinweise',
       description: 'Allergien und Risiken',
       icon: GpIcons.allergies,
-      route: '/dashboard/health',
+      route: '/health/allergies',
       colors: GpColors.yellow,
     ),
     _DashboardItem(

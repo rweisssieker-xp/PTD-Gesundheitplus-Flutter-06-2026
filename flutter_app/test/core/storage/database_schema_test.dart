@@ -34,4 +34,25 @@ void main() {
     );
     db.close();
   });
+
+  test('allergies table includes PWA parity fields', () {
+    final db = AppDatabase.memory();
+    final columns = db
+        .select('PRAGMA table_info(allergies)')
+        .map((row) => row['name'])
+        .toSet();
+    expect(
+      columns,
+      containsAll([
+        'substance',
+        'category',
+        'reaction',
+        'severity',
+        'diagnosed_at',
+        'diagnosed_by',
+        'notes',
+      ]),
+    );
+    db.close();
+  });
 }

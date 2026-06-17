@@ -29,4 +29,42 @@ void main() {
     expect(records.first.title, 'Operation');
     db.close();
   });
+
+  test('stores, updates, sorts, and deletes allergies', () async {
+    final db = AppDatabase.memory();
+    final repo = HealthRecordRepository(db);
+    await repo.addAllergy(
+      substance: 'Birke',
+      category: 'Pollen',
+      severity: 'Leicht',
+      reaction: 'Niesen',
+    );
+    await repo.addAllergy(
+      substance: 'Penicillin',
+      category: 'Medikament',
+      severity: 'Lebensbedrohlich',
+      reaction: 'Atemnot',
+    );
+
+    final created = await repo.listAllergies();
+    expect(created.first.substance, 'Penicillin');
+    expect(created.first.category, 'Medikament');
+
+    await repo.updateAllergy(
+      id: created.first.id,
+      substance: 'Penicillin',
+      category: 'Medikament',
+      severity: 'Schwer',
+      reaction: 'Schwellung',
+      notes: 'Notfallrelevant',
+    );
+    final updated = await repo.listAllergies();
+    expect(updated.first.severity, 'Schwer');
+    expect(updated.first.notes, 'Notfallrelevant');
+
+    await repo.deleteAllergy(updated.first.id);
+    final remaining = await repo.listAllergies();
+    expect(remaining.single.substance, 'Birke');
+    db.close();
+  });
 }

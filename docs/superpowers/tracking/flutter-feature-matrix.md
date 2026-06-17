@@ -7,6 +7,7 @@
 | Anamnese | `/health/anamnesis` | Health record | implemented | User can create, list, and delete local medical history entries. |
 | Behandlungshistorie | `/health/treatments` | Health record | implemented | User can create, list, delete, and sort treatments by date. |
 | Heilberufe | `/health/professionals` | Health record | implemented | User can create, list, and delete local healthcare professionals. |
+| Allergien | `/health/allergies` | Health record | implemented | User can create, edit, group, list, and delete local allergies with severity warnings. |
 | Termine | `/appointments` | Appointments | implemented | User can create, list, complete, and delete local appointments. |
 | Medikation | `/medication` | Medication management | implemented | User can add, edit, deactivate, delete, and list local medications with reminder times. |
 | Medikamenten-Tagesplan | `/medication/daily-plan` | Medication management | implemented | User can generate daily medication logs and mark intake as taken or skipped. |

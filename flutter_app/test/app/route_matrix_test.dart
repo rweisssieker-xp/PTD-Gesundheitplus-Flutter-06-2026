@@ -16,6 +16,7 @@ void main() {
         '/health/anamnesis',
         '/health/treatments',
         '/health/professionals',
+        '/health/allergies',
         '/appointments',
         '/medication',
         '/medication/daily-plan',

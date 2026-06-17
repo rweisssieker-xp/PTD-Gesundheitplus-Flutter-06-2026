@@ -116,6 +116,109 @@ class HealthRecordRepository {
     _db.execute('DELETE FROM treatment_records WHERE id = ?', [id]);
   }
 
+  Future<void> addAllergy({
+    required String substance,
+    String? category,
+    String? reaction,
+    String? severity,
+    DateTime? diagnosedAt,
+    String? diagnosedBy,
+    String? notes,
+  }) async {
+    final now = DateTime.now().toIso8601String();
+    _db.execute(
+      '''
+      INSERT INTO allergies (
+        id, substance, category, reaction, severity, diagnosed_at, diagnosed_by, notes, created_at, updated_at
+      )
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ''',
+      [
+        _uuid.v4(),
+        substance,
+        category,
+        reaction,
+        severity,
+        diagnosedAt?.toIso8601String(),
+        diagnosedBy,
+        notes,
+        now,
+        now,
+      ],
+    );
+  }
+
+  Future<void> updateAllergy({
+    required String id,
+    required String substance,
+    String? category,
+    String? reaction,
+    String? severity,
+    DateTime? diagnosedAt,
+    String? diagnosedBy,
+    String? notes,
+  }) async {
+    _db.execute(
+      '''
+      UPDATE allergies
+      SET substance = ?,
+          category = ?,
+          reaction = ?,
+          severity = ?,
+          diagnosed_at = ?,
+          diagnosed_by = ?,
+          notes = ?,
+          updated_at = ?
+      WHERE id = ?
+      ''',
+      [
+        substance,
+        category,
+        reaction,
+        severity,
+        diagnosedAt?.toIso8601String(),
+        diagnosedBy,
+        notes,
+        DateTime.now().toIso8601String(),
+        id,
+      ],
+    );
+  }
+
+  Future<List<AllergyRecord>> listAllergies() async {
+    final rows = _db.select('''
+      SELECT id, substance, category, reaction, severity, diagnosed_at, diagnosed_by, notes
+      FROM allergies
+      ORDER BY
+        CASE severity
+          WHEN 'Lebensbedrohlich' THEN 0
+          WHEN 'Schwer' THEN 1
+          WHEN 'Mittel' THEN 2
+          WHEN 'Leicht' THEN 3
+          ELSE 4
+        END,
+        substance ASC
+      ''');
+    return rows
+        .map(
+          (row) => AllergyRecord(
+            id: row['id'] as String,
+            substance: row['substance'] as String,
+            category: row['category'] as String?,
+            reaction: row['reaction'] as String?,
+            severity: row['severity'] as String?,
+            diagnosedAt: _date(row['diagnosed_at']),
+            diagnosedBy: row['diagnosed_by'] as String?,
+            notes: row['notes'] as String?,
+          ),
+        )
+        .toList();
+  }
+
+  Future<void> deleteAllergy(String id) async {
+    _db.execute('DELETE FROM allergies WHERE id = ?', [id]);
+  }
+
   DateTime? _date(Object? value) {
     if (value == null) return null;
     return DateTime.parse(value as String);

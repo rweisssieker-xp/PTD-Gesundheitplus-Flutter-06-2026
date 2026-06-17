@@ -35,3 +35,25 @@ class TreatmentRecord {
   final String? outcome;
   final String? notes;
 }
+
+class AllergyRecord {
+  const AllergyRecord({
+    required this.id,
+    required this.substance,
+    this.category,
+    this.reaction,
+    this.severity,
+    this.diagnosedAt,
+    this.diagnosedBy,
+    this.notes,
+  });
+
+  final String id;
+  final String substance;
+  final String? category;
+  final String? reaction;
+  final String? severity;
+  final DateTime? diagnosedAt;
+  final String? diagnosedBy;
+  final String? notes;
+}

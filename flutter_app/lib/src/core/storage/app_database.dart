@@ -196,12 +196,20 @@ class AppDatabase {
       CREATE TABLE IF NOT EXISTS allergies (
         id TEXT PRIMARY KEY,
         substance TEXT NOT NULL,
+        category TEXT,
         reaction TEXT,
         severity TEXT,
+        diagnosed_at TEXT,
+        diagnosed_by TEXT,
+        notes TEXT,
         created_at TEXT NOT NULL,
         updated_at TEXT NOT NULL
       );
     ''');
+    _ensureColumn('allergies', 'category', 'TEXT');
+    _ensureColumn('allergies', 'diagnosed_at', 'TEXT');
+    _ensureColumn('allergies', 'diagnosed_by', 'TEXT');
+    _ensureColumn('allergies', 'notes', 'TEXT');
     _db.execute('''
       CREATE TABLE IF NOT EXISTS blood_pressure_logs (
         id TEXT PRIMARY KEY,
