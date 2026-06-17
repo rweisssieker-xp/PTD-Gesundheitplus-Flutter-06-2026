@@ -1,0 +1,66 @@
+{
+  "name": "DrugInteractionCheck",
+  "type": "object",
+  "properties": {
+    "medications_checked": {
+      "type": "array",
+      "description": "Gepr\u00fcfte Medikamente",
+      "items": {
+        "type": "string"
+      }
+    },
+    "interactions_found": {
+      "type": "array",
+      "description": "Gefundene Wechselwirkungen",
+      "items": {
+        "type": "object",
+        "properties": {
+          "drug1": {
+            "type": "string"
+          },
+          "drug2": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "contraindicated",
+              "major",
+              "moderate",
+              "minor",
+              "unknown"
+            ]
+          },
+          "description": {
+            "type": "string"
+          },
+          "recommendation": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "checked_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "overall_risk": {
+      "type": "string",
+      "enum": [
+        "low",
+        "moderate",
+        "high",
+        "critical"
+      ]
+    },
+    "summary": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "medications_checked"
+  ]
+}

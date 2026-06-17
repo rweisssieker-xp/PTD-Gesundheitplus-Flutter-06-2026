@@ -1,0 +1,55 @@
+{
+  "name": "FamilyCheckIn",
+  "type": "object",
+  "properties": {
+    "user_name": {
+      "type": "string",
+      "description": "Name des Check-in-Mitglieds"
+    },
+    "user_email": {
+      "type": "string",
+      "description": "E-Mail des Mitglieds"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "safe",
+        "help_needed",
+        "unknown"
+      ],
+      "default": "unknown",
+      "description": "Aktueller Status"
+    },
+    "message": {
+      "type": "string",
+      "description": "Optionale Nachricht"
+    },
+    "location_text": {
+      "type": "string",
+      "description": "Optionaler Standort als Text"
+    },
+    "checked_in_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Zeitpunkt des Check-ins"
+    },
+    "group_id": {
+      "type": "string",
+      "description": "Familien-Gruppe ID"
+    },
+    "auto_checkin_interval_hours": {
+      "type": "number",
+      "default": 24,
+      "description": "Automatischer Check-in Intervall in Stunden"
+    },
+    "next_checkin_due": {
+      "type": "string",
+      "format": "date-time",
+      "description": "N\u00e4chster f\u00e4lliger Check-in"
+    }
+  },
+  "required": [
+    "user_name",
+    "status"
+  ]
+}
