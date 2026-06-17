@@ -5,6 +5,7 @@ import '../../../core/storage/database_provider.dart';
 import '../../../shared_ui/gp_colors.dart';
 import '../../../shared_ui/gp_icons.dart';
 import '../../../shared_ui/gp_screen.dart';
+import '../../../shared_ui/gp_voice_navigation.dart';
 import '../data/prevention_repository.dart';
 import '../domain/prevention.dart';
 
@@ -49,6 +50,8 @@ class _VaccinationScreenState extends ConsumerState<VaccinationScreen> {
                     label: 'Eintraege',
                     icon: GpIcons.vaccination,
                   ),
+                  const SizedBox(height: 12),
+                  GpVoiceNavigation(content: _vaccinationVoiceContent(records)),
                   const SizedBox(height: 16),
                   if (records.isEmpty)
                     const Card(
@@ -96,6 +99,25 @@ class _VaccinationScreenState extends ConsumerState<VaccinationScreen> {
     );
     if (saved == true) setState(() => _reload++);
   }
+}
+
+String _vaccinationVoiceContent(List<VaccinationRecord> records) {
+  if (records.isEmpty) {
+    return 'Impfpass. Es sind noch keine Impfungen gespeichert.';
+  }
+  final due = records.where((record) => record.boosterDue).toList();
+  final dueText = due.isEmpty
+      ? 'Keine fälligen Auffrischungen markiert.'
+      : '${due.length} Auffrischungen sind fällig: ${due.map((record) => record.vaccineName).join(', ')}.';
+  final details = records
+      .take(8)
+      .map(
+        (record) =>
+            '${record.vaccineName} am ${_date(record.vaccinatedAt)}'
+            '${record.targetDisease == null ? '' : ', Schutz gegen ${record.targetDisease}'}',
+      )
+      .join('. ');
+  return 'Impfpass. ${records.length} Impfungen gespeichert. $dueText $details.';
 }
 
 class _VaccinationEditor extends StatefulWidget {

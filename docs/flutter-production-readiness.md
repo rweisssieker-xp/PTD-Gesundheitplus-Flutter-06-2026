@@ -49,6 +49,7 @@ The native Flutter shell now mirrors the PWA layout pattern with a white header,
 - Anamnesis entries can be encoded into an offline-readable local QR payload for physician handoff.
 - Appointments can be exported on-device as `.ics` calendar files for native calendar app handoff.
 - Family-circle check-ins store local safety status, optional notes, and optional current-device location text on-device.
+- Anamnesis, allergies, treatment history, healthcare professionals, appointments, medication, and vaccination screens expose native text-to-speech read-aloud summaries.
 
 ## Remaining production gates
 

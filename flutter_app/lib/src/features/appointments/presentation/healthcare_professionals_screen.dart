@@ -5,6 +5,7 @@ import '../../../core/storage/database_provider.dart';
 import '../../../shared_ui/gp_colors.dart';
 import '../../../shared_ui/gp_icons.dart';
 import '../../../shared_ui/gp_screen.dart';
+import '../../../shared_ui/gp_voice_navigation.dart';
 import '../data/appointment_repository.dart';
 import '../domain/healthcare_professional.dart';
 
@@ -46,6 +47,10 @@ class _HealthcareProfessionalsScreenState
                 padding: const EdgeInsets.all(16),
                 children: [
                   _ProfessionalSummary(count: professionals.length),
+                  const SizedBox(height: 12),
+                  GpVoiceNavigation(
+                    content: _professionalsVoiceContent(professionals),
+                  ),
                   const SizedBox(height: 16),
                   if (professionals.isEmpty)
                     const Card(
@@ -114,6 +119,21 @@ class _HealthcareProfessionalsScreenState
       _reload++;
     });
   }
+}
+
+String _professionalsVoiceContent(List<HealthcareProfessional> professionals) {
+  if (professionals.isEmpty) {
+    return 'Heilberufe. Es sind noch keine Ärzte oder Behandler gespeichert.';
+  }
+  final details = professionals
+      .take(8)
+      .map(
+        (item) =>
+            '${item.name}, ${item.specialty}'
+            '${item.phone == null || item.phone!.isEmpty ? '' : ', Telefon ${item.phone}'}',
+      )
+      .join('. ');
+  return 'Heilberufe. ${professionals.length} Behandler gespeichert. $details.';
 }
 
 class _ProfessionalSummary extends StatelessWidget {

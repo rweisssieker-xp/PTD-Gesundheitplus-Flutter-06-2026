@@ -11,6 +11,7 @@ import '../../../core/storage/database_provider.dart';
 import '../../../shared_ui/gp_colors.dart';
 import '../../../shared_ui/gp_icons.dart';
 import '../../../shared_ui/gp_screen.dart';
+import '../../../shared_ui/gp_voice_navigation.dart';
 import '../data/appointment_repository.dart';
 import '../domain/appointment.dart';
 import '../domain/appointment_ics_builder.dart';
@@ -59,6 +60,10 @@ class _AppointmentsScreenState extends ConsumerState<AppointmentsScreen> {
                 padding: const EdgeInsets.all(16),
                 children: [
                   _AppointmentSummary(count: upcoming.length),
+                  const SizedBox(height: 12),
+                  GpVoiceNavigation(
+                    content: _appointmentVoiceContent(appointments, upcoming),
+                  ),
                   const SizedBox(height: 16),
                   _CalendarExportCard(
                     appointments: appointments,
@@ -195,6 +200,25 @@ class _AppointmentsScreenState extends ConsumerState<AppointmentsScreen> {
       XFile(file.path, mimeType: 'text/calendar', name: fileName),
     ]);
   }
+}
+
+String _appointmentVoiceContent(
+  List<Appointment> appointments,
+  List<Appointment> upcoming,
+) {
+  if (appointments.isEmpty) {
+    return 'Termine. Es sind noch keine Termine eingetragen.';
+  }
+  final next = upcoming
+      .take(5)
+      .map(
+        (appointment) =>
+            '${appointment.doctorName} am ${appointment.date.day}.${appointment.date.month}.${appointment.date.year} um ${appointment.time} Uhr'
+            '${appointment.location == null || appointment.location!.isEmpty ? '' : ' in ${appointment.location}'}'
+            '${appointment.reason == null || appointment.reason!.isEmpty ? '' : ', Grund: ${appointment.reason}'}',
+      )
+      .join('. ');
+  return 'Termine. ${upcoming.length} anstehende von ${appointments.length} Terminen. $next.';
 }
 
 class _CalendarExportCard extends StatelessWidget {

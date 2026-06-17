@@ -5,6 +5,7 @@ import '../../../core/storage/database_provider.dart';
 import '../../../shared_ui/gp_colors.dart';
 import '../../../shared_ui/gp_icons.dart';
 import '../../../shared_ui/gp_screen.dart';
+import '../../../shared_ui/gp_voice_navigation.dart';
 import '../data/health_record_repository.dart';
 import '../domain/health_record.dart';
 
@@ -81,6 +82,8 @@ class _TreatmentHistoryScreenState
                       ),
                     ),
                   ),
+                  const SizedBox(height: 12),
+                  GpVoiceNavigation(content: _treatmentVoiceContent(records)),
                   const SizedBox(height: 16),
                   if (records.isEmpty)
                     const Card(
@@ -129,6 +132,22 @@ class _TreatmentHistoryScreenState
     );
     if (saved == true) setState(() => _reload++);
   }
+}
+
+String _treatmentVoiceContent(List<TreatmentRecord> records) {
+  if (records.isEmpty) {
+    return 'Behandlungshistorie. Es sind noch keine Behandlungen gespeichert.';
+  }
+  final details = records
+      .take(8)
+      .map(
+        (record) =>
+            '${record.title} am ${_date(record.treatedAt)}'
+            '${record.provider == null ? '' : ' bei ${record.provider}'}'
+            '${record.outcome == null ? '' : ', Ergebnis: ${record.outcome}'}',
+      )
+      .join('. ');
+  return 'Behandlungshistorie. ${records.length} Behandlungen gespeichert. $details.';
 }
 
 class _TreatmentEditor extends StatefulWidget {

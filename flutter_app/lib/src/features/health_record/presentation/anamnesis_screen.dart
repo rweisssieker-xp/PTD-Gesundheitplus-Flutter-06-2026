@@ -6,6 +6,7 @@ import '../../../core/storage/database_provider.dart';
 import '../../../shared_ui/gp_colors.dart';
 import '../../../shared_ui/gp_icons.dart';
 import '../../../shared_ui/gp_screen.dart';
+import '../../../shared_ui/gp_voice_navigation.dart';
 import '../data/health_record_repository.dart';
 import '../domain/anamnesis_payload_builder.dart';
 import '../domain/health_record.dart';
@@ -47,6 +48,8 @@ class _AnamnesisScreenState extends ConsumerState<AnamnesisScreen> {
                 padding: const EdgeInsets.all(16),
                 children: [
                   _HealthRecordHeader(count: entries.length, title: 'Anamnese'),
+                  const SizedBox(height: 12),
+                  GpVoiceNavigation(content: _anamnesisVoiceContent(entries)),
                   const SizedBox(height: 16),
                   _AnamnesisQrCard(
                     entries: entries,
@@ -104,6 +107,22 @@ class _AnamnesisScreenState extends ConsumerState<AnamnesisScreen> {
     );
     if (saved == true) setState(() => _reload++);
   }
+}
+
+String _anamnesisVoiceContent(List<MedicalHistoryEntry> entries) {
+  if (entries.isEmpty) {
+    return 'Anamnese. Es sind noch keine medizinischen Einträge gespeichert.';
+  }
+  final active = entries.where((entry) => entry.active).length;
+  final details = entries
+      .take(6)
+      .map(
+        (entry) =>
+            '${entry.category}: ${entry.title}'
+            '${entry.details == null ? '' : ', ${entry.details}'}',
+      )
+      .join('. ');
+  return 'Anamnese. $active aktive Einträge gespeichert. $details.';
 }
 
 class _AnamnesisQrCard extends StatelessWidget {

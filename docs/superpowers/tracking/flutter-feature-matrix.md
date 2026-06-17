@@ -4,18 +4,18 @@
 | --- | --- | --- | --- | --- |
 | Home | `/` | Dashboard and navigation | implemented | User can reach primary dashboard actions from a native dashboard that mirrors the PWA mobile layout, colors, icons, shell controls, and locally persisted language switching. |
 | Gesundheits-Dashboard | `/dashboard/health` | Dashboard and navigation | implemented | User sees local summary cards for medication, appointments, vital values, and alerts. |
-| Anamnese | `/health/anamnesis` | Health record | implemented | User can create, list, delete, and share local medical history entries through an offline-readable QR payload. |
-| Behandlungshistorie | `/health/treatments` | Health record | implemented | User can create, list, delete, and sort treatments by date. |
-| Heilberufe | `/health/professionals` | Health record | implemented | User can create, list, and delete local healthcare professionals. |
-| Allergien | `/health/allergies` | Health record | implemented | User can create, edit, group, list, and delete local allergies with severity warnings. |
-| Termine | `/appointments` | Appointments | implemented | User can create, list, complete, delete, schedule native local reminders, and export appointments as local `.ics` calendar files. |
-| Medikation | `/medication` | Medication management | implemented | User can add, edit, deactivate, delete, and list local medications with native local reminder scheduling. |
+| Anamnese | `/health/anamnesis` | Health record | implemented | User can create, list, delete, hear a native read-aloud summary, and share local medical history entries through an offline-readable QR payload. |
+| Behandlungshistorie | `/health/treatments` | Health record | implemented | User can create, list, delete, sort treatments by date, and hear a native read-aloud summary. |
+| Heilberufe | `/health/professionals` | Health record | implemented | User can create, list, delete, and hear a native read-aloud summary of local healthcare professionals. |
+| Allergien | `/health/allergies` | Health record | implemented | User can create, edit, group, list, hear a native read-aloud summary, and delete local allergies with severity warnings. |
+| Termine | `/appointments` | Appointments | implemented | User can create, list, complete, delete, hear a native read-aloud summary, schedule native local reminders, and export appointments as local `.ics` calendar files. |
+| Medikation | `/medication` | Medication management | implemented | User can add, edit, deactivate, delete, list, and hear a native read-aloud summary of local medications with native local reminder scheduling. |
 | Medikamenten-Tagesplan | `/medication/daily-plan` | Medication management | implemented | User can generate daily medication logs and mark intake as taken or skipped. |
 | Medikations-Interaktionen | `/medication/interactions` | Medication safety and interactions | implemented | User can create and review stored local interaction guidance. |
 | Wechselwirkungen-Checker | `/medication/interaction-checker` | Medication safety and interactions | implemented | User can run a local consent-gated interaction check against active medication. |
 | Blutdruck | `/vitals/blood-pressure` | Vital values | implemented | User can log and list systolic, diastolic, and pulse values locally. |
 | Gewicht | `/vitals/weight` | Vital values | implemented | User can log weight locally and see BMI per entry when height is present. |
-| Impfpass | `/prevention/vaccination` | Prevention and vaccination | implemented | User can create and list local vaccination records with optional booster due date. |
+| Impfpass | `/prevention/vaccination` | Prevention and vaccination | implemented | User can create, list, and hear a native read-aloud summary of local vaccination records with optional booster due date. |
 | Vorsorge | `/prevention/care` | Prevention and vaccination | implemented | User can create native local preventive-care reminders and mark them done. |
 | Notfallprofil | `/emergency/profile` | Emergency | implemented | User sees a QR-backed emergency profile built from local records and can use native phone, SMS, and current-location SMS handoff for emergency contacts. |
 | Notfall-Einrichtung | `/emergency/setup` | Emergency | implemented | User can create, import from device contacts after permission, verify, list, and delete local emergency contacts. |

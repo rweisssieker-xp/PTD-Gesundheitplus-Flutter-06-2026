@@ -8,6 +8,7 @@ import '../../../core/storage/database_provider.dart';
 import '../../../shared_ui/gp_colors.dart';
 import '../../../shared_ui/gp_icons.dart';
 import '../../../shared_ui/gp_screen.dart';
+import '../../../shared_ui/gp_voice_navigation.dart';
 import '../data/medication_repository.dart';
 import '../domain/medication.dart';
 
@@ -50,6 +51,10 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen> {
                 padding: const EdgeInsets.all(16),
                 children: [
                   _MedicationSummary(activeCount: activeCount),
+                  const SizedBox(height: 12),
+                  GpVoiceNavigation(
+                    content: _medicationVoiceContent(medications),
+                  ),
                   const SizedBox(height: 12),
                   SwitchListTile(
                     value: _showInactive,
@@ -163,6 +168,24 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen> {
       reminderTimes: medication.reminderTimes,
     );
   }
+}
+
+String _medicationVoiceContent(List<Medication> medications) {
+  final active = medications.where((medication) => medication.active).toList();
+  if (active.isEmpty) {
+    return 'Medikation. Es sind keine aktiven Medikamente gespeichert.';
+  }
+  final details = active
+      .take(8)
+      .map(
+        (medication) =>
+            '${medication.name}'
+            '${medication.dosage == null || medication.dosage!.isEmpty ? '' : ', ${medication.dosage}'}'
+            '${medication.frequency == null || medication.frequency!.isEmpty ? '' : ', ${medication.frequency}'}'
+            '${medication.reminderTimes.isEmpty ? '' : ', Erinnerung um ${medication.reminderTimes.join(' und ')}'}',
+      )
+      .join('. ');
+  return 'Medikation. ${active.length} aktive Medikamente. $details.';
 }
 
 class _MedicationSummary extends StatelessWidget {

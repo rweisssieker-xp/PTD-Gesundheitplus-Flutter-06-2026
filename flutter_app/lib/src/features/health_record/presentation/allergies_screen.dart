@@ -5,6 +5,7 @@ import '../../../core/storage/database_provider.dart';
 import '../../../shared_ui/gp_colors.dart';
 import '../../../shared_ui/gp_icons.dart';
 import '../../../shared_ui/gp_screen.dart';
+import '../../../shared_ui/gp_voice_navigation.dart';
 import '../data/health_record_repository.dart';
 import '../domain/health_record.dart';
 
@@ -53,6 +54,8 @@ class _AllergiesScreenState extends ConsumerState<AllergiesScreen> {
                 padding: const EdgeInsets.all(16),
                 children: [
                   _AllergySummary(count: allergies.length),
+                  const SizedBox(height: 12),
+                  GpVoiceNavigation(content: _allergyVoiceContent(allergies)),
                   if (severe.isNotEmpty) ...[
                     const SizedBox(height: 12),
                     _SevereAllergyWarning(allergies: severe),
@@ -135,6 +138,30 @@ class _AllergiesScreenState extends ConsumerState<AllergiesScreen> {
     }
     return grouped;
   }
+}
+
+String _allergyVoiceContent(List<AllergyRecord> allergies) {
+  if (allergies.isEmpty) {
+    return 'Allergien. Es sind noch keine Allergien eingetragen.';
+  }
+  final severe = allergies
+      .where(
+        (allergy) =>
+            allergy.severity == 'Schwer' ||
+            allergy.severity == 'Lebensbedrohlich',
+      )
+      .toList();
+  final severeText = severe.isEmpty
+      ? 'Keine schweren Allergien markiert.'
+      : 'Wichtig: ${severe.length} schwere Allergien: ${severe.map((allergy) => allergy.substance).join(', ')}.';
+  final list = allergies
+      .take(8)
+      .map(
+        (allergy) =>
+            '${allergy.substance}, ${allergy.category ?? 'Sonstiges'}, Schweregrad ${allergy.severity ?? 'nicht angegeben'}',
+      )
+      .join('. ');
+  return 'Allergien. ${allergies.length} Allergien gespeichert. $severeText $list.';
 }
 
 class _AllergySummary extends StatelessWidget {
