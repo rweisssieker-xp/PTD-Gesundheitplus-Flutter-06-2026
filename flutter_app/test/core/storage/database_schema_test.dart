@@ -19,6 +19,7 @@ void main() {
         'weight_logs',
         'vaccinations',
         'preventive_care_items',
+        'health_documents',
         'emergency_contacts',
         'notifications',
         'consent_settings',

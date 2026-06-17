@@ -5,6 +5,9 @@ import '../features/dashboard/presentation/dashboard_screen.dart';
 import '../features/dashboard/presentation/health_dashboard_screen.dart';
 import '../features/appointments/presentation/appointments_screen.dart';
 import '../features/appointments/presentation/healthcare_professionals_screen.dart';
+import '../features/documents/presentation/document_scan_screen.dart';
+import '../features/documents/presentation/documents_screen.dart';
+import '../features/documents/presentation/export_screen.dart';
 import '../features/emergency/domain/emergency_payload_builder.dart';
 import '../features/emergency/domain/emergency_profile.dart';
 import '../features/emergency/presentation/emergency_offline_screen.dart';
@@ -95,19 +98,13 @@ final appRouter = GoRouter(
     ),
     GoRoute(
       path: '/documents/scan',
-      builder: (context, state) =>
-          const FeatureShellScreen(title: 'Dokumenten-Scan'),
+      builder: (context, state) => const DocumentScanScreen(),
     ),
     GoRoute(
       path: '/documents',
-      builder: (context, state) =>
-          const FeatureShellScreen(title: 'Gescannte-Dokumente'),
+      builder: (context, state) => const DocumentsScreen(),
     ),
-    GoRoute(
-      path: '/export',
-      builder: (context, state) =>
-          const FeatureShellScreen(title: 'Daten-Export'),
-    ),
+    GoRoute(path: '/export', builder: (context, state) => const ExportScreen()),
     GoRoute(
       path: '/family',
       builder: (context, state) =>

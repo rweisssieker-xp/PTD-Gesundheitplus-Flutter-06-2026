@@ -150,6 +150,18 @@ class DashboardScreen extends StatelessWidget {
                   icon: const Icon(Icons.storage_outlined),
                   label: const Text('Lokalen Speicher anzeigen'),
                 ),
+                const SizedBox(height: 8),
+                OutlinedButton.icon(
+                  onPressed: () => context.go('/documents'),
+                  icon: const Icon(GpIcons.scan),
+                  label: const Text('Dokumente anzeigen'),
+                ),
+                const SizedBox(height: 8),
+                OutlinedButton.icon(
+                  onPressed: () => context.go('/export'),
+                  icon: const Icon(GpIcons.export),
+                  label: const Text('Daten exportieren'),
+                ),
               ],
             ),
           ),

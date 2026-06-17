@@ -231,6 +231,19 @@ class AppDatabase {
       );
     ''');
     _db.execute('''
+      CREATE TABLE IF NOT EXISTS health_documents (
+        id TEXT PRIMARY KEY,
+        title TEXT NOT NULL,
+        category TEXT NOT NULL,
+        local_path TEXT NOT NULL,
+        mime_type TEXT,
+        captured_at TEXT NOT NULL,
+        notes TEXT,
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+      );
+    ''');
+    _db.execute('''
       CREATE TABLE IF NOT EXISTS emergency_contacts (
         id TEXT PRIMARY KEY,
         name TEXT NOT NULL,

@@ -19,6 +19,7 @@ class AppTables {
   static const weightLogs = AppTable('weight_logs');
   static const vaccinations = AppTable('vaccinations');
   static const preventiveCareItems = AppTable('preventive_care_items');
+  static const healthDocuments = AppTable('health_documents');
   static const emergencyContacts = AppTable('emergency_contacts');
   static const notifications = AppTable('notifications');
   static const consentSettings = AppTable('consent_settings');
@@ -37,6 +38,7 @@ class AppTables {
     weightLogs,
     vaccinations,
     preventiveCareItems,
+    healthDocuments,
     emergencyContacts,
     notifications,
     consentSettings,

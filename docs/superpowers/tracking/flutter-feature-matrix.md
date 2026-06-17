@@ -19,9 +19,9 @@
 | Notfallprofil | `/emergency/profile` | Emergency | implemented | Offline emergency payload builder, QR screen, route, and test coverage exist. |
 | Notfall-Einrichtung | `/emergency/setup` | Emergency | implemented | User can create, verify, list, and delete local emergency contacts. |
 | Offline-Notfall | `/emergency/offline` | Emergency | implemented | Emergency screen renders local medication, allergy, contact, and QR payload data without backend access. |
-| Dokumenten-Scan | `/documents/scan` | Documents and scanning | not started | User can capture or attach document images. |
-| Gescannte-Dokumente | `/documents` | Documents and scanning | not started | User can list and inspect stored documents. |
-| Daten-Export | `/export` | Local export and sharing | not started | User can export local health record and share file. |
+| Dokumenten-Scan | `/documents/scan` | Documents and scanning | implemented | User can capture or attach document images and store metadata locally. |
+| Gescannte-Dokumente | `/documents` | Documents and scanning | implemented | User can list and delete locally stored documents. |
+| Daten-Export | `/export` | Local export and sharing | implemented | User can export local health record JSON and share the generated file. |
 | Familien-Kreis | `/family` | Family circle | not started | User can manage local family check-ins. |
 | Demenz-Unterstuetzung | `/dementia` | Dementia support | not started | User can log hydration, meals, and reminders. |
 | KI-Gesundheitscoach | `/ai/coach` | AI coach | not started | User can ask AI after consent and network availability. |
