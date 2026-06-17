@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/notifications/native_notification_service.dart';
+import '../../../core/notifications/notification_scheduler.dart';
 import '../../../core/storage/database_provider.dart';
 import '../../../shared_ui/gp_colors.dart';
 import '../../../shared_ui/gp_icons.dart';
@@ -16,6 +18,7 @@ class AppointmentsScreen extends ConsumerStatefulWidget {
 
 class _AppointmentsScreenState extends ConsumerState<AppointmentsScreen> {
   int _reload = 0;
+  final _notifications = NativeNotificationService();
 
   @override
   Widget build(BuildContext context) {
@@ -59,15 +62,43 @@ class _AppointmentsScreenState extends ConsumerState<AppointmentsScreen> {
                       (appointment) => _AppointmentCard(
                         appointment: appointment,
                         onComplete: () async {
+                          final messenger = ScaffoldMessenger.of(context);
                           await repo.saveAppointment(
                             appointment.copyWith(
                               status: AppointmentStatus.completed,
                             ),
                           );
+                          try {
+                            await _cancelAppointmentReminder(appointment);
+                          } catch (_) {
+                            if (mounted) {
+                              messenger.showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    'Termin abgeschlossen, Erinnerung konnte nicht entfernt werden.',
+                                  ),
+                                ),
+                              );
+                            }
+                          }
                           _refresh();
                         },
                         onDelete: () async {
+                          final messenger = ScaffoldMessenger.of(context);
                           await repo.deleteAppointment(appointment.id);
+                          try {
+                            await _cancelAppointmentReminder(appointment);
+                          } catch (_) {
+                            if (mounted) {
+                              messenger.showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    'Termin geloescht, Erinnerung konnte nicht entfernt werden.',
+                                  ),
+                                ),
+                              );
+                            }
+                          }
                           _refresh();
                         },
                       ),
@@ -85,7 +116,10 @@ class _AppointmentsScreenState extends ConsumerState<AppointmentsScreen> {
     final saved = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
-      builder: (context) => _AppointmentEditor(repo: repo),
+      builder: (context) => _AppointmentEditor(
+        repo: repo,
+        scheduleAppointment: _scheduleAppointmentReminder,
+      ),
     );
     if (saved == true) _refresh();
   }
@@ -101,6 +135,34 @@ class _AppointmentsScreenState extends ConsumerState<AppointmentsScreen> {
     return date.year == now.year &&
         date.month == now.month &&
         date.day == now.day;
+  }
+
+  Future<void> _scheduleAppointmentReminder(Appointment appointment) async {
+    if (!appointment.reminderEnabled ||
+        appointment.status == AppointmentStatus.completed ||
+        appointment.status == AppointmentStatus.cancelled) {
+      return;
+    }
+    final reminder = NotificationScheduler().appointmentReminder(
+      appointmentId: appointment.id,
+      doctorName: appointment.doctorName,
+      startsAt: appointment.startsAt,
+      hoursBefore: appointment.reminderHoursBefore,
+      now: DateTime.now(),
+    );
+    if (reminder == null) return;
+    await _notifications.scheduleReminder(
+      reminder,
+      body: [
+        appointment.reason,
+        appointment.location,
+        '${appointment.date.day}.${appointment.date.month}.${appointment.date.year} um ${appointment.time} Uhr',
+      ].whereType<String>().where((value) => value.trim().isNotEmpty).join(' • '),
+    );
+  }
+
+  Future<void> _cancelAppointmentReminder(Appointment appointment) {
+    return _notifications.cancelAppointmentReminder(appointment.id);
   }
 }
 
@@ -289,9 +351,13 @@ class _Line extends StatelessWidget {
 }
 
 class _AppointmentEditor extends StatefulWidget {
-  const _AppointmentEditor({required this.repo});
+  const _AppointmentEditor({
+    required this.repo,
+    required this.scheduleAppointment,
+  });
 
   final AppointmentRepository repo;
+  final Future<void> Function(Appointment appointment) scheduleAppointment;
 
   @override
   State<_AppointmentEditor> createState() => _AppointmentEditorState();
@@ -394,17 +460,29 @@ class _AppointmentEditorState extends State<_AppointmentEditor> {
       );
       return;
     }
-    await widget.repo.saveAppointment(
-      widget.repo.newAppointment(
-        doctorName: _doctorName.text.trim(),
-        specialty: _specialty.text.trim(),
-        date: date,
-        time: _time.text.trim(),
-        location: _location.text.trim(),
-        reason: _reason.text.trim(),
-        notes: _notes.text.trim(),
-      ),
+    final appointment = widget.repo.newAppointment(
+      doctorName: _doctorName.text.trim(),
+      specialty: _specialty.text.trim(),
+      date: date,
+      time: _time.text.trim(),
+      location: _location.text.trim(),
+      reason: _reason.text.trim(),
+      notes: _notes.text.trim(),
     );
+    await widget.repo.saveAppointment(appointment);
+    try {
+      await widget.scheduleAppointment(appointment);
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Termin gespeichert, Erinnerung konnte nicht geplant werden.',
+            ),
+          ),
+        );
+      }
+    }
     if (mounted) Navigator.pop(context, true);
   }
 }

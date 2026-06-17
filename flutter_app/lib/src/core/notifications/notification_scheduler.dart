@@ -47,6 +47,23 @@ class NotificationScheduler {
         .toList();
   }
 
+  ScheduledReminder? appointmentReminder({
+    required String appointmentId,
+    required String doctorName,
+    required DateTime startsAt,
+    required int hoursBefore,
+    required DateTime now,
+  }) {
+    final scheduledAt = startsAt.subtract(Duration(hours: hoursBefore));
+    if (!scheduledAt.isAfter(now)) return null;
+    return ScheduledReminder(
+      id: 'appointment-$appointmentId',
+      title: 'Termin: $doctorName',
+      category: 'appointment',
+      scheduledAt: scheduledAt,
+    );
+  }
+
   ({int hour, int minute})? _parseTime(String value) {
     final match = RegExp(r'^(\d{1,2}):(\d{2})$').firstMatch(value.trim());
     if (match == null) return null;

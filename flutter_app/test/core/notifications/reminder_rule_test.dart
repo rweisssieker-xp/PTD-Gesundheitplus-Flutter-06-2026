@@ -38,4 +38,32 @@ void main() {
     expect(reminders.first.title, 'Ramipril einnehmen');
     expect(reminders.last.scheduledAt, DateTime(2026, 6, 17, 20, 30));
   });
+
+  test('builds appointment reminder before start time', () {
+    final reminder = NotificationScheduler().appointmentReminder(
+      appointmentId: 'appt-1',
+      doctorName: 'Dr. Muster',
+      startsAt: DateTime(2026, 6, 18, 9, 30),
+      hoursBefore: 24,
+      now: DateTime(2026, 6, 17, 8),
+    );
+
+    expect(reminder, isNotNull);
+    expect(reminder!.id, 'appointment-appt-1');
+    expect(reminder.title, 'Termin: Dr. Muster');
+    expect(reminder.category, 'appointment');
+    expect(reminder.scheduledAt, DateTime(2026, 6, 17, 9, 30));
+  });
+
+  test('skips appointment reminder when reminder time is in the past', () {
+    final reminder = NotificationScheduler().appointmentReminder(
+      appointmentId: 'appt-1',
+      doctorName: 'Dr. Muster',
+      startsAt: DateTime(2026, 6, 18, 9, 30),
+      hoursBefore: 24,
+      now: DateTime(2026, 6, 17, 10),
+    );
+
+    expect(reminder, isNull);
+  });
 }

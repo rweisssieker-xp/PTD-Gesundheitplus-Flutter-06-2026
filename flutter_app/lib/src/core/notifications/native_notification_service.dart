@@ -30,6 +30,14 @@ class NativeNotificationService {
     ScheduledReminder reminder, {
     required String body,
   }) async {
+    await scheduleReminder(reminder, body: body, repeatDaily: true);
+  }
+
+  Future<void> scheduleReminder(
+    ScheduledReminder reminder, {
+    required String body,
+    bool repeatDaily = false,
+  }) async {
     await initialize();
     final status = await Permission.notification.request();
     if (!status.isGranted && !status.isLimited) {
@@ -53,7 +61,7 @@ class NativeNotificationService {
       androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime,
-      matchDateTimeComponents: DateTimeComponents.time,
+      matchDateTimeComponents: repeatDaily ? DateTimeComponents.time : null,
       payload: reminder.id,
     );
   }
@@ -77,6 +85,10 @@ class NativeNotificationService {
     for (final reminder in reminders) {
       await cancelReminder(reminder.id);
     }
+  }
+
+  Future<void> cancelAppointmentReminder(String appointmentId) {
+    return cancelReminder('appointment-$appointmentId');
   }
 
   int _stableNotificationId(String value) {
