@@ -17,8 +17,13 @@ class EmergencyProfile {
 }
 
 class EmergencyContactSummary {
-  const EmergencyContactSummary({required this.name, required this.phone});
+  const EmergencyContactSummary({
+    required this.name,
+    required this.phone,
+    this.messenger,
+  });
 
   final String name;
   final String phone;
+  final String? messenger;
 }

@@ -22,4 +22,19 @@ void main() {
       'whatsapp://send?phone=49176123456&text=Ich+brauche+Hilfe',
     );
   });
+
+  test('builds telegram URI from handle', () {
+    final uri = PlatformHandoffService.telegramUri('@anna_hilfe');
+    expect(uri.toString(), 'tg://resolve?domain=anna_hilfe');
+  });
+
+  test('builds telegram URI from t.me link', () {
+    final uri = PlatformHandoffService.telegramUri('https://t.me/anna_hilfe');
+    expect(uri.toString(), 'tg://resolve?domain=anna_hilfe');
+  });
+
+  test('builds telegram URI from phone-like target', () {
+    final uri = PlatformHandoffService.telegramUri('+49 176 123456');
+    expect(uri.toString(), 'tg://resolve?phone=49176123456');
+  });
 }

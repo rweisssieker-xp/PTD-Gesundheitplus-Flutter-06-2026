@@ -48,55 +48,84 @@ class EmergencyContactsSection extends StatelessWidget {
               Text(empty, style: const TextStyle(color: GpColors.textSecondary))
             else
               ...contacts.map(
-                (contact) => ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: Text(contact.name),
-                  subtitle: Text(contact.phone),
-                  trailing: Wrap(
-                    spacing: 4,
+                (contact) => Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      IconButton(
-                        tooltip: 'Anrufen',
-                        icon: const Icon(Icons.call_outlined),
-                        onPressed: () => _launch(
-                          context,
-                          PlatformHandoffService.telUri(contact.phone),
-                          'Telefon-App konnte nicht geoeffnet werden.',
+                      Text(
+                        contact.name,
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w800,
                         ),
                       ),
-                      IconButton(
-                        tooltip: 'SMS senden',
-                        icon: const Icon(Icons.sms_outlined),
-                        onPressed: () => _launch(
-                          context,
-                          PlatformHandoffService.smsUri(
-                            contact.phone,
-                            'Ich brauche Hilfe. Bitte rufen Sie mich an.',
+                      const SizedBox(height: 2),
+                      Text(
+                        contact.phone,
+                        style: const TextStyle(color: GpColors.textSecondary),
+                      ),
+                      const SizedBox(height: 6),
+                      Wrap(
+                        spacing: 4,
+                        runSpacing: 4,
+                        children: [
+                          IconButton(
+                            tooltip: 'Anrufen',
+                            icon: const Icon(Icons.call_outlined),
+                            onPressed: () => _launch(
+                              context,
+                              PlatformHandoffService.telUri(contact.phone),
+                              'Telefon-App konnte nicht geoeffnet werden.',
+                            ),
                           ),
-                          'SMS-App konnte nicht geoeffnet werden.',
-                        ),
-                      ),
-                      IconButton(
-                        tooltip: 'Standort per SMS',
-                        icon: const Icon(Icons.my_location_outlined),
-                        onPressed: () => _shareLocation(context, contact.phone),
-                      ),
-                      IconButton(
-                        tooltip: 'WhatsApp',
-                        icon: const Icon(Icons.chat_outlined),
-                        onPressed: () => _launch(
-                          context,
-                          PlatformHandoffService.whatsappUri(
-                            contact.phone,
-                            _emergencyMessage,
+                          IconButton(
+                            tooltip: 'SMS senden',
+                            icon: const Icon(Icons.sms_outlined),
+                            onPressed: () => _launch(
+                              context,
+                              PlatformHandoffService.smsUri(
+                                contact.phone,
+                                'Ich brauche Hilfe. Bitte rufen Sie mich an.',
+                              ),
+                              'SMS-App konnte nicht geoeffnet werden.',
+                            ),
                           ),
-                          'WhatsApp konnte nicht geoeffnet werden. Nutzen Sie Teilen oder SMS.',
-                        ),
-                      ),
-                      IconButton(
-                        tooltip: 'Teilen',
-                        icon: const Icon(Icons.ios_share_outlined),
-                        onPressed: () => _shareEmergencyText(context),
+                          IconButton(
+                            tooltip: 'Standort per SMS',
+                            icon: const Icon(Icons.my_location_outlined),
+                            onPressed: () =>
+                                _shareLocation(context, contact.phone),
+                          ),
+                          IconButton(
+                            tooltip: 'WhatsApp',
+                            icon: const Icon(Icons.chat_outlined),
+                            onPressed: () => _launch(
+                              context,
+                              PlatformHandoffService.whatsappUri(
+                                contact.phone,
+                                _emergencyMessage,
+                              ),
+                              'WhatsApp konnte nicht geoeffnet werden. Nutzen Sie Teilen oder SMS.',
+                            ),
+                          ),
+                          if (_hasMessenger(contact))
+                            IconButton(
+                              tooltip: 'Telegram',
+                              icon: const Icon(Icons.send_outlined),
+                              onPressed: () => _launch(
+                                context,
+                                PlatformHandoffService.telegramUri(
+                                  contact.messenger!,
+                                ),
+                                'Telegram konnte nicht geoeffnet werden. Nutzen Sie Teilen oder SMS.',
+                              ),
+                            ),
+                          IconButton(
+                            tooltip: 'Teilen',
+                            icon: const Icon(Icons.ios_share_outlined),
+                            onPressed: () => _shareEmergencyText(context),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -107,6 +136,9 @@ class EmergencyContactsSection extends StatelessWidget {
       ),
     );
   }
+
+  bool _hasMessenger(EmergencyContactSummary contact) =>
+      contact.messenger != null && contact.messenger!.trim().isNotEmpty;
 
   Future<void> _launch(
     BuildContext context,

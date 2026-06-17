@@ -61,6 +61,57 @@ void main() {
     expect(sharedText, contains('Ich brauche Hilfe'));
     expect(sharedText, contains('Gesundheit Plus'));
   });
+
+  testWidgets('launches telegram handoff when contact has messenger target', (
+    tester,
+  ) async {
+    final handoff = _FakeHandoff(launchResult: true);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: EmergencyContactsSection(
+            contacts: const [
+              EmergencyContactSummary(
+                name: 'Anna',
+                phone: '+49176123456',
+                messenger: '@anna_hilfe',
+              ),
+            ],
+            handoff: handoff,
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byTooltip('Telegram'));
+    await tester.pumpAndSettle();
+
+    expect(
+      handoff.launched.single.toString(),
+      'tg://resolve?domain=anna_hilfe',
+    );
+  });
+
+  testWidgets('hides telegram handoff without messenger target', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: EmergencyContactsSection(
+            contacts: [
+              EmergencyContactSummary(name: 'Anna', phone: '+49176123456'),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byTooltip('Telegram'), findsNothing);
+  });
 }
 
 class _FakeHandoff extends PlatformHandoffService {

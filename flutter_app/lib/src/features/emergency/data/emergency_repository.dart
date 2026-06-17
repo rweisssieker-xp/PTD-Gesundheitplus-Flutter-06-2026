@@ -134,6 +134,7 @@ class EmergencyRepository {
             (contact) => EmergencyContactSummary(
               name: contact.name,
               phone: contact.phone!,
+              messenger: contact.messenger,
             ),
           )
           .toList(),

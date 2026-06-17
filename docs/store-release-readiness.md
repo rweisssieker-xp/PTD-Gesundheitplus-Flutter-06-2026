@@ -20,7 +20,7 @@ Gesundheit Plus keeps your personal health record, medications, appointments, em
 
 Gesundheit Plus is a local-first health companion for managing important medical information on your own device. The app helps you maintain medication plans, appointment records, allergies, treatment history, vaccination and preventive-care reminders, emergency contacts, emergency QR information, scanned health documents, family check-ins, and vital values.
 
-Health data is stored locally in an encrypted SQLite database. Documents are copied into app-controlled storage. Local notifications can remind you about medication, appointments, preventive care, and dementia-support tasks. Emergency features can hand off to native phone, SMS, WhatsApp, system sharing, and current-location messages when you choose to use them.
+Health data is stored locally in an encrypted SQLite database. Documents are copied into app-controlled storage. Local notifications can remind you about medication, appointments, preventive care, and dementia-support tasks. Emergency features can hand off to native phone, SMS, WhatsApp, Telegram, system sharing, and current-location messages when you choose to use them.
 
 The AI coach is local by default. Health context is only summarized after explicit consent, and optional online AI processing must fail with a visible recovery message without changing local health records.
 
@@ -36,7 +36,7 @@ Gesundheit Plus is not a medical diagnosis tool and does not replace professiona
 | Notifications | Android, iOS | Schedule local reminders for medication, appointments, preventive care, and support tasks. |
 | Location while in use | Android, iOS | Add current-device location to emergency SMS and family check-ins when the user explicitly requests it. |
 | Biometrics / Face ID | Android, iOS | Unlock the local health record with device biometric authentication when enabled by the user. |
-| Phone/SMS/WhatsApp/share handoff | Android, iOS | Let the user contact emergency contacts through native apps. |
+| Phone/SMS/WhatsApp/Telegram/share handoff | Android, iOS | Let the user contact emergency contacts through native apps. |
 
 ## Google Play Data Safety Draft
 
@@ -50,7 +50,7 @@ Data collected by the app and stored locally on device:
 Data sharing:
 
 - No automatic backend sharing is implemented.
-- User-initiated sharing can happen through native share sheets, phone, SMS, WhatsApp, calendar file export, QR payloads, and exported health-record files.
+- User-initiated sharing can happen through native share sheets, phone, SMS, WhatsApp, Telegram, calendar file export, QR payloads, and exported health-record files.
 - Optional AI responder integration is not active by default and is consent-gated.
 
 Security:

@@ -79,7 +79,11 @@ void main() {
       )
       VALUES ('history-1', 'Diagnose', 'Asthma', NULL, 1, 'now', 'now')
       ''');
-    await repo.addContact(name: 'Max Kontakt', phone: '112233');
+    await repo.addContact(
+      name: 'Max Kontakt',
+      phone: '112233',
+      messenger: '@maxhilfe',
+    );
     final profile = await repo.buildLocalProfile();
     expect(profile.fullName, 'Erika Muster');
     expect(profile.notes, 'Diabetes Typ 2');
@@ -87,6 +91,7 @@ void main() {
     expect(profile.allergies, contains('Penicillin (Schwer)'));
     expect(profile.diagnoses, contains('Asthma'));
     expect(profile.contacts.single.name, 'Max Kontakt');
+    expect(profile.contacts.single.messenger, '@maxhilfe');
     db.close();
   });
 }

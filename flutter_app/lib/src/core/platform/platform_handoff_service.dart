@@ -14,6 +14,22 @@ class PlatformHandoffService {
     queryParameters: {'phone': _whatsappPhone(phone), 'text': body},
   );
 
+  static Uri telegramUri(String target) {
+    final normalized = _telegramTarget(target);
+    if (_looksLikePhone(normalized)) {
+      return Uri(
+        scheme: 'tg',
+        host: 'resolve',
+        queryParameters: {'phone': normalized.replaceAll('+', '')},
+      );
+    }
+    return Uri(
+      scheme: 'tg',
+      host: 'resolve',
+      queryParameters: {'domain': normalized.replaceFirst('@', '')},
+    );
+  }
+
   Future<bool> launch(Uri uri) async {
     if (!await canLaunchUrl(uri)) {
       return false;
@@ -26,5 +42,21 @@ class PlatformHandoffService {
     if (normalized.startsWith('+')) return normalized.substring(1);
     if (normalized.startsWith('00')) return normalized.substring(2);
     return normalized;
+  }
+
+  static String _telegramTarget(String target) {
+    final trimmed = target.trim();
+    final parsed = Uri.tryParse(trimmed);
+    if (parsed != null &&
+        (parsed.host == 't.me' || parsed.host == 'telegram.me') &&
+        parsed.pathSegments.isNotEmpty) {
+      return parsed.pathSegments.first;
+    }
+    return trimmed.replaceAll(RegExp(r'\s+'), '');
+  }
+
+  static bool _looksLikePhone(String target) {
+    final phone = target.replaceAll(RegExp(r'[^0-9+]'), '');
+    return phone.length >= 6 && RegExp(r'^\+?[0-9]+$').hasMatch(phone);
   }
 }
