@@ -262,6 +262,17 @@ class AppDatabase {
         updated_at TEXT NOT NULL
       );
     ''');
+    _db.execute('''
+      CREATE TABLE IF NOT EXISTS communication_preferences (
+        id TEXT PRIMARY KEY,
+        channel TEXT NOT NULL,
+        enabled INTEGER NOT NULL DEFAULT 0,
+        display_name TEXT,
+        target_value TEXT,
+        notes TEXT,
+        updated_at TEXT NOT NULL
+      );
+    ''');
   }
 
   void _ensureColumn(String table, String column, String definition) {

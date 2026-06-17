@@ -22,6 +22,7 @@ void main() {
         'emergency_contacts',
         'notifications',
         'consent_settings',
+        'communication_preferences',
       ]),
     );
     db.close();

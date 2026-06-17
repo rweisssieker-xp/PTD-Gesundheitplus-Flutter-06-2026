@@ -1,5 +1,6 @@
 import 'package:go_router/go_router.dart';
 
+import '../features/communication/presentation/communication_settings_screen.dart';
 import '../features/dashboard/presentation/dashboard_screen.dart';
 import '../features/dashboard/presentation/health_dashboard_screen.dart';
 import '../features/appointments/presentation/appointments_screen.dart';
@@ -136,13 +137,15 @@ final appRouter = GoRouter(
     ),
     GoRoute(
       path: '/settings/telegram',
-      builder: (context, state) =>
-          const FeatureShellScreen(title: 'Telegram-Setup'),
+      builder: (context, state) => const CommunicationSettingsScreen(
+        channel: 'telegram',
+        title: 'Telegram-Setup',
+      ),
     ),
     GoRoute(
       path: '/settings/sms',
       builder: (context, state) =>
-          const FeatureShellScreen(title: 'Twilio-Setup'),
+          const CommunicationSettingsScreen(channel: 'sms', title: 'SMS-Setup'),
     ),
     GoRoute(
       path: '/onboarding',

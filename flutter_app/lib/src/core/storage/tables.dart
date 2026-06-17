@@ -22,6 +22,7 @@ class AppTables {
   static const emergencyContacts = AppTable('emergency_contacts');
   static const notifications = AppTable('notifications');
   static const consentSettings = AppTable('consent_settings');
+  static const communicationPreferences = AppTable('communication_preferences');
 
   static const all = [
     localProfiles,
@@ -39,5 +40,6 @@ class AppTables {
     emergencyContacts,
     notifications,
     consentSettings,
+    communicationPreferences,
   ];
 }

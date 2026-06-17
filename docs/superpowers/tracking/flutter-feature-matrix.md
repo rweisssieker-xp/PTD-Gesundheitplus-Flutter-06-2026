@@ -28,6 +28,6 @@
 | Benachrichtigungen | `/notifications` | Notification center | implemented | User can view and mark local notifications as read. |
 | Datenschutz | `/privacy` | Privacy and storage settings | implemented | User can view local storage count and manage AI context consent. |
 | Speicher-Modus | `/privacy/storage` | Privacy and storage settings | implemented | User sees local-only storage mode and per-table local record counts. |
-| Telegram-Setup | `/settings/telegram` | Communication settings | not started | User can configure Telegram handoff preference. |
-| Twilio-Setup | `/settings/sms` | Communication settings | not started | User sees native SMS handoff configuration, not Twilio backend dependency. |
+| Telegram-Setup | `/settings/telegram` | Communication settings | implemented | User can configure local Telegram handoff preference. |
+| Twilio-Setup | `/settings/sms` | Communication settings | implemented | User sees and stores native SMS handoff configuration without Twilio backend dependency. |
 | Onboarding | `/onboarding` | Local profile and security setup | not started | User completes local profile, PIN, biometrics, permissions, and AI consent. |
