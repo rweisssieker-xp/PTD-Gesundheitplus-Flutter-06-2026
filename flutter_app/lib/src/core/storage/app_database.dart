@@ -286,6 +286,40 @@ class AppDatabase {
         updated_at TEXT NOT NULL
       );
     ''');
+    _db.execute('''
+      CREATE TABLE IF NOT EXISTS family_members (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        relationship TEXT,
+        phone TEXT,
+        role TEXT,
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+      );
+    ''');
+    _db.execute('''
+      CREATE TABLE IF NOT EXISTS family_check_ins (
+        id TEXT PRIMARY KEY,
+        member_id TEXT,
+        member_name TEXT NOT NULL,
+        status TEXT NOT NULL,
+        note TEXT,
+        checked_at TEXT NOT NULL,
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+      );
+    ''');
+    _db.execute('''
+      CREATE TABLE IF NOT EXISTS dementia_logs (
+        id TEXT PRIMARY KEY,
+        type TEXT NOT NULL,
+        value TEXT NOT NULL,
+        note TEXT,
+        logged_at TEXT NOT NULL,
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+      );
+    ''');
   }
 
   void _ensureColumn(String table, String column, String definition) {

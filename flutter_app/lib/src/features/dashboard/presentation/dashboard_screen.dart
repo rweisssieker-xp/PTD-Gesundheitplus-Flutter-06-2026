@@ -162,6 +162,18 @@ class DashboardScreen extends StatelessWidget {
                   icon: const Icon(GpIcons.export),
                   label: const Text('Daten exportieren'),
                 ),
+                const SizedBox(height: 8),
+                OutlinedButton.icon(
+                  onPressed: () => context.go('/family'),
+                  icon: const Icon(GpIcons.family),
+                  label: const Text('Familien-Kreis'),
+                ),
+                const SizedBox(height: 8),
+                OutlinedButton.icon(
+                  onPressed: () => context.go('/dementia'),
+                  icon: const Icon(Icons.elderly_outlined),
+                  label: const Text('Demenz-Unterstuetzung'),
+                ),
               ],
             ),
           ),

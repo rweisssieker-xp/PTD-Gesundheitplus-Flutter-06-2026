@@ -24,6 +24,9 @@ void main() {
         'notifications',
         'consent_settings',
         'communication_preferences',
+        'family_members',
+        'family_check_ins',
+        'dementia_logs',
       ]),
     );
     db.close();

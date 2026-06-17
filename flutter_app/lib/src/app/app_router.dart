@@ -1,5 +1,7 @@
 import 'package:go_router/go_router.dart';
 
+import '../features/care/presentation/dementia_support_screen.dart';
+import '../features/care/presentation/family_circle_screen.dart';
 import '../features/communication/presentation/communication_settings_screen.dart';
 import '../features/dashboard/presentation/dashboard_screen.dart';
 import '../features/dashboard/presentation/health_dashboard_screen.dart';
@@ -107,13 +109,11 @@ final appRouter = GoRouter(
     GoRoute(path: '/export', builder: (context, state) => const ExportScreen()),
     GoRoute(
       path: '/family',
-      builder: (context, state) =>
-          const FeatureShellScreen(title: 'Familien-Kreis'),
+      builder: (context, state) => const FamilyCircleScreen(),
     ),
     GoRoute(
       path: '/dementia',
-      builder: (context, state) =>
-          const FeatureShellScreen(title: 'Demenz-Unterstuetzung'),
+      builder: (context, state) => const DementiaSupportScreen(),
     ),
     GoRoute(
       path: '/ai/coach',

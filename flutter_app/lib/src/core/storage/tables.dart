@@ -24,6 +24,9 @@ class AppTables {
   static const notifications = AppTable('notifications');
   static const consentSettings = AppTable('consent_settings');
   static const communicationPreferences = AppTable('communication_preferences');
+  static const familyMembers = AppTable('family_members');
+  static const familyCheckIns = AppTable('family_check_ins');
+  static const dementiaLogs = AppTable('dementia_logs');
 
   static const all = [
     localProfiles,
@@ -43,5 +46,8 @@ class AppTables {
     notifications,
     consentSettings,
     communicationPreferences,
+    familyMembers,
+    familyCheckIns,
+    dementiaLogs,
   ];
 }
