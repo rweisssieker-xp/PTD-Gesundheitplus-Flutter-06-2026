@@ -1,6 +1,7 @@
 import 'package:uuid/uuid.dart';
 
 import '../../../core/storage/app_database.dart';
+import '../domain/device_contact.dart';
 import '../domain/emergency_profile.dart';
 
 class EmergencyRepository {
@@ -26,6 +27,23 @@ class EmergencyRepository {
       ''',
       [_uuid.v4(), name, relationship, phone, email, messenger, now, now],
     );
+  }
+
+  Future<int> importDeviceContacts(List<DeviceContact> contacts) async {
+    var imported = 0;
+    for (final contact in contacts) {
+      final name = contact.name.trim();
+      final phone = normalizeGermanPhoneNumber(contact.phone);
+      if (name.isEmpty || phone.isEmpty) continue;
+      await addContact(
+        name: name,
+        relationship: 'Sonstige',
+        phone: phone,
+        messenger: null,
+      );
+      imported++;
+    }
+    return imported;
   }
 
   Future<List<EmergencyContact>> listContacts() async {

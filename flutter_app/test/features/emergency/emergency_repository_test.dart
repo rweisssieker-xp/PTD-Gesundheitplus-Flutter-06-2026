@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gesundheitplus/src/core/storage/app_database.dart';
 import 'package:gesundheitplus/src/features/emergency/data/emergency_repository.dart';
+import 'package:gesundheitplus/src/features/emergency/domain/device_contact.dart';
 
 void main() {
   test('stores and verifies emergency contacts', () async {
@@ -18,6 +19,37 @@ void main() {
     final verified = await repo.listContacts();
     expect(verified.single.verified, isTrue);
     db.close();
+  });
+
+  test(
+    'imports device contacts as unverified local emergency contacts',
+    () async {
+      final db = AppDatabase.memory();
+      final repo = EmergencyRepository(db);
+
+      final imported = await repo.importDeviceContacts(const [
+        DeviceContact(
+          id: 'device-1',
+          name: 'Bernd Beispiel',
+          phone: '0176 123456',
+        ),
+        DeviceContact(id: 'device-2', name: '  ', phone: '+491700000'),
+      ]);
+
+      final contacts = await repo.listContacts();
+      expect(imported, 1);
+      expect(contacts.single.name, 'Bernd Beispiel');
+      expect(contacts.single.relationship, 'Sonstige');
+      expect(contacts.single.phone, '+49176123456');
+      expect(contacts.single.verified, isFalse);
+      db.close();
+    },
+  );
+
+  test('normalizes german phone numbers from address book values', () {
+    expect(normalizeGermanPhoneNumber('0176 123 456'), '+49176123456');
+    expect(normalizeGermanPhoneNumber('0049 30 123'), '+4930123');
+    expect(normalizeGermanPhoneNumber('+49 30 123'), '+4930123');
   });
 
   test('builds local emergency profile from stored local records', () async {

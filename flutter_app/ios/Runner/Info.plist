@@ -26,6 +26,8 @@
 	<true/>
 	<key>NSCameraUsageDescription</key>
 	<string>Gesundheit Plus nutzt die Kamera, um Gesundheitsdokumente lokal zu erfassen.</string>
+	<key>NSContactsUsageDescription</key>
+	<string>Gesundheit Plus kann Kontakte nach Ihrer Zustimmung lokal als Notfallkontakte importieren.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Gesundheit Plus kann Dokumentbilder aus der Mediathek lokal in der App speichern.</string>
 	<key>NSFaceIDUsageDescription</key>
