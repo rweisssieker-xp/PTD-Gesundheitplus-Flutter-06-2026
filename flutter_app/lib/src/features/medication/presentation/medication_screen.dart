@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../core/notifications/native_notification_service.dart';
+import '../../../core/notifications/notification_scheduler.dart';
 import '../../../core/storage/database_provider.dart';
 import '../../../shared_ui/gp_colors.dart';
 import '../../../shared_ui/gp_icons.dart';
@@ -18,6 +20,7 @@ class MedicationScreen extends ConsumerStatefulWidget {
 class _MedicationScreenState extends ConsumerState<MedicationScreen> {
   bool _showInactive = false;
   int _reload = 0;
+  final _notifications = NativeNotificationService();
 
   @override
   Widget build(BuildContext context) {
@@ -72,12 +75,32 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen> {
                         medication: medication,
                         onEdit: () => _openEditor(repo, medication: medication),
                         onToggleActive: () async {
-                          await repo.save(
-                            medication.copyWith(active: !medication.active),
+                          final messenger = ScaffoldMessenger.of(context);
+                          final updated = medication.copyWith(
+                            active: !medication.active,
                           );
+                          await repo.save(updated);
+                          try {
+                            if (updated.active) {
+                              await _scheduleMedication(updated);
+                            } else {
+                              await _cancelMedication(medication);
+                            }
+                          } catch (_) {
+                            if (mounted) {
+                              messenger.showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    'Medikament aktualisiert, Benachrichtigung konnte nicht angepasst werden.',
+                                  ),
+                                ),
+                              );
+                            }
+                          }
                           _refresh();
                         },
                         onDelete: () async {
+                          await _cancelMedication(medication);
                           await repo.delete(medication.id);
                           _refresh();
                         },
@@ -99,8 +122,12 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen> {
     final saved = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
-      builder: (context) =>
-          _MedicationEditor(repo: repo, medication: medication),
+      builder: (context) => _MedicationEditor(
+        repo: repo,
+        medication: medication,
+        scheduleMedication: _scheduleMedication,
+        cancelMedication: _cancelMedication,
+      ),
     );
     if (saved == true) _refresh();
   }
@@ -109,6 +136,32 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen> {
     setState(() {
       _reload++;
     });
+  }
+
+  Future<void> _scheduleMedication(Medication medication) async {
+    if (!medication.active || !medication.reminderEnabled) return;
+    final reminders = NotificationScheduler().medicationReminders(
+      medicationId: medication.id,
+      medicationName: medication.name,
+      reminderTimes: medication.reminderTimes,
+      now: DateTime.now(),
+    );
+    for (final reminder in reminders) {
+      await _notifications.scheduleDailyReminder(
+        reminder,
+        body: [medication.dosage, medication.frequency]
+            .whereType<String>()
+            .where((value) => value.trim().isNotEmpty)
+            .join(' • '),
+      );
+    }
+  }
+
+  Future<void> _cancelMedication(Medication medication) {
+    return _notifications.cancelMedicationReminders(
+      medicationId: medication.id,
+      reminderTimes: medication.reminderTimes,
+    );
   }
 }
 
@@ -314,9 +367,16 @@ class _DetailLine extends StatelessWidget {
 }
 
 class _MedicationEditor extends StatefulWidget {
-  const _MedicationEditor({required this.repo, this.medication});
+  const _MedicationEditor({
+    required this.repo,
+    required this.scheduleMedication,
+    required this.cancelMedication,
+    this.medication,
+  });
 
   final MedicationRepository repo;
+  final Future<void> Function(Medication medication) scheduleMedication;
+  final Future<void> Function(Medication medication) cancelMedication;
   final Medication? medication;
 
   @override
@@ -461,28 +521,44 @@ class _MedicationEditorState extends State<_MedicationEditor> {
       return;
     }
     final existing = widget.medication;
-    await widget.repo.save(
-      Medication(
-        id: existing?.id ?? const Uuid().v4(),
-        name: _name.text.trim(),
-        dosage: _dosage.text.trim(),
-        frequency: _frequency.text.trim(),
-        schedule: _schedule.text.trim(),
-        startDate: existing?.startDate,
-        endDate: existing?.endDate,
-        prescribedBy: _prescribedBy.text.trim(),
-        reason: _reason.text.trim(),
-        reminderEnabled: _reminderEnabled,
-        reminderTimes: _reminderTimes.text
-            .split(',')
-            .map((value) => value.trim())
-            .where((value) => value.isNotEmpty)
-            .toList(),
-        refillReminderDays: existing?.refillReminderDays ?? 7,
-        notes: _notes.text.trim(),
-        active: _active,
-      ),
+    final medication = Medication(
+      id: existing?.id ?? const Uuid().v4(),
+      name: _name.text.trim(),
+      dosage: _dosage.text.trim(),
+      frequency: _frequency.text.trim(),
+      schedule: _schedule.text.trim(),
+      startDate: existing?.startDate,
+      endDate: existing?.endDate,
+      prescribedBy: _prescribedBy.text.trim(),
+      reason: _reason.text.trim(),
+      reminderEnabled: _reminderEnabled,
+      reminderTimes: _reminderTimes.text
+          .split(',')
+          .map((value) => value.trim())
+          .where((value) => value.isNotEmpty)
+          .toList(),
+      refillReminderDays: existing?.refillReminderDays ?? 7,
+      notes: _notes.text.trim(),
+      active: _active,
     );
+    await widget.repo.save(medication);
+    try {
+      if (existing != null) {
+        await widget.cancelMedication(existing);
+      }
+      await widget.cancelMedication(medication);
+      await widget.scheduleMedication(medication);
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Medikament gespeichert, Benachrichtigung konnte nicht geplant werden.',
+            ),
+          ),
+        );
+      }
+    }
     if (mounted) Navigator.pop(context, true);
   }
 }

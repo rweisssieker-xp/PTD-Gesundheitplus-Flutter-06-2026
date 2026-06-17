@@ -11,7 +11,10 @@ class GpColors {
   static const border = Color(0xFFE5E7EB);
 
   static const redGradient = [Color(0xFFEF4444), Color(0xFFDC2626)];
+  static const redDeep = [Color(0xFFDC2626), Color(0xFFB91C1C)];
+  static const redDark = Color(0xFF991B1B);
   static const blue = [Color(0xFF3B82F6), Color(0xFF2563EB)];
+  static const blueIndigo = [Color(0xFF2563EB), Color(0xFF4F46E5)];
   static const green = [Color(0xFF22C55E), Color(0xFF16A34A)];
   static const purplePink = [Color(0xFFA855F7), Color(0xFFDB2777)];
   static const indigo = [Color(0xFF6366F1), Color(0xFF4F46E5)];

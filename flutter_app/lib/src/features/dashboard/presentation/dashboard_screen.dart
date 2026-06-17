@@ -147,15 +147,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     children: [
                       _EmergencyButton(
                         onTap: () => context.go('/emergency/offline'),
+                        onSettingsTap: () => context.go('/emergency/setup'),
                       ),
                       const SizedBox(height: 12),
-                      GridView.count(
-                        crossAxisCount: 4,
+                      GridView(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
-                        crossAxisSpacing: 12,
-                        mainAxisSpacing: 12,
-                        childAspectRatio: 0.82,
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 4,
+                              crossAxisSpacing: 12,
+                              mainAxisSpacing: 12,
+                              mainAxisExtent: 80,
+                            ),
                         children: [
                           _GradientActionTile(
                             label: 'KI-Coach',
@@ -184,13 +188,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         ],
                       ),
                       const SizedBox(height: 12),
-                      GridView.count(
-                        crossAxisCount: 2,
+                      GridView(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
-                        crossAxisSpacing: 12,
-                        mainAxisSpacing: 12,
-                        childAspectRatio: 2.05,
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              crossAxisSpacing: 12,
+                              mainAxisSpacing: 12,
+                              mainAxisExtent: 80,
+                            ),
                         children: [
                           _GradientActionTile(
                             label: 'Familienkreis',
@@ -301,6 +308,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           ),
                         ],
                       ),
+                      const SizedBox(height: 28),
+                      _DashboardFooter(
+                        onOnboarding: () => context.go('/onboarding'),
+                        onPrivacy: () => context.go('/privacy'),
+                        onStorage: () => context.go('/privacy/storage'),
+                      ),
                     ],
                   ),
                 ),
@@ -341,40 +354,187 @@ class _DashboardItem {
 }
 
 class _EmergencyButton extends StatelessWidget {
-  const _EmergencyButton({required this.onTap});
+  const _EmergencyButton({required this.onTap, required this.onSettingsTap});
 
+  final VoidCallback onTap;
+  final VoidCallback onSettingsTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(colors: GpColors.redDeep),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: GpColors.redDark, width: 4),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x33000000),
+                blurRadius: 24,
+                offset: Offset(0, 10),
+              ),
+            ],
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(8),
+              onTap: onTap,
+              child: const SizedBox(
+                height: 96,
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.warning_amber_rounded,
+                        color: Colors.white,
+                        size: 38,
+                      ),
+                      SizedBox(height: 6),
+                      Text(
+                        'NOTFALL',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 19,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      SizedBox(height: 3),
+                      Text(
+                        'Im Notfall hier drücken',
+                        style: TextStyle(color: Colors.white, fontSize: 12),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+        Positioned(
+          top: 8,
+          right: 8,
+          child: Material(
+            color: Colors.white.withValues(alpha: 0.2),
+            borderRadius: BorderRadius.circular(8),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(8),
+              onTap: onSettingsTap,
+              child: const SizedBox(
+                width: 32,
+                height: 32,
+                child: Icon(Icons.settings_outlined, color: Colors.white),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _DashboardFooter extends StatelessWidget {
+  const _DashboardFooter({
+    required this.onOnboarding,
+    required this.onPrivacy,
+    required this.onStorage,
+  });
+
+  final VoidCallback onOnboarding;
+  final VoidCallback onPrivacy;
+  final VoidCallback onStorage;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        _GradientSurface(
+          colors: GpColors.blueIndigo,
+          radius: 8,
+          onTap: onOnboarding,
+          child: const SizedBox(
+            height: 44,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.play_arrow_outlined, color: Colors.white, size: 22),
+                SizedBox(width: 8),
+                Flexible(
+                  child: Text(
+                    'Demo / Onboarding starten',
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 14),
+        Wrap(
+          alignment: WrapAlignment.center,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: 12,
+          runSpacing: 6,
+          children: [
+            _FooterLink(label: 'Datenschutz', onTap: onPrivacy),
+            const Text('•', style: TextStyle(color: GpColors.textSecondary)),
+            _FooterLink(
+              label: 'Speicher-Modus',
+              icon: Icons.shield_outlined,
+              onTap: onStorage,
+            ),
+            const Text('•', style: TextStyle(color: GpColors.textSecondary)),
+            const Text(
+              'Kontakt',
+              style: TextStyle(color: GpColors.textSecondary, fontSize: 12),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        const Text(
+          'Eine Initiative für Ihre Gesundheit',
+          textAlign: TextAlign.center,
+          style: TextStyle(color: GpColors.textSecondary, fontSize: 12),
+        ),
+      ],
+    );
+  }
+}
+
+class _FooterLink extends StatelessWidget {
+  const _FooterLink({required this.label, required this.onTap, this.icon});
+
+  final String label;
+  final IconData? icon;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return _GradientSurface(
-      colors: GpColors.redGradient,
-      radius: 8,
+    return InkWell(
+      borderRadius: BorderRadius.circular(4),
       onTap: onTap,
-      child: const SizedBox(
-        height: 64,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 4),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(GpIcons.emergency, color: Colors.white, size: 28),
-            SizedBox(width: 10),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'SOS Notfall',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                Text(
-                  'Im Notfall hier drücken',
-                  style: TextStyle(color: Colors.white, fontSize: 12),
-                ),
-              ],
+            if (icon != null) ...[
+              Icon(icon, size: 13, color: GpColors.textSecondary),
+              const SizedBox(width: 3),
+            ],
+            Text(
+              label,
+              style: const TextStyle(
+                color: GpColors.textSecondary,
+                fontSize: 12,
+              ),
             ),
           ],
         ),

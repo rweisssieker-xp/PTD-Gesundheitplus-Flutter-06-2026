@@ -7,7 +7,7 @@ Date: 2026-06-17
 - `flutter doctor -v`: no issues after installing Android SDK command-line tools and accepting Android licenses.
 - `dart format lib test`: clean.
 - `flutter analyze`: no issues.
-- `flutter test`: 48 tests passed.
+- `flutter test`: 49 tests passed.
 - `flutter build apk --debug`: built successfully.
 - `flutter build apk --release`: built successfully with local release keystore.
 - `flutter build appbundle --release`: built successfully with local release keystore.
@@ -39,6 +39,7 @@ All rows are implemented and the router no longer uses placeholder feature shell
 - The database encryption key is generated on-device and stored through `flutter_secure_storage`, backed by iOS Keychain / Android Keystore.
 - App access is protected by local PIN and optional device biometric unlock where supported.
 - Document files copied into app storage are removed during the privacy data wipe before their metadata rows are deleted.
+- Medication reminders are scheduled as native local notifications on-device.
 
 ## Remaining production gates
 

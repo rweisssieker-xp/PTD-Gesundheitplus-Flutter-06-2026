@@ -23,4 +23,36 @@ class NotificationScheduler {
       scheduledAt: rule.nextOccurrence(now),
     );
   }
+
+  List<ScheduledReminder> medicationReminders({
+    required String medicationId,
+    required String medicationName,
+    required List<String> reminderTimes,
+    required DateTime now,
+  }) {
+    return reminderTimes
+        .map(_parseTime)
+        .whereType<({int hour, int minute})>()
+        .map(
+          (time) => buildScheduledReminder(
+            ReminderRule.medication(
+              id: '$medicationId-${time.hour}-${time.minute}',
+              title: '$medicationName einnehmen',
+              hour: time.hour,
+              minute: time.minute,
+            ),
+            now,
+          ),
+        )
+        .toList();
+  }
+
+  ({int hour, int minute})? _parseTime(String value) {
+    final match = RegExp(r'^(\d{1,2}):(\d{2})$').firstMatch(value.trim());
+    if (match == null) return null;
+    final hour = int.parse(match.group(1)!);
+    final minute = int.parse(match.group(2)!);
+    if (hour < 0 || hour > 23 || minute < 0 || minute > 59) return null;
+    return (hour: hour, minute: minute);
+  }
 }

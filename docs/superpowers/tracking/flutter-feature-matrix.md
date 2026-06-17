@@ -9,7 +9,7 @@
 | Heilberufe | `/health/professionals` | Health record | implemented | User can create, list, and delete local healthcare professionals. |
 | Allergien | `/health/allergies` | Health record | implemented | User can create, edit, group, list, and delete local allergies with severity warnings. |
 | Termine | `/appointments` | Appointments | implemented | User can create, list, complete, and delete local appointments. |
-| Medikation | `/medication` | Medication management | implemented | User can add, edit, deactivate, delete, and list local medications with reminder times. |
+| Medikation | `/medication` | Medication management | implemented | User can add, edit, deactivate, delete, and list local medications with native local reminder scheduling. |
 | Medikamenten-Tagesplan | `/medication/daily-plan` | Medication management | implemented | User can generate daily medication logs and mark intake as taken or skipped. |
 | Medikations-Interaktionen | `/medication/interactions` | Medication safety and interactions | implemented | User can create and review stored local interaction guidance. |
 | Wechselwirkungen-Checker | `/medication/interaction-checker` | Medication safety and interactions | implemented | User can run a local consent-gated interaction check against active medication. |
