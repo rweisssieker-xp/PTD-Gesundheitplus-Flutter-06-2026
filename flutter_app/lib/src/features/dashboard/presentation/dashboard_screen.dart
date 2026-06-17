@@ -14,7 +14,20 @@ class DashboardScreen extends StatelessWidget {
     return Scaffold(
       body: Column(
         children: [
-          const GpHeader(actions: [Icon(Icons.settings_outlined)]),
+          GpHeader(
+            actions: [
+              IconButton(
+                tooltip: 'Benachrichtigungen',
+                onPressed: () => context.go('/notifications'),
+                icon: const Icon(Icons.notifications_none),
+              ),
+              IconButton(
+                tooltip: 'Datenschutz',
+                onPressed: () => context.go('/privacy'),
+                icon: const Icon(Icons.settings_outlined),
+              ),
+            ],
+          ),
           Expanded(
             child: ListView(
               padding: const EdgeInsets.all(16),
@@ -118,6 +131,12 @@ class DashboardScreen extends StatelessWidget {
                   onPressed: () => context.go('/emergency/setup'),
                   icon: const Icon(GpIcons.emergency),
                   label: const Text('Notfallkontakte verwalten'),
+                ),
+                const SizedBox(height: 8),
+                OutlinedButton.icon(
+                  onPressed: () => context.go('/privacy/storage'),
+                  icon: const Icon(Icons.storage_outlined),
+                  label: const Text('Lokalen Speicher anzeigen'),
                 ),
               ],
             ),

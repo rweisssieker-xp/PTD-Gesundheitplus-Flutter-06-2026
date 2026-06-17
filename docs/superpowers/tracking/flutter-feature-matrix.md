@@ -25,9 +25,9 @@
 | Familien-Kreis | `/family` | Family circle | not started | User can manage local family check-ins. |
 | Demenz-Unterstuetzung | `/dementia` | Dementia support | not started | User can log hydration, meals, and reminders. |
 | KI-Gesundheitscoach | `/ai/coach` | AI coach | not started | User can ask AI after consent and network availability. |
-| Benachrichtigungen | `/notifications` | Notification center | not started | User can view and mark local notifications. |
-| Datenschutz | `/privacy` | Privacy and storage settings | not started | User can view local storage, AI consent, export, and delete controls. |
-| Speicher-Modus | `/privacy/storage` | Privacy and storage settings | not started | User sees local-only storage mode. |
+| Benachrichtigungen | `/notifications` | Notification center | implemented | User can view and mark local notifications as read. |
+| Datenschutz | `/privacy` | Privacy and storage settings | implemented | User can view local storage count and manage AI context consent. |
+| Speicher-Modus | `/privacy/storage` | Privacy and storage settings | implemented | User sees local-only storage mode and per-table local record counts. |
 | Telegram-Setup | `/settings/telegram` | Communication settings | not started | User can configure Telegram handoff preference. |
 | Twilio-Setup | `/settings/sms` | Communication settings | not started | User sees native SMS handoff configuration, not Twilio backend dependency. |
 | Onboarding | `/onboarding` | Local profile and security setup | not started | User completes local profile, PIN, biometrics, permissions, and AI consent. |

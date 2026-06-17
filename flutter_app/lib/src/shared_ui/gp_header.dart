@@ -45,7 +45,7 @@ class GpHeader extends StatelessWidget {
                     ),
                   ),
                   SizedBox(
-                    width: 48,
+                    width: actions.isEmpty ? 48 : actions.length * 48,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: actions,

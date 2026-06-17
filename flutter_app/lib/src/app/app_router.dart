@@ -10,8 +10,11 @@ import '../features/emergency/presentation/emergency_profile_screen.dart';
 import '../features/emergency/presentation/emergency_setup_screen.dart';
 import '../features/medication/presentation/medication_daily_plan_screen.dart';
 import '../features/medication/presentation/medication_screen.dart';
+import '../features/notifications/presentation/notification_center_screen.dart';
 import '../features/prevention/presentation/preventive_care_screen.dart';
 import '../features/prevention/presentation/vaccination_screen.dart';
+import '../features/privacy/presentation/privacy_screen.dart';
+import '../features/privacy/presentation/storage_mode_screen.dart';
 import '../features/vitals/presentation/blood_pressure_screen.dart';
 import '../features/vitals/presentation/weight_screen.dart';
 import '../shared_ui/feature_shell_screen.dart';
@@ -120,18 +123,15 @@ final appRouter = GoRouter(
     ),
     GoRoute(
       path: '/notifications',
-      builder: (context, state) =>
-          const FeatureShellScreen(title: 'Benachrichtigungen'),
+      builder: (context, state) => const NotificationCenterScreen(),
     ),
     GoRoute(
       path: '/privacy',
-      builder: (context, state) =>
-          const FeatureShellScreen(title: 'Datenschutz'),
+      builder: (context, state) => const PrivacyScreen(),
     ),
     GoRoute(
       path: '/privacy/storage',
-      builder: (context, state) =>
-          const FeatureShellScreen(title: 'Speicher-Modus'),
+      builder: (context, state) => const StorageModeScreen(),
     ),
     GoRoute(
       path: '/settings/telegram',
