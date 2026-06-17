@@ -7,7 +7,7 @@
 | Anamnese | `/health/anamnesis` | Health record | not started | User can create and edit medical history. |
 | Behandlungshistorie | `/health/treatments` | Health record | not started | User can create, edit, delete, and sort treatments by date. |
 | Heilberufe | `/health/professionals` | Health record | not started | User can manage healthcare professionals. |
-| Medikation | `/medication` | Medication management | not started | User can manage active and inactive medications. |
+| Medikation | `/medication` | Medication management | implemented | Medication domain model, local repository, test coverage, and native route exist. |
 | Medikamenten-Tagesplan | `/medication/daily-plan` | Medication management | not started | User can mark daily medication intake. |
 | Medikations-Interaktionen | `/medication/interactions` | Medication safety and interactions | not started | User can review stored interaction guidance. |
 | Wechselwirkungen-Checker | `/medication/interaction-checker` | Medication safety and interactions | not started | User can run an AI-supported interaction check after consent. |
@@ -15,7 +15,7 @@
 | Gewicht | `/vitals/weight` | Vital values | not started | User can log weight and see BMI trend. |
 | Impfpass | `/prevention/vaccination` | Prevention and vaccination | not started | User can manage vaccinations and health pass entries. |
 | Vorsorge | `/prevention/care` | Prevention and vaccination | not started | User can manage preventive care reminders. |
-| Notfallprofil | `/emergency/profile` | Emergency | not started | User can view emergency profile offline. |
+| Notfallprofil | `/emergency/profile` | Emergency | implemented | Offline emergency payload builder, QR screen, route, and test coverage exist. |
 | Notfall-Einrichtung | `/emergency/setup` | Emergency | not started | User can manage emergency contacts. |
 | Offline-Notfall | `/emergency/offline` | Emergency | not started | Emergency screen works with airplane mode enabled. |
 | Dokumenten-Scan | `/documents/scan` | Documents and scanning | not started | User can capture or attach document images. |

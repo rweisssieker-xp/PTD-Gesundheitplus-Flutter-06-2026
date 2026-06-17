@@ -1,6 +1,9 @@
 import 'package:go_router/go_router.dart';
 
 import '../features/dashboard/presentation/dashboard_screen.dart';
+import '../features/emergency/domain/emergency_payload_builder.dart';
+import '../features/emergency/domain/emergency_profile.dart';
+import '../features/emergency/presentation/emergency_profile_screen.dart';
 import '../features/medication/presentation/medication_screen.dart';
 import '../shared_ui/feature_shell_screen.dart';
 
@@ -64,7 +67,7 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/emergency/profile',
       builder: (context, state) =>
-          const FeatureShellScreen(title: 'Notfallprofil'),
+          EmergencyProfileScreen(payload: _demoEmergencyPayload()),
     ),
     GoRoute(
       path: '/emergency/setup',
@@ -138,3 +141,16 @@ final appRouter = GoRouter(
     ),
   ],
 );
+
+String _demoEmergencyPayload() {
+  return EmergencyPayloadBuilder().build(
+    const EmergencyProfile(
+      fullName: 'Patient',
+      notes: 'Lokales Notfallprofil',
+      medications: [],
+      allergies: [],
+      diagnoses: [],
+      contacts: [],
+    ),
+  );
+}
