@@ -20,8 +20,8 @@
 | Notfallprofil | `/emergency/profile` | Emergency | implemented | User sees a QR-backed emergency profile built from local records and can use native phone, SMS, and current-location SMS handoff for emergency contacts. |
 | Notfall-Einrichtung | `/emergency/setup` | Emergency | implemented | User can create, import from device contacts after permission, verify, list, and delete local emergency contacts. |
 | Offline-Notfall | `/emergency/offline` | Emergency | implemented | Emergency screen renders local medication, allergy, contact, QR payload, and native phone/SMS/current-location handoff without backend access. |
-| Dokumenten-Scan | `/documents/scan` | Documents and scanning | implemented | User can capture or attach document images and store metadata locally. |
-| Gescannte-Dokumente | `/documents` | Documents and scanning | implemented | User can list and delete locally stored documents. |
+| Dokumenten-Scan | `/documents/scan` | Documents and scanning | implemented | User can capture or attach document images, preview local medical insights, and store metadata locally. |
+| Gescannte-Dokumente | `/documents` | Documents and scanning | implemented | User can list, expand local medical insights for, and delete locally stored documents. |
 | Daten-Export | `/export` | Local export and sharing | implemented | User can export local health record JSON and share the generated file. |
 | Familien-Kreis | `/family` | Family circle | implemented | User can manage local family members and send local safety check-ins with optional note and current-device location text. |
 | Demenz-Unterstuetzung | `/dementia` | Dementia support | implemented | User can log hydration, meals, and reminders locally with follow-up native local reminders. |

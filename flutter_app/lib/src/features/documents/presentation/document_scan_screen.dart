@@ -8,6 +8,8 @@ import '../../../shared_ui/gp_colors.dart';
 import '../../../shared_ui/gp_icons.dart';
 import '../../../shared_ui/gp_screen.dart';
 import '../data/document_repository.dart';
+import '../domain/medical_document_insights.dart';
+import 'medical_insights_card.dart';
 
 class DocumentScanScreen extends ConsumerStatefulWidget {
   const DocumentScanScreen({super.key});
@@ -63,6 +65,18 @@ class _DocumentScanScreenState extends ConsumerState<DocumentScanScreen> {
           TextField(
             controller: _notes,
             decoration: const InputDecoration(labelText: 'Notizen'),
+            minLines: 2,
+            maxLines: 4,
+          ),
+          const SizedBox(height: 16),
+          MedicalInsightsCard(
+            insights: const MedicalDocumentInsightAnalyzer().analyzeText(
+              title: _title.text.trim().isEmpty
+                  ? 'Neues Dokument'
+                  : _title.text.trim(),
+              category: _emptyToNull(_category.text) ?? 'Dokument',
+              notes: _emptyToNull(_notes.text),
+            ),
           ),
           const SizedBox(height: 16),
           Wrap(
@@ -137,6 +151,29 @@ class _DocumentScanScreenState extends ConsumerState<DocumentScanScreen> {
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(const SnackBar(content: Text('Dokument lokal gespeichert')));
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _title.addListener(_refreshInsightPreview);
+    _category.addListener(_refreshInsightPreview);
+    _notes.addListener(_refreshInsightPreview);
+  }
+
+  @override
+  void dispose() {
+    _title.removeListener(_refreshInsightPreview);
+    _category.removeListener(_refreshInsightPreview);
+    _notes.removeListener(_refreshInsightPreview);
+    _title.dispose();
+    _category.dispose();
+    _notes.dispose();
+    super.dispose();
+  }
+
+  void _refreshInsightPreview() {
+    if (mounted) setState(() {});
   }
 }
 

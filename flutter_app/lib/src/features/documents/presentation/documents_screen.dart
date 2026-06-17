@@ -9,6 +9,8 @@ import '../../../shared_ui/gp_icons.dart';
 import '../../../shared_ui/gp_screen.dart';
 import '../data/document_repository.dart';
 import '../domain/health_document.dart';
+import '../domain/medical_document_insights.dart';
+import 'medical_insights_card.dart';
 
 class DocumentsScreen extends ConsumerStatefulWidget {
   const DocumentsScreen({super.key});
@@ -49,7 +51,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
                     ...docs.map(
                       (doc) => Card(
                         margin: const EdgeInsets.only(bottom: 10),
-                        child: ListTile(
+                        child: ExpansionTile(
                           leading: _DocumentThumb(path: doc.localPath),
                           title: Text(doc.title),
                           subtitle: Text(
@@ -63,6 +65,18 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
                               if (mounted) setState(() => _reload++);
                             },
                           ),
+                          childrenPadding: const EdgeInsets.fromLTRB(
+                            12,
+                            0,
+                            12,
+                            12,
+                          ),
+                          children: [
+                            MedicalInsightsCard(
+                              insights: const MedicalDocumentInsightAnalyzer()
+                                  .analyzeDocument(doc),
+                            ),
+                          ],
                         ),
                       ),
                     ),
