@@ -65,7 +65,7 @@ class PreventionRepository {
         .toList();
   }
 
-  Future<void> addPreventiveCare({
+  Future<PreventiveCareItem> addPreventiveCare({
     required String title,
     required String category,
     required DateTime dueAt,
@@ -74,6 +74,7 @@ class PreventionRepository {
     String? notes,
   }) async {
     final now = DateTime.now().toIso8601String();
+    final id = _uuid.v4();
     _db.execute(
       '''
       INSERT INTO preventive_care_items (
@@ -83,7 +84,7 @@ class PreventionRepository {
       VALUES (?, ?, ?, ?, ?, 'offen', ?, ?, ?, ?)
       ''',
       [
-        _uuid.v4(),
+        id,
         title,
         category,
         dueAt.toIso8601String(),
@@ -93,6 +94,16 @@ class PreventionRepository {
         now,
         now,
       ],
+    );
+    return PreventiveCareItem(
+      id: id,
+      title: title,
+      category: category,
+      dueAt: dueAt,
+      intervalMonths: intervalMonths,
+      status: 'offen',
+      doctorName: doctorName,
+      notes: notes,
     );
   }
 

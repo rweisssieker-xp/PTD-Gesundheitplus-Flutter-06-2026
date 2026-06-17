@@ -66,4 +66,30 @@ void main() {
 
     expect(reminder, isNull);
   });
+
+  test('builds preventive care reminder for future due date', () {
+    final reminder = NotificationScheduler().preventiveCareReminder(
+      itemId: 'care-1',
+      title: 'Hautscreening',
+      dueAt: DateTime(2026, 7, 1, 9),
+      now: DateTime(2026, 6, 17, 8),
+    );
+
+    expect(reminder, isNotNull);
+    expect(reminder!.id, 'prevention-care-1');
+    expect(reminder.title, 'Vorsorge: Hautscreening');
+    expect(reminder.category, 'prevention');
+    expect(reminder.scheduledAt, DateTime(2026, 7, 1, 9));
+  });
+
+  test('skips preventive care reminder when due date is in the past', () {
+    final reminder = NotificationScheduler().preventiveCareReminder(
+      itemId: 'care-1',
+      title: 'Hautscreening',
+      dueAt: DateTime(2026, 6, 1, 9),
+      now: DateTime(2026, 6, 17, 8),
+    );
+
+    expect(reminder, isNull);
+  });
 }

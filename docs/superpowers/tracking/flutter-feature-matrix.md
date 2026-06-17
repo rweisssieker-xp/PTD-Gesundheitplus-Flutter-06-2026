@@ -16,7 +16,7 @@
 | Blutdruck | `/vitals/blood-pressure` | Vital values | implemented | User can log and list systolic, diastolic, and pulse values locally. |
 | Gewicht | `/vitals/weight` | Vital values | implemented | User can log weight locally and see BMI per entry when height is present. |
 | Impfpass | `/prevention/vaccination` | Prevention and vaccination | implemented | User can create and list local vaccination records with optional booster due date. |
-| Vorsorge | `/prevention/care` | Prevention and vaccination | implemented | User can create local preventive care reminders and mark them done. |
+| Vorsorge | `/prevention/care` | Prevention and vaccination | implemented | User can create native local preventive-care reminders and mark them done. |
 | Notfallprofil | `/emergency/profile` | Emergency | implemented | User sees a QR-backed emergency profile built from local profile, diagnosis, medication, allergy, and contact records. |
 | Notfall-Einrichtung | `/emergency/setup` | Emergency | implemented | User can create, verify, list, and delete local emergency contacts. |
 | Offline-Notfall | `/emergency/offline` | Emergency | implemented | Emergency screen renders local medication, allergy, contact, and QR payload data without backend access. |

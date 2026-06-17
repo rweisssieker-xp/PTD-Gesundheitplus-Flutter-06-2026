@@ -64,6 +64,21 @@ class NotificationScheduler {
     );
   }
 
+  ScheduledReminder? preventiveCareReminder({
+    required String itemId,
+    required String title,
+    required DateTime dueAt,
+    required DateTime now,
+  }) {
+    if (!dueAt.isAfter(now)) return null;
+    return ScheduledReminder(
+      id: 'prevention-$itemId',
+      title: 'Vorsorge: $title',
+      category: 'prevention',
+      scheduledAt: dueAt,
+    );
+  }
+
   ({int hour, int minute})? _parseTime(String value) {
     final match = RegExp(r'^(\d{1,2}):(\d{2})$').firstMatch(value.trim());
     if (match == null) return null;

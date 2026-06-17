@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/notifications/native_notification_service.dart';
+import '../../../core/notifications/notification_scheduler.dart';
 import '../../../core/storage/database_provider.dart';
 import '../../../shared_ui/gp_colors.dart';
 import '../../../shared_ui/gp_icons.dart';
@@ -17,6 +19,7 @@ class PreventiveCareScreen extends ConsumerStatefulWidget {
 
 class _PreventiveCareScreenState extends ConsumerState<PreventiveCareScreen> {
   int _reload = 0;
+  final _notifications = NativeNotificationService();
 
   @override
   Widget build(BuildContext context) {
@@ -113,7 +116,23 @@ class _PreventiveCareScreenState extends ConsumerState<PreventiveCareScreen> {
                                   tooltip: 'Als erledigt markieren',
                                   icon: const Icon(Icons.done),
                                   onPressed: () async {
+                                    final messenger = ScaffoldMessenger.of(
+                                      context,
+                                    );
                                     await repo.markPreventiveCareDone(item.id);
+                                    try {
+                                      await _cancelPreventiveCareReminder(item);
+                                    } catch (_) {
+                                      if (mounted) {
+                                        messenger.showSnackBar(
+                                          const SnackBar(
+                                            content: Text(
+                                              'Vorsorge erledigt, Erinnerung konnte nicht entfernt werden.',
+                                            ),
+                                          ),
+                                        );
+                                      }
+                                    }
                                     if (mounted) setState(() => _reload++);
                                   },
                                 ),
@@ -133,16 +152,45 @@ class _PreventiveCareScreenState extends ConsumerState<PreventiveCareScreen> {
     final saved = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
-      builder: (context) => _PreventiveCareEditor(repo: repo),
+      builder: (context) => _PreventiveCareEditor(
+        repo: repo,
+        schedulePreventiveCare: _schedulePreventiveCareReminder,
+      ),
     );
     if (saved == true) setState(() => _reload++);
+  }
+
+  Future<void> _schedulePreventiveCareReminder(PreventiveCareItem item) async {
+    if (item.isDone) return;
+    final reminder = NotificationScheduler().preventiveCareReminder(
+      itemId: item.id,
+      title: item.title,
+      dueAt: item.dueAt,
+      now: DateTime.now(),
+    );
+    if (reminder == null) return;
+    await _notifications.scheduleReminder(
+      reminder,
+      body: [item.category, item.doctorName, _date(item.dueAt)]
+          .whereType<String>()
+          .where((value) => value.trim().isNotEmpty)
+          .join(' • '),
+    );
+  }
+
+  Future<void> _cancelPreventiveCareReminder(PreventiveCareItem item) {
+    return _notifications.cancelPreventiveCareReminder(item.id);
   }
 }
 
 class _PreventiveCareEditor extends StatefulWidget {
-  const _PreventiveCareEditor({required this.repo});
+  const _PreventiveCareEditor({
+    required this.repo,
+    required this.schedulePreventiveCare,
+  });
 
   final PreventionRepository repo;
+  final Future<void> Function(PreventiveCareItem item) schedulePreventiveCare;
 
   @override
   State<_PreventiveCareEditor> createState() => _PreventiveCareEditorState();
@@ -208,13 +256,26 @@ class _PreventiveCareEditorState extends State<_PreventiveCareEditor> {
     final title = _title.text.trim();
     if (title.isEmpty) return;
     final days = int.tryParse(_dueInDays.text) ?? 0;
-    await widget.repo.addPreventiveCare(
+    final item = await widget.repo.addPreventiveCare(
       title: title,
       category: _emptyToNull(_category.text) ?? 'Vorsorge',
       dueAt: DateTime.now().add(Duration(days: days)),
       intervalMonths: int.tryParse(_intervalMonths.text),
       doctorName: _emptyToNull(_doctor.text),
     );
+    try {
+      await widget.schedulePreventiveCare(item);
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Vorsorge gespeichert, Erinnerung konnte nicht geplant werden.',
+            ),
+          ),
+        );
+      }
+    }
     if (mounted) Navigator.pop(context, true);
   }
 }

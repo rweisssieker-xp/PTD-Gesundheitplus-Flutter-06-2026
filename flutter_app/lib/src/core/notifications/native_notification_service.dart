@@ -91,6 +91,10 @@ class NativeNotificationService {
     return cancelReminder('appointment-$appointmentId');
   }
 
+  Future<void> cancelPreventiveCareReminder(String itemId) {
+    return cancelReminder('prevention-$itemId');
+  }
+
   int _stableNotificationId(String value) {
     final bytes = md5.convert(utf8.encode(value)).bytes;
     return bytes.take(4).fold<int>(0, (id, byte) => (id << 8) | byte) &
