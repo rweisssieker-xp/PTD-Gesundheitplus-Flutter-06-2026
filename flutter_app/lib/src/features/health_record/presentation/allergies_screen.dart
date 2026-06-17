@@ -7,6 +7,7 @@ import '../../../shared_ui/gp_icons.dart';
 import '../../../shared_ui/gp_screen.dart';
 import '../../../shared_ui/gp_voice_navigation.dart';
 import '../data/health_record_repository.dart';
+import '../domain/allergy_text_parser.dart';
 import '../domain/health_record.dart';
 
 class AllergiesScreen extends ConsumerStatefulWidget {
@@ -18,6 +19,15 @@ class AllergiesScreen extends ConsumerStatefulWidget {
 
 class _AllergiesScreenState extends ConsumerState<AllergiesScreen> {
   int _reload = 0;
+  final _assistantText = TextEditingController();
+  AllergyTextSuggestion? _assistantSuggestion;
+  String? _assistantError;
+
+  @override
+  void dispose() {
+    _assistantText.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,6 +66,16 @@ class _AllergiesScreenState extends ConsumerState<AllergiesScreen> {
                   _AllergySummary(count: allergies.length),
                   const SizedBox(height: 12),
                   GpVoiceNavigation(content: _allergyVoiceContent(allergies)),
+                  const SizedBox(height: 12),
+                  _AllergyTextAssistantCard(
+                    controller: _assistantText,
+                    suggestion: _assistantSuggestion,
+                    error: _assistantError,
+                    onParse: _parseAssistantText,
+                    onSave: _assistantSuggestion?.isComplete == true
+                        ? () => _saveAssistantSuggestion(repo)
+                        : null,
+                  ),
                   const SizedBox(height: 12),
                   FutureBuilder<AllergyMedicationCheckResult>(
                     future: repo.checkMedicationAllergies(),
@@ -156,6 +176,49 @@ class _AllergiesScreenState extends ConsumerState<AllergiesScreen> {
     if (saved == true) setState(() => _reload++);
   }
 
+  void _parseAssistantText() {
+    final input = _assistantText.text.trim();
+    if (input.isEmpty) {
+      setState(() {
+        _assistantSuggestion = null;
+        _assistantError = 'Bitte beschreiben Sie die Allergie zuerst.';
+      });
+      return;
+    }
+    final suggestion = const AllergyTextParser().parse(input);
+    setState(() {
+      _assistantSuggestion = suggestion;
+      _assistantError = suggestion.isComplete
+          ? null
+          : 'Fehlt noch: ${suggestion.missingFields.join(', ')}';
+    });
+  }
+
+  Future<void> _saveAssistantSuggestion(HealthRecordRepository repo) async {
+    final suggestion = _assistantSuggestion;
+    if (suggestion == null || !suggestion.isComplete) {
+      _parseAssistantText();
+      return;
+    }
+    await repo.addAllergy(
+      substance: suggestion.substance!.trim(),
+      category: suggestion.category,
+      severity: suggestion.severity,
+      reaction: suggestion.reaction,
+      notes: 'Aus lokaler Texteingabe erstellt: ${suggestion.originalText}',
+    );
+    if (!mounted) return;
+    _assistantText.clear();
+    setState(() {
+      _assistantSuggestion = null;
+      _assistantError = null;
+      _reload++;
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Allergie aus Texteingabe gespeichert.')),
+    );
+  }
+
   Map<String, List<AllergyRecord>> _groupByCategory(
     List<AllergyRecord> allergies,
   ) {
@@ -165,6 +228,174 @@ class _AllergiesScreenState extends ConsumerState<AllergiesScreen> {
       grouped.putIfAbsent(category, () => []).add(allergy);
     }
     return grouped;
+  }
+}
+
+class _AllergyTextAssistantCard extends StatelessWidget {
+  const _AllergyTextAssistantCard({
+    required this.controller,
+    required this.suggestion,
+    required this.error,
+    required this.onParse,
+    required this.onSave,
+  });
+
+  final TextEditingController controller;
+  final AllergyTextSuggestion? suggestion;
+  final String? error;
+  final VoidCallback onParse;
+  final VoidCallback? onSave;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: const Color(0xFFFEFCE8),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+        side: const BorderSide(color: Color(0xFFFEF08A), width: 2),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.mic_outlined, color: Color(0xFFCA8A04)),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Lokale Allergieeingabe',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Beschreiben Sie Allergen und Reaktion wie gesprochen. Die App erkennt Kategorie und Schweregrad direkt auf dem Gerät.',
+              style: TextStyle(color: GpColors.textSecondary, fontSize: 13),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: controller,
+              minLines: 2,
+              maxLines: 4,
+              decoration: const InputDecoration(
+                labelText: 'Allergie beschreiben',
+                hintText:
+                    'Allergisch gegen Penicillin mit Atemnot und Schwellung',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            if (suggestion != null) ...[
+              const SizedBox(height: 12),
+              _AllergySuggestionPreview(suggestion: suggestion!),
+            ],
+            if (error != null) ...[
+              const SizedBox(height: 10),
+              Text(
+                error!,
+                style: const TextStyle(
+                  color: GpColors.emergencyRed,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: onParse,
+                    icon: const Icon(Icons.auto_fix_high_outlined),
+                    label: const Text('Erkennen'),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: FilledButton.icon(
+                    onPressed: onSave,
+                    icon: const Icon(Icons.check),
+                    label: const Text('Speichern'),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _AllergySuggestionPreview extends StatelessWidget {
+  const _AllergySuggestionPreview({required this.suggestion});
+
+  final AllergyTextSuggestion suggestion;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: GpColors.border, width: 2),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Erkannter Vorschlag',
+              style: TextStyle(fontWeight: FontWeight.w800),
+            ),
+            const SizedBox(height: 8),
+            _SuggestionLine(
+              icon: Icons.warning_amber_outlined,
+              label: suggestion.substance ?? 'Allergen fehlt',
+            ),
+            _SuggestionLine(
+              icon: Icons.category_outlined,
+              label: suggestion.category,
+            ),
+            _SuggestionLine(
+              icon: Icons.report_problem_outlined,
+              label: suggestion.severity,
+            ),
+            if ((suggestion.reaction ?? '').isNotEmpty)
+              _SuggestionLine(
+                icon: Icons.medical_information_outlined,
+                label: suggestion.reaction!,
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SuggestionLine extends StatelessWidget {
+  const _SuggestionLine({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 4),
+      child: Row(
+        children: [
+          Icon(icon, size: 17, color: GpColors.textSecondary),
+          const SizedBox(width: 6),
+          Expanded(child: Text(label)),
+        ],
+      ),
+    );
   }
 }
 

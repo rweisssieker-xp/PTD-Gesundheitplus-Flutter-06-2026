@@ -7,7 +7,7 @@ Date: 2026-06-17
 - `flutter doctor -v`: no issues after installing Android SDK command-line tools and accepting Android licenses.
 - `dart format lib test`: clean.
 - `flutter analyze`: no issues.
-- `flutter test`: 81 tests passed.
+- `flutter test`: 84 tests passed.
 - `flutter build apk --debug`: built successfully.
 - `flutter build apk --release`: built successfully with local release keystore.
 - `flutter build appbundle --release`: built successfully with local release keystore.
@@ -51,6 +51,7 @@ The native Flutter shell now mirrors the PWA layout pattern with the first-run s
 - Emergency contacts can be imported from the device address book after explicit contact permission and remain stored locally.
 - Healthcare professionals expose a local Facharzt search with on-device provider suggestions and direct local add, replacing the PWA internet/LLM doctor search with a local-only workflow.
 - Allergies expose a local medication conflict check that compares active medications with medication allergies and known local substance-class rules without sending data off-device.
+- Allergies can be drafted from spoken-style German text using a deterministic on-device parser for allergen, category, severity, and reaction.
 - Preventive care exposes local age-based recommendations for due vaccinations and screenings, and can turn recommendations into local reminder-backed Vorsorge items.
 - Anamnesis entries can be encoded into an offline-readable local QR payload for physician handoff.
 - Appointments can be exported on-device as `.ics` calendar files for native calendar app handoff.
