@@ -99,8 +99,10 @@ class _StorageModeChoice extends StatelessWidget {
             iconBackground: const Color(0xFFDCFCE7),
             icon: Icons.phone_android_outlined,
             title: 'Nur auf diesem Gerät',
+            titleColor: const Color(0xFF166534),
             subtitle: 'Maximaler Datenschutz',
             subtitleColor: const Color(0xFF16A34A),
+            featureIconColor: const Color(0xFF22C55E),
             features: const [
               'Daten verlassen nie Ihr Gerät',
               'Kein Server-Zugriff auf Gesundheitsdaten',
@@ -120,14 +122,17 @@ class _StorageModeChoice extends StatelessWidget {
             iconBackground: const Color(0xFFDBEAFE),
             icon: Icons.cloud_outlined,
             title: 'Cloud-Synchronisation',
-            subtitle: 'In dieser nativen Version nicht aktiviert',
+            titleColor: const Color(0xFF1E40AF),
+            subtitle: 'Volle Funktionalität',
             subtitleColor: const Color(0xFF2563EB),
+            featureIconColor: const Color(0xFF3B82F6),
             features: const [
-              'Lokale Daten bleiben auf diesem Gerät',
-              'Kein automatisches Backup in die Cloud',
-              'DSGVO-konformer Lokalmodus',
+              'Auf allen Geräten verfügbar',
+              'KI-Coach & alle Features voll verfügbar',
+              'Automatisches Backup',
+              'DSGVO-konform, Server in Deutschland',
             ],
-            buttonLabel: 'Cloud-Sync nicht aktiv',
+            buttonLabel: 'Cloud-Sync wählen',
             buttonIcon: Icons.cloud_outlined,
             buttonColors: const [Color(0xFF2563EB), Color(0xFF4F46E5)],
             onPressed: () {
@@ -182,8 +187,10 @@ class _ModeCard extends StatelessWidget {
     required this.iconBackground,
     required this.icon,
     required this.title,
+    required this.titleColor,
     required this.subtitle,
     required this.subtitleColor,
+    required this.featureIconColor,
     required this.features,
     required this.buttonLabel,
     required this.buttonIcon,
@@ -197,8 +204,10 @@ class _ModeCard extends StatelessWidget {
   final Color iconBackground;
   final IconData icon;
   final String title;
+  final Color titleColor;
   final String subtitle;
   final Color subtitleColor;
+  final Color featureIconColor;
   final List<String> features;
   final String buttonLabel;
   final IconData buttonIcon;
@@ -244,8 +253,8 @@ class _ModeCard extends StatelessWidget {
                     children: [
                       Text(
                         title,
-                        style: const TextStyle(
-                          color: GpColors.textPrimary,
+                        style: TextStyle(
+                          color: titleColor,
                           fontSize: 18,
                           fontWeight: FontWeight.w900,
                         ),
@@ -271,10 +280,10 @@ class _ModeCard extends StatelessWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.check_circle_outline,
                       size: 18,
-                      color: Color(0xFF22C55E),
+                      color: featureIconColor,
                     ),
                     const SizedBox(width: 8),
                     Expanded(
@@ -357,7 +366,7 @@ class _GradientChoiceButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(6),
           onTap: onPressed,
           child: SizedBox(
-            height: 40,
+            height: 48,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [

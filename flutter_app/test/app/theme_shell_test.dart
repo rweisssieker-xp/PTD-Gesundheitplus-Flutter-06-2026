@@ -10,6 +10,11 @@ import 'package:gesundheitplus/src/features/dashboard/presentation/dashboard_scr
 
 void main() {
   testWidgets('renders Gesundheit Plus shell with red header', (tester) async {
+    tester.view.physicalSize = const Size(390, 1400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
     final db = AppDatabase.memory();
     addTearDown(db.close);
 
@@ -31,6 +36,9 @@ void main() {
 
     expect(find.text('Gesundheit Plus'), findsOneWidget);
     expect(find.text('Nur auf diesem Gerät'), findsOneWidget);
+    expect(find.text('Cloud-Synchronisation'), findsOneWidget);
+    expect(find.text('Volle Funktionalität'), findsOneWidget);
+    expect(find.text('Cloud-Sync wählen'), findsOneWidget);
     await tester.ensureVisible(find.text('Lokal speichern wählen'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Lokal speichern wählen'));
