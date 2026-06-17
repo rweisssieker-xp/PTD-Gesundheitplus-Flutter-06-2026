@@ -556,7 +556,7 @@ class _FeatureCarousel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 430,
+      height: 400,
       child: Stack(
         alignment: Alignment.center,
         children: [
@@ -620,8 +620,8 @@ class _FeatureCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Container(
-                    width: 88,
-                    height: 88,
+                    width: 96,
+                    height: 96,
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         begin: Alignment.topLeft,
@@ -637,7 +637,7 @@ class _FeatureCard extends StatelessWidget {
                         ),
                       ],
                     ),
-                    child: Icon(item.icon, color: Colors.white, size: 44),
+                    child: Icon(item.icon, color: Colors.white, size: 48),
                   ),
                   const SizedBox(height: 18),
                   Flexible(
