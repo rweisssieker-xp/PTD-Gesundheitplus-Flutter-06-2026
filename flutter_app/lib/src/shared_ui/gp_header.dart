@@ -41,40 +41,53 @@ class GpHeader extends StatelessWidget {
                           alignment: Alignment.centerLeft,
                           child: SizedBox(width: 104, child: leading),
                         ),
-                      Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Text(
-                            'Gesundheit Plus',
-                            style: TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.w800,
-                              color: GpColors.textPrimary,
-                            ),
-                          ),
-                          ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 260),
-                            child: FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Text(
-                                    'Ihre digitale Gesundheitsakte',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: GpColors.textSecondary,
-                                    ),
-                                  ),
-                                  if (showLocalBadge) ...[
-                                    const SizedBox(width: 8),
-                                    const _LocalBadge(),
-                                  ],
-                                ],
+                      Padding(
+                        padding: EdgeInsets.only(
+                          left: leading == null ? 0 : 112,
+                          right: actions.isEmpty ? 0 : actions.length * 48,
+                        ),
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Text(
+                                'Gesundheit Plus',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.w800,
+                                  color: GpColors.textPrimary,
+                                ),
                               ),
-                            ),
+                              ConstrainedBox(
+                                constraints: const BoxConstraints(
+                                  maxWidth: 260,
+                                ),
+                                child: FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Text(
+                                        'Ihre digitale Gesundheitsakte',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: GpColors.textSecondary,
+                                        ),
+                                      ),
+                                      if (showLocalBadge) ...[
+                                        const SizedBox(width: 8),
+                                        const _LocalBadge(),
+                                      ],
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
                       if (actions.isNotEmpty)
                         Align(
@@ -129,6 +142,61 @@ class _LocalBadge extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class GpLanguageButton extends StatelessWidget {
+  const GpLanguageButton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      tooltip: 'Sprache',
+      onPressed: () => showModalBottomSheet<void>(
+        context: context,
+        showDragHandle: true,
+        builder: (context) => SafeArea(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 448),
+            child: ListView(
+              shrinkWrap: true,
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              children: const [
+                ListTile(
+                  leading: Icon(Icons.language_outlined),
+                  title: Text('Sprache'),
+                  subtitle: Text('Lokale Anzeigeoptionen'),
+                ),
+                _LanguageOption(label: 'Deutsch', selected: true),
+                _LanguageOption(label: 'English'),
+                _LanguageOption(label: 'Türkçe'),
+                _LanguageOption(label: 'العربية'),
+                _LanguageOption(label: 'Українська'),
+              ],
+            ),
+          ),
+        ),
+      ),
+      icon: const Icon(Icons.language_outlined),
+    );
+  }
+}
+
+class _LanguageOption extends StatelessWidget {
+  const _LanguageOption({required this.label, this.selected = false});
+
+  final String label;
+  final bool selected;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: selected
+          ? const Icon(Icons.check_circle, color: GpColors.emergencyRed)
+          : const SizedBox(width: 24),
+      title: Text(label),
+      onTap: () => Navigator.of(context).pop(),
     );
   }
 }

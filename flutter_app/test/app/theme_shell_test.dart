@@ -23,6 +23,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Gesundheit Plus'), findsOneWidget);
+    expect(find.byTooltip('Sprache'), findsOneWidget);
     final container = tester.widget<Container>(
       find.byKey(const Key('gp-header-red-border')),
     );

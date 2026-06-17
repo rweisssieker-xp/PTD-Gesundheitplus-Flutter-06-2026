@@ -1,5 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../../core/notifications/native_notification_service.dart';
 import '../../../core/notifications/notification_scheduler.dart';
@@ -9,6 +13,7 @@ import '../../../shared_ui/gp_icons.dart';
 import '../../../shared_ui/gp_screen.dart';
 import '../data/appointment_repository.dart';
 import '../domain/appointment.dart';
+import '../domain/appointment_ics_builder.dart';
 
 class AppointmentsScreen extends ConsumerStatefulWidget {
   const AppointmentsScreen({super.key});
@@ -54,6 +59,12 @@ class _AppointmentsScreenState extends ConsumerState<AppointmentsScreen> {
                 padding: const EdgeInsets.all(16),
                 children: [
                   _AppointmentSummary(count: upcoming.length),
+                  const SizedBox(height: 16),
+                  _CalendarExportCard(
+                    appointments: appointments,
+                    upcoming: upcoming,
+                    onExport: _exportAppointments,
+                  ),
                   const SizedBox(height: 16),
                   if (appointments.isEmpty)
                     _EmptyAppointments(onAdd: () => _openEditor(repo))
@@ -163,6 +174,115 @@ class _AppointmentsScreenState extends ConsumerState<AppointmentsScreen> {
 
   Future<void> _cancelAppointmentReminder(Appointment appointment) {
     return _notifications.cancelAppointmentReminder(appointment.id);
+  }
+
+  Future<void> _exportAppointments(List<Appointment> appointments) async {
+    if (appointments.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Keine Termine zum Exportieren vorhanden'),
+        ),
+      );
+      return;
+    }
+    final directory = await getTemporaryDirectory();
+    final date = DateTime.now();
+    final fileName =
+        'gesundheit-plus-termine-${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}.ics';
+    final file = File('${directory.path}${Platform.pathSeparator}$fileName');
+    await file.writeAsString(AppointmentIcsBuilder().build(appointments));
+    await Share.shareXFiles([
+      XFile(file.path, mimeType: 'text/calendar', name: fileName),
+    ]);
+  }
+}
+
+class _CalendarExportCard extends StatelessWidget {
+  const _CalendarExportCard({
+    required this.appointments,
+    required this.upcoming,
+    required this.onExport,
+  });
+
+  final List<Appointment> appointments;
+  final List<Appointment> upcoming;
+  final ValueChanged<List<Appointment>> onExport;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: const Color(0xFFEEF2FF),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+        side: const BorderSide(color: Color(0xFFC7D2FE), width: 2),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.calendar_month_outlined),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Kalender Synchronisation',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Exportieren Sie Ihre Termine als .ics Datei für Google Calendar, Outlook, Apple Calendar oder andere Kalender-Apps.',
+              style: TextStyle(color: GpColors.textSecondary, fontSize: 13),
+            ),
+            const SizedBox(height: 12),
+            DecoratedBox(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border.all(color: GpColors.border, width: 2),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      '${upcoming.length} anstehende / ${appointments.length} Termin(e) gesamt',
+                      style: const TextStyle(
+                        color: GpColors.textPrimary,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    FilledButton.icon(
+                      onPressed: upcoming.isEmpty
+                          ? null
+                          : () => onExport(upcoming),
+                      icon: const Icon(Icons.file_download_outlined),
+                      label: const Text('Anstehende Termine exportieren'),
+                    ),
+                    const SizedBox(height: 8),
+                    OutlinedButton.icon(
+                      onPressed: appointments.isEmpty
+                          ? null
+                          : () => onExport(appointments),
+                      icon: const Icon(Icons.calendar_today_outlined),
+                      label: const Text('Alle Termine exportieren'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 

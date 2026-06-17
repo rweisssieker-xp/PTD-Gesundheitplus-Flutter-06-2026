@@ -17,6 +17,7 @@ class GpColors {
   static const blueIndigo = [Color(0xFF2563EB), Color(0xFF4F46E5)];
   static const green = [Color(0xFF22C55E), Color(0xFF16A34A)];
   static const purplePink = [Color(0xFFA855F7), Color(0xFFDB2777)];
+  static const purple = [Color(0xFFA855F7), Color(0xFF9333EA)];
   static const indigo = [Color(0xFF6366F1), Color(0xFF4F46E5)];
   static const orange = [Color(0xFFF97316), Color(0xFFEA580C)];
   static const amberOrange = [Color(0xFFF59E0B), Color(0xFFEA580C)];

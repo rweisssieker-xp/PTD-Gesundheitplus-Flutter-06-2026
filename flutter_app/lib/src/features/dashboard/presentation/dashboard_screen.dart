@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../shared_ui/gp_colors.dart';
+import '../../../shared_ui/gp_footer.dart';
 import '../../../shared_ui/gp_header.dart';
 import '../../../shared_ui/gp_icons.dart';
 
@@ -28,15 +29,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
     _DashboardItem(
       title: 'Heilberufe',
       subtitle: 'Ärzte & Therapeuten',
-      description: 'Behandler und Kontakte',
+      description: 'Ärzte und Therapeuten',
       icon: GpIcons.healthcare,
       route: '/health/professionals',
       colors: GpColors.green,
     ),
     _DashboardItem(
-      title: 'Behandlung',
-      subtitle: 'Historie',
-      description: 'Behandlungen und Befunde',
+      title: 'Behandlungshistorie',
+      subtitle: 'Behandlungen',
+      description: 'Behandlungshistorie',
       icon: GpIcons.treatmentHistory,
       route: '/health/treatments',
       colors: GpColors.teal,
@@ -47,7 +48,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       description: 'Impfschutz und Nachweise',
       icon: GpIcons.vaccination,
       route: '/prevention/vaccination',
-      colors: GpColors.violet,
+      colors: GpColors.purple,
     ),
     _DashboardItem(
       title: 'Medikation',
@@ -118,6 +119,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         children: [
           GpHeader(
             actions: [
+              const GpLanguageButton(),
               IconButton(
                 tooltip: 'Benachrichtigungen',
                 onPressed: () => context.go('/notifications'),
@@ -168,7 +170,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             onTap: () => context.go('/ai/coach'),
                           ),
                           _GradientActionTile(
-                            label: 'Scan',
+                            label: 'Dokument scannen',
                             icon: GpIcons.scan,
                             colors: GpColors.indigo,
                             onTap: () => context.go('/documents/scan'),
@@ -262,58 +264,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               item: item,
                               onTap: () => context.go(item.route),
                             ),
-                          _AreaCard(
-                            item: const _DashboardItem(
-                              title: 'Dokumente',
-                              subtitle: 'Scans',
-                              description: 'Gescannte Unterlagen',
-                              icon: GpIcons.scan,
-                              route: '/documents',
-                              colors: GpColors.indigo,
-                            ),
-                            onTap: () => context.go('/documents'),
-                          ),
-                          _AreaCard(
-                            item: const _DashboardItem(
-                              title: 'Notfall',
-                              subtitle: 'Kontakte',
-                              description: 'Notfallkontakte',
-                              icon: GpIcons.emergency,
-                              route: '/emergency/setup',
-                              colors: GpColors.redGradient,
-                            ),
-                            onTap: () => context.go('/emergency/setup'),
-                          ),
-                          _AreaCard(
-                            item: const _DashboardItem(
-                              title: 'Demenz',
-                              subtitle: 'Unterstützung',
-                              description: 'Alltag und Hinweise',
-                              icon: Icons.elderly_outlined,
-                              route: '/dementia',
-                              colors: GpColors.green,
-                            ),
-                            onTap: () => context.go('/dementia'),
-                          ),
-                          _AreaCard(
-                            item: const _DashboardItem(
-                              title: 'Speicher',
-                              subtitle: 'Lokal',
-                              description: 'Lokale Daten',
-                              icon: Icons.storage_outlined,
-                              route: '/privacy/storage',
-                              colors: GpColors.grayDark,
-                            ),
-                            onTap: () => context.go('/privacy/storage'),
-                          ),
                         ],
                       ),
                       const SizedBox(height: 28),
-                      _DashboardFooter(
-                        onOnboarding: () => context.go('/onboarding'),
-                        onPrivacy: () => context.go('/privacy'),
-                        onStorage: () => context.go('/privacy/storage'),
-                      ),
+                      const GpFooter(),
                     ],
                   ),
                 ),
@@ -427,114 +381,6 @@ class _EmergencyButton extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _DashboardFooter extends StatelessWidget {
-  const _DashboardFooter({
-    required this.onOnboarding,
-    required this.onPrivacy,
-    required this.onStorage,
-  });
-
-  final VoidCallback onOnboarding;
-  final VoidCallback onPrivacy;
-  final VoidCallback onStorage;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        _GradientSurface(
-          colors: GpColors.blueIndigo,
-          radius: 8,
-          onTap: onOnboarding,
-          child: const SizedBox(
-            height: 44,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.play_arrow_outlined, color: Colors.white, size: 22),
-                SizedBox(width: 8),
-                Flexible(
-                  child: Text(
-                    'Demo / Onboarding starten',
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(height: 14),
-        Wrap(
-          alignment: WrapAlignment.center,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          spacing: 12,
-          runSpacing: 6,
-          children: [
-            _FooterLink(label: 'Datenschutz', onTap: onPrivacy),
-            const Text('•', style: TextStyle(color: GpColors.textSecondary)),
-            _FooterLink(
-              label: 'Speicher-Modus',
-              icon: Icons.shield_outlined,
-              onTap: onStorage,
-            ),
-            const Text('•', style: TextStyle(color: GpColors.textSecondary)),
-            const Text(
-              'Kontakt',
-              style: TextStyle(color: GpColors.textSecondary, fontSize: 12),
-            ),
-          ],
-        ),
-        const SizedBox(height: 10),
-        const Text(
-          'Eine Initiative für Ihre Gesundheit',
-          textAlign: TextAlign.center,
-          style: TextStyle(color: GpColors.textSecondary, fontSize: 12),
-        ),
-      ],
-    );
-  }
-}
-
-class _FooterLink extends StatelessWidget {
-  const _FooterLink({required this.label, required this.onTap, this.icon});
-
-  final String label;
-  final IconData? icon;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(4),
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 4),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (icon != null) ...[
-              Icon(icon, size: 13, color: GpColors.textSecondary),
-              const SizedBox(width: 3),
-            ],
-            Text(
-              label,
-              style: const TextStyle(
-                color: GpColors.textSecondary,
-                fontSize: 12,
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

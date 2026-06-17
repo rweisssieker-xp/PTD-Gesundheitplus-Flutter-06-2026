@@ -8,7 +8,7 @@
 | Behandlungshistorie | `/health/treatments` | Health record | implemented | User can create, list, delete, and sort treatments by date. |
 | Heilberufe | `/health/professionals` | Health record | implemented | User can create, list, and delete local healthcare professionals. |
 | Allergien | `/health/allergies` | Health record | implemented | User can create, edit, group, list, and delete local allergies with severity warnings. |
-| Termine | `/appointments` | Appointments | implemented | User can create, list, complete, delete, and schedule native local reminders for appointments. |
+| Termine | `/appointments` | Appointments | implemented | User can create, list, complete, delete, schedule native local reminders, and export appointments as local `.ics` calendar files. |
 | Medikation | `/medication` | Medication management | implemented | User can add, edit, deactivate, delete, and list local medications with native local reminder scheduling. |
 | Medikamenten-Tagesplan | `/medication/daily-plan` | Medication management | implemented | User can generate daily medication logs and mark intake as taken or skipped. |
 | Medikations-Interaktionen | `/medication/interactions` | Medication safety and interactions | implemented | User can create and review stored local interaction guidance. |

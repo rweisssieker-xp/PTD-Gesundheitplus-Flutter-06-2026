@@ -29,7 +29,12 @@ class GpScreen extends StatelessWidget {
           GpHeader(
             leading: showNavigation ? const _GpBackHomeButtons() : null,
             actions:
-                actions ?? const [_GpNotificationButton(), _GpSettingsButton()],
+                actions ??
+                const [
+                  GpLanguageButton(),
+                  _GpNotificationButton(),
+                  _GpSettingsButton(),
+                ],
           ),
           Expanded(
             child: DecoratedBox(
