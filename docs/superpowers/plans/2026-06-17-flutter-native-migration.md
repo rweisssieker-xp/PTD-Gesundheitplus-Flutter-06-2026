@@ -6,7 +6,7 @@
 
 **Architecture:** Create a new Flutter app next to the PWA and migrate by domain modules, not by copying React files. The first implementation pass establishes app shell, theme, local encrypted persistence boundaries, security unlock, notifications, AI consent, emergency flows, and feature parity tracking; feature modules then fill in screens and repositories behind stable interfaces.
 
-**Tech Stack:** Flutter, Dart, Material 3, GoRouter, Riverpod, Drift/SQLite, flutter_secure_storage, local_auth, flutter_local_notifications, permission_handler, geolocator, share_plus, url_launcher, mobile_scanner/image_picker, qr_flutter, dio, flutter_test, integration_test.
+**Tech Stack:** Flutter, Dart, Material 3, GoRouter, Riverpod, SQLite, flutter_secure_storage, local_auth, flutter_local_notifications, permission_handler, geolocator, share_plus, url_launcher, mobile_scanner/image_picker, qr_flutter, dio, flutter_test, integration_test.
 
 ---
 
@@ -58,8 +58,6 @@ dependencies:
     sdk: flutter
   cupertino_icons: ^1.0.8
   dio: ^5.7.0
-  drift: ^2.22.1
-  drift_flutter: ^0.2.4
   flutter_local_notifications: ^18.0.1
   flutter_riverpod: ^2.6.1
   flutter_secure_storage: ^9.2.2
@@ -82,10 +80,8 @@ dev_dependencies:
     sdk: flutter
   integration_test:
     sdk: flutter
-  build_runner: ^2.4.13
-  drift_dev: ^2.22.1
   flutter_lints: ^5.0.0
-  json_serializable: ^6.9.0
+  sqlite3: ^2.9.4
 ```
 
 - [ ] **Step 3: Run dependency resolution**
@@ -739,7 +735,7 @@ QueryExecutor _openConnection() {
 Run:
 
 ```powershell
-dart run build_runner build --delete-conflicting-outputs
+dart build
 ```
 
 Expected: `app_database.g.dart` is generated.
