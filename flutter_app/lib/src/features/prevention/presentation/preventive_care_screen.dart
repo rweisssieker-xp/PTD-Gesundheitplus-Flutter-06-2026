@@ -39,11 +39,12 @@ class _PreventiveCareScreenState extends ConsumerState<PreventiveCareScreen> {
             Center(child: Text('Datenbankfehler: $error')),
         data: (db) {
           final repo = PreventionRepository(db);
-          return FutureBuilder<List<PreventiveCareItem>>(
+          return FutureBuilder<PreventiveCareSnapshot>(
             key: ValueKey(_reload),
-            future: repo.listPreventiveCare(),
+            future: repo.snapshot(),
             builder: (context, snapshot) {
-              final items = snapshot.data ?? [];
+              final items = snapshot.data?.items ?? [];
+              final recommendations = snapshot.data?.recommendations ?? [];
               final due = items.where((item) => item.isDue).length;
               return ListView(
                 padding: const EdgeInsets.all(16),
@@ -85,6 +86,15 @@ class _PreventiveCareScreenState extends ConsumerState<PreventiveCareScreen> {
                     ),
                   ),
                   const SizedBox(height: 16),
+                  if (recommendations.isNotEmpty) ...[
+                    _RecommendationPanel(
+                      recommendations: recommendations.take(5).toList(),
+                      onPlan: (recommendation) async {
+                        await _planRecommendation(repo, recommendation);
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                  ],
                   if (items.isEmpty)
                     const Card(
                       child: Padding(
@@ -180,6 +190,168 @@ class _PreventiveCareScreenState extends ConsumerState<PreventiveCareScreen> {
 
   Future<void> _cancelPreventiveCareReminder(PreventiveCareItem item) {
     return _notifications.cancelPreventiveCareReminder(item.id);
+  }
+
+  Future<void> _planRecommendation(
+    PreventionRepository repo,
+    PreventionRecommendation recommendation,
+  ) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final item = await repo.addPreventiveCare(
+      title: recommendation.title,
+      category: recommendation.category,
+      dueAt: recommendation.dueAt,
+      intervalMonths: recommendation.intervalMonths,
+      doctorName: recommendation.doctorName,
+      notes: recommendation.reason,
+    );
+    try {
+      await _schedulePreventiveCareReminder(item);
+    } catch (_) {
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Empfehlung geplant, Erinnerung konnte nicht erstellt werden.',
+          ),
+        ),
+      );
+    }
+    if (!mounted) return;
+    setState(() => _reload++);
+    messenger.showSnackBar(
+      SnackBar(content: Text('${recommendation.title} geplant.')),
+    );
+  }
+}
+
+class _RecommendationPanel extends StatelessWidget {
+  const _RecommendationPanel({
+    required this.recommendations,
+    required this.onPlan,
+  });
+
+  final List<PreventionRecommendation> recommendations;
+  final ValueChanged<PreventionRecommendation> onPlan;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: const Color(0xFFF0FDF4),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+        side: const BorderSide(color: Color(0xFFBBF7D0)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Row(
+              children: [
+                Icon(Icons.auto_awesome_outlined, color: Color(0xFF16A34A)),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Lokale Vorsorge-Empfehlungen',
+                    style: TextStyle(
+                      color: GpColors.textPrimary,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            const Text(
+              'Basierend auf Alter, lokalen Impfungen und geplanten Vorsorgen.',
+              style: TextStyle(color: GpColors.textSecondary, fontSize: 12),
+            ),
+            const SizedBox(height: 12),
+            for (final recommendation in recommendations)
+              _RecommendationTile(
+                recommendation: recommendation,
+                onPlan: () => onPlan(recommendation),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _RecommendationTile extends StatelessWidget {
+  const _RecommendationTile({
+    required this.recommendation,
+    required this.onPlan,
+  });
+
+  final PreventionRecommendation recommendation;
+  final VoidCallback onPlan;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = recommendation.isHighPriority
+        ? GpColors.emergencyRed
+        : GpColors.green.first;
+    return Container(
+      margin: const EdgeInsets.only(top: 8),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: const Color(0xFFE5E7EB)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(
+                recommendation.category == 'Impfung'
+                    ? GpIcons.vaccination
+                    : GpIcons.prevention,
+                color: color,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      recommendation.title,
+                      style: const TextStyle(
+                        color: GpColors.textPrimary,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    Text(
+                      '${recommendation.category} • ${recommendation.urgency}',
+                      style: TextStyle(
+                        color: color,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              TextButton.icon(
+                onPressed: onPlan,
+                icon: const Icon(Icons.add_task_outlined, size: 18),
+                label: const Text('Planen'),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            recommendation.reason,
+            style: const TextStyle(color: GpColors.textSecondary, fontSize: 13),
+          ),
+        ],
+      ),
+    );
   }
 }
 

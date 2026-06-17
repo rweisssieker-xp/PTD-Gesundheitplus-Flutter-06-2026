@@ -48,3 +48,35 @@ class PreventiveCareItem {
 
   bool get isDue => !isDone && !dueAt.isAfter(DateTime.now());
 }
+
+class PreventionRecommendation {
+  const PreventionRecommendation({
+    required this.title,
+    required this.category,
+    required this.reason,
+    required this.urgency,
+    required this.dueAt,
+    this.intervalMonths,
+    this.doctorName,
+  });
+
+  final String title;
+  final String category;
+  final String reason;
+  final String urgency;
+  final DateTime dueAt;
+  final int? intervalMonths;
+  final String? doctorName;
+
+  bool get isHighPriority => urgency == 'hoch';
+}
+
+class PreventiveCareSnapshot {
+  const PreventiveCareSnapshot({
+    required this.items,
+    required this.recommendations,
+  });
+
+  final List<PreventiveCareItem> items;
+  final List<PreventionRecommendation> recommendations;
+}
