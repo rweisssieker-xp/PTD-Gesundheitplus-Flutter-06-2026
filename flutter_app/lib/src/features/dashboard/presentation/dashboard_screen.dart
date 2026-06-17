@@ -1,99 +1,113 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/localization/app_language.dart';
+import '../../../core/localization/app_language_controller.dart';
 import '../../../shared_ui/gp_colors.dart';
 import '../../../shared_ui/gp_footer.dart';
 import '../../../shared_ui/gp_header.dart';
 import '../../../shared_ui/gp_icons.dart';
 
-class DashboardScreen extends StatefulWidget {
+class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
 
   @override
-  State<DashboardScreen> createState() => _DashboardScreenState();
+  ConsumerState<DashboardScreen> createState() => _DashboardScreenState();
 }
 
-class _DashboardScreenState extends State<DashboardScreen> {
+class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   late final PageController _pageController;
   int _currentIndex = 0;
+  static const _featuredItemCount = 10;
 
-  static final List<_DashboardItem> _featuredItems = [
+  List<_DashboardItem> _featuredItems(AppLanguage language) => [
     _DashboardItem(
-      title: 'Anamnese',
-      subtitle: 'Gesundheitsdaten',
-      description: 'Medizinische Vorgeschichte',
+      title: language.t(AppText.anamnesis),
+      subtitle: language.t(AppText.anamnesisSubtitle),
+      description: language.t(AppText.anamnesisDesc),
+      openLabel: language.t(AppText.open),
       icon: GpIcons.anamnesis,
       route: '/health/anamnesis',
       colors: GpColors.blue,
     ),
     _DashboardItem(
-      title: 'Heilberufe',
-      subtitle: 'Ärzte & Therapeuten',
-      description: 'Ärzte und Therapeuten',
+      title: language.t(AppText.healthcare),
+      subtitle: language.t(AppText.healthcareSubtitle),
+      description: language.t(AppText.healthcareDesc),
+      openLabel: language.t(AppText.open),
       icon: GpIcons.healthcare,
       route: '/health/professionals',
       colors: GpColors.green,
     ),
     _DashboardItem(
-      title: 'Behandlungshistorie',
-      subtitle: 'Behandlungen',
-      description: 'Behandlungshistorie',
+      title: language.t(AppText.treatmentHistory),
+      subtitle: language.t(AppText.treatmentHistorySubtitle),
+      description: language.t(AppText.treatmentHistoryDesc),
+      openLabel: language.t(AppText.open),
       icon: GpIcons.treatmentHistory,
       route: '/health/treatments',
       colors: GpColors.teal,
     ),
     _DashboardItem(
-      title: 'Impfpass',
-      subtitle: 'Impfungen',
-      description: 'Impfschutz und Nachweise',
+      title: language.t(AppText.vaccination),
+      subtitle: language.t(AppText.vaccinationSubtitle),
+      description: language.t(AppText.vaccinationDesc),
+      openLabel: language.t(AppText.open),
       icon: GpIcons.vaccination,
       route: '/prevention/vaccination',
       colors: GpColors.purple,
     ),
     _DashboardItem(
-      title: 'Medikation',
-      subtitle: 'Medikamente',
-      description: 'Einnahme und Bestand',
+      title: language.t(AppText.medication),
+      subtitle: language.t(AppText.medicationSubtitle),
+      description: language.t(AppText.medicationDesc),
+      openLabel: language.t(AppText.open),
       icon: GpIcons.medication,
       route: '/medication',
       colors: GpColors.orange,
     ),
     _DashboardItem(
-      title: 'Termine',
-      subtitle: 'Arzttermine',
-      description: 'Planung und Erinnerungen',
+      title: language.t(AppText.appointments),
+      subtitle: language.t(AppText.appointmentsSubtitle),
+      description: language.t(AppText.appointmentsDesc),
+      openLabel: language.t(AppText.open),
       icon: GpIcons.appointments,
       route: '/appointments',
       colors: GpColors.redGradient,
     ),
     _DashboardItem(
-      title: 'Allergien',
-      subtitle: 'Warnhinweise',
-      description: 'Allergien und Risiken',
+      title: language.t(AppText.allergies),
+      subtitle: language.t(AppText.allergiesSubtitle),
+      description: language.t(AppText.allergiesDesc),
+      openLabel: language.t(AppText.open),
       icon: GpIcons.allergies,
       route: '/health/allergies',
       colors: GpColors.yellow,
     ),
     _DashboardItem(
-      title: 'Vorsorge',
-      subtitle: 'Checkups',
-      description: 'Vorsorge und Prävention',
+      title: language.t(AppText.prevention),
+      subtitle: language.t(AppText.preventionSubtitle),
+      description: language.t(AppText.preventionDesc),
+      openLabel: language.t(AppText.open),
       icon: GpIcons.prevention,
       route: '/prevention/care',
       colors: GpColors.indigo,
     ),
     _DashboardItem(
-      title: 'Blutdruck',
-      subtitle: 'Messwerte',
-      description: 'Blutdruck und Puls',
+      title: language.t(AppText.bloodPressure),
+      subtitle: language.t(AppText.bloodPressureSubtitle),
+      description: language.t(AppText.bloodPressureDesc),
+      openLabel: language.t(AppText.open),
       icon: GpIcons.bloodPressure,
       route: '/vitals/blood-pressure',
       colors: GpColors.rose,
     ),
     _DashboardItem(
-      title: 'Gewicht',
-      subtitle: 'BMI & Verlauf',
-      description: 'Gewichtskontrolle',
+      title: language.t(AppText.weight),
+      subtitle: language.t(AppText.weightSubtitle),
+      description: language.t(AppText.weightDesc),
+      openLabel: language.t(AppText.open),
       icon: GpIcons.weight,
       route: '/vitals/weight',
       colors: GpColors.violet,
@@ -114,6 +128,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final language =
+        ref.watch(appLanguageControllerProvider).valueOrNull ?? AppLanguage.de;
+    final featuredItems = _featuredItems(language);
+    if (_currentIndex >= featuredItems.length) {
+      _currentIndex = 0;
+    }
     return Scaffold(
       body: Column(
         children: [
@@ -170,13 +190,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             onTap: () => context.go('/ai/coach'),
                           ),
                           _GradientActionTile(
-                            label: 'Dokument scannen',
+                            label: language.t(AppText.scanDocument),
                             icon: GpIcons.scan,
                             colors: GpColors.indigo,
                             onTap: () => context.go('/documents/scan'),
                           ),
                           _GradientActionTile(
-                            label: 'Tagesplan',
+                            label: language.t(AppText.dailyPlan),
                             icon: GpIcons.dailyPlan,
                             colors: GpColors.orange,
                             onTap: () => context.go('/medication/daily-plan'),
@@ -202,13 +222,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             ),
                         children: [
                           _GradientActionTile(
-                            label: 'Familienkreis',
+                            label: language.t(AppText.familyCircle),
                             icon: GpIcons.family,
                             colors: GpColors.teal,
                             onTap: () => context.go('/family'),
                           ),
                           _GradientActionTile(
-                            label: 'Wechselwirkungen',
+                            label: language.t(AppText.interactionCheck),
                             icon: GpIcons.interactions,
                             colors: GpColors.amberOrange,
                             onTap: () =>
@@ -217,33 +237,36 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         ],
                       ),
                       const SizedBox(height: 12),
-                      _ExportButton(onTap: () => context.go('/export')),
+                      _ExportButton(
+                        label: language.t(AppText.healthExport),
+                        onTap: () => context.go('/export'),
+                      ),
                       const SizedBox(height: 14),
                       _FeatureCarousel(
                         controller: _pageController,
-                        item: _featuredItems[_currentIndex],
+                        item: featuredItems[_currentIndex],
                         onOpen: () =>
-                            context.go(_featuredItems[_currentIndex].route),
+                            context.go(featuredItems[_currentIndex].route),
                         onPrevious: () => _goToPage(_currentIndex - 1),
                         onNext: () => _goToPage(_currentIndex + 1),
                         onChanged: (index) =>
                             setState(() => _currentIndex = index),
                         itemBuilder: (context, index) => _FeatureCard(
-                          item: _featuredItems[index],
-                          onOpen: () => context.go(_featuredItems[index].route),
+                          item: featuredItems[index],
+                          onOpen: () => context.go(featuredItems[index].route),
                         ),
-                        itemCount: _featuredItems.length,
+                        itemCount: featuredItems.length,
                       ),
                       const SizedBox(height: 24),
                       _PageDots(
-                        count: _featuredItems.length,
+                        count: featuredItems.length,
                         index: _currentIndex,
                         onTap: _goToPage,
                       ),
                       const SizedBox(height: 20),
-                      const Text(
-                        'ALLE BEREICHE',
-                        style: TextStyle(
+                      Text(
+                        language.t(AppText.allAreas),
+                        style: const TextStyle(
                           color: GpColors.textSecondary,
                           fontSize: 12,
                           fontWeight: FontWeight.w800,
@@ -259,7 +282,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         mainAxisSpacing: 12,
                         childAspectRatio: 1.28,
                         children: [
-                          for (final item in _featuredItems)
+                          for (final item in featuredItems)
                             _AreaCard(
                               item: item,
                               onTap: () => context.go(item.route),
@@ -280,7 +303,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   void _goToPage(int index) {
-    final target = (index + _featuredItems.length) % _featuredItems.length;
+    final target = (index + _featuredItemCount) % _featuredItemCount;
     _pageController.animateToPage(
       target,
       duration: const Duration(milliseconds: 260),
@@ -294,6 +317,7 @@ class _DashboardItem {
     required this.title,
     required this.subtitle,
     required this.description,
+    required this.openLabel,
     required this.icon,
     required this.route,
     required this.colors,
@@ -302,6 +326,7 @@ class _DashboardItem {
   final String title;
   final String subtitle;
   final String description;
+  final String openLabel;
   final IconData icon;
   final String route;
   final List<Color> colors;
@@ -433,8 +458,9 @@ class _GradientActionTile extends StatelessWidget {
 }
 
 class _ExportButton extends StatelessWidget {
-  const _ExportButton({required this.onTap});
+  const _ExportButton({required this.label, required this.onTap});
 
+  final String label;
   final VoidCallback onTap;
 
   @override
@@ -443,18 +469,18 @@ class _ExportButton extends StatelessWidget {
       colors: GpColors.grayDark,
       radius: 8,
       onTap: onTap,
-      child: const SizedBox(
+      child: SizedBox(
         height: 56,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(GpIcons.export, color: Colors.white, size: 22),
-            SizedBox(width: 10),
+            const Icon(GpIcons.export, color: Colors.white, size: 22),
+            const SizedBox(width: 10),
             Flexible(
               child: Text(
-                'Gesundheitsakte exportieren',
+                label,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 14,
                   fontWeight: FontWeight.w800,
@@ -551,13 +577,13 @@ class _FeatureCard extends StatelessWidget {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 74, vertical: 32),
+              padding: const EdgeInsets.symmetric(horizontal: 56, vertical: 24),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Container(
-                    width: 96,
-                    height: 96,
+                    width: 88,
+                    height: 88,
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         begin: Alignment.topLeft,
@@ -573,49 +599,62 @@ class _FeatureCard extends StatelessWidget {
                         ),
                       ],
                     ),
-                    child: Icon(item.icon, color: Colors.white, size: 48),
+                    child: Icon(item.icon, color: Colors.white, size: 44),
                   ),
-                  const SizedBox(height: 22),
-                  Text(
-                    item.title,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      color: GpColors.textPrimary,
-                      fontSize: 30,
-                      fontWeight: FontWeight.w900,
+                  const SizedBox(height: 18),
+                  Flexible(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        item.title,
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        style: const TextStyle(
+                          color: GpColors.textPrimary,
+                          fontSize: 30,
+                          fontWeight: FontWeight.w900,
+                          height: 1.05,
+                        ),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     item.subtitle,
                     textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       color: GpColors.textSecondary,
                       fontSize: 18,
+                      height: 1.15,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     item.description,
                     textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       color: Color(0xFF6B7280),
                       fontSize: 14,
+                      height: 1.15,
                     ),
                   ),
-                  const SizedBox(height: 22),
+                  const SizedBox(height: 18),
                   _GradientSurface(
                     colors: item.colors,
                     radius: 8,
                     onTap: onOpen,
-                    child: const Padding(
-                      padding: EdgeInsets.symmetric(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
                         horizontal: 34,
                         vertical: 15,
                       ),
                       child: Text(
-                        'Öffnen',
-                        style: TextStyle(
+                        item.openLabel,
+                        style: const TextStyle(
                           color: Colors.white,
                           fontSize: 18,
                           fontWeight: FontWeight.w800,

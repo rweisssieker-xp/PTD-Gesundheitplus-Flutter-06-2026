@@ -25,6 +25,7 @@ void main() {
         'emergency_contacts',
         'notifications',
         'consent_settings',
+        'app_preferences',
         'ai_coach_messages',
         'communication_preferences',
         'family_members',

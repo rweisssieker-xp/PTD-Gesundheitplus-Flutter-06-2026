@@ -7,7 +7,7 @@ Date: 2026-06-17
 - `flutter doctor -v`: no issues after installing Android SDK command-line tools and accepting Android licenses.
 - `dart format lib test`: clean.
 - `flutter analyze`: no issues.
-- `flutter test`: 59 tests passed.
+- `flutter test`: 61 tests passed.
 - `flutter build apk --debug`: built successfully.
 - `flutter build apk --release`: built successfully with local release keystore.
 - `flutter build appbundle --release`: built successfully with local release keystore.
@@ -43,6 +43,7 @@ The native Flutter shell now mirrors the PWA layout pattern with a white header,
 - Medication, appointment, preventive-care, and dementia-support reminders are scheduled as native local notifications on-device.
 - The notification center shows system notification permission state and links blocked users to app settings.
 - The iOS bundle display name is set to `Gesundheit Plus`.
+- The PWA language switcher is backed by a local on-device preference and translates the native dashboard entry points for German, English, Turkish, Arabic, and Ukrainian.
 - Emergency contacts expose native phone, SMS, and current-location SMS handoff actions from the emergency profile and offline emergency views.
 - Anamnesis entries can be encoded into an offline-readable local QR payload for physician handoff.
 - Appointments can be exported on-device as `.ics` calendar files for native calendar app handoff.

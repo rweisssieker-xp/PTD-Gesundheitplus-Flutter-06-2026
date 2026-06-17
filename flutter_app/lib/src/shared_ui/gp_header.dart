@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../core/localization/app_language.dart';
+import '../core/localization/app_language_controller.dart';
 import 'gp_colors.dart';
 
 class GpHeader extends StatelessWidget {
@@ -146,36 +149,43 @@ class _LocalBadge extends StatelessWidget {
   }
 }
 
-class GpLanguageButton extends StatelessWidget {
+class GpLanguageButton extends ConsumerWidget {
   const GpLanguageButton({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return IconButton(
       tooltip: 'Sprache',
       onPressed: () => showModalBottomSheet<void>(
         context: context,
         showDragHandle: true,
-        builder: (context) => SafeArea(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 448),
-            child: ListView(
-              shrinkWrap: true,
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-              children: const [
-                ListTile(
-                  leading: Icon(Icons.language_outlined),
-                  title: Text('Sprache'),
-                  subtitle: Text('Lokale Anzeigeoptionen'),
+        builder: (context) => Consumer(
+          builder: (context, ref, _) {
+            final selected =
+                ref.watch(appLanguageControllerProvider).valueOrNull ??
+                AppLanguage.de;
+            return SafeArea(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 448),
+                child: ListView(
+                  shrinkWrap: true,
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                  children: [
+                    const ListTile(
+                      leading: Icon(Icons.language_outlined),
+                      title: Text('Sprache'),
+                      subtitle: Text('Lokale Anzeigeoptionen'),
+                    ),
+                    for (final language in AppLanguage.values)
+                      _LanguageOption(
+                        language: language,
+                        selected: language == selected,
+                      ),
+                  ],
                 ),
-                _LanguageOption(label: 'Deutsch', selected: true),
-                _LanguageOption(label: 'English'),
-                _LanguageOption(label: 'Türkçe'),
-                _LanguageOption(label: 'العربية'),
-                _LanguageOption(label: 'Українська'),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         ),
       ),
       icon: const Icon(Icons.language_outlined),
@@ -184,19 +194,27 @@ class GpLanguageButton extends StatelessWidget {
 }
 
 class _LanguageOption extends StatelessWidget {
-  const _LanguageOption({required this.label, this.selected = false});
+  const _LanguageOption({required this.language, this.selected = false});
 
-  final String label;
+  final AppLanguage language;
   final bool selected;
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      leading: selected
-          ? const Icon(Icons.check_circle, color: GpColors.emergencyRed)
-          : const SizedBox(width: 24),
-      title: Text(label),
-      onTap: () => Navigator.of(context).pop(),
+    return Consumer(
+      builder: (context, ref, _) => ListTile(
+        leading: selected
+            ? const Icon(Icons.check_circle, color: GpColors.emergencyRed)
+            : const SizedBox(width: 24),
+        title: Text('${language.flag} ${language.label}'),
+        onTap: () async {
+          final navigator = Navigator.of(context);
+          await ref
+              .read(appLanguageControllerProvider.notifier)
+              .setLanguage(language);
+          navigator.pop();
+        },
+      ),
     );
   }
 }

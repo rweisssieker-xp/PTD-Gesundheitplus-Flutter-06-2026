@@ -2,7 +2,7 @@
 
 | PWA Page | Flutter Route | Feature Group | Status | Acceptance Signal |
 | --- | --- | --- | --- | --- |
-| Home | `/` | Dashboard and navigation | implemented | User can reach primary dashboard actions from a native dashboard that mirrors the PWA mobile layout, colors, icons, and shell controls. |
+| Home | `/` | Dashboard and navigation | implemented | User can reach primary dashboard actions from a native dashboard that mirrors the PWA mobile layout, colors, icons, shell controls, and locally persisted language switching. |
 | Gesundheits-Dashboard | `/dashboard/health` | Dashboard and navigation | implemented | User sees local summary cards for medication, appointments, vital values, and alerts. |
 | Anamnese | `/health/anamnesis` | Health record | implemented | User can create, list, delete, and share local medical history entries through an offline-readable QR payload. |
 | Behandlungshistorie | `/health/treatments` | Health record | implemented | User can create, list, delete, and sort treatments by date. |

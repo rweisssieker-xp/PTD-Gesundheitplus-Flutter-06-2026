@@ -312,6 +312,13 @@ class AppDatabase {
       );
     ''');
     _db.execute('''
+      CREATE TABLE IF NOT EXISTS app_preferences (
+        id TEXT PRIMARY KEY,
+        language_code TEXT NOT NULL DEFAULT 'de',
+        updated_at TEXT NOT NULL
+      );
+    ''');
+    _db.execute('''
       CREATE TABLE IF NOT EXISTS ai_coach_messages (
         id TEXT PRIMARY KEY,
         role TEXT NOT NULL,

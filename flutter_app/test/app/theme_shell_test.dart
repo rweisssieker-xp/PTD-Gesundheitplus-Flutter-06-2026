@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gesundheitplus/src/app/gesundheit_app.dart';
+import 'package:gesundheitplus/src/core/storage/app_database.dart';
+import 'package:gesundheitplus/src/core/storage/database_provider.dart';
 import 'package:gesundheitplus/src/core/security/app_lock_service.dart';
 import 'package:gesundheitplus/src/core/security/security_providers.dart';
+import 'package:gesundheitplus/src/features/dashboard/presentation/dashboard_screen.dart';
 
 void main() {
   testWidgets('renders Gesundheit Plus shell with red header', (tester) async {
@@ -24,6 +27,7 @@ void main() {
 
     expect(find.text('Gesundheit Plus'), findsOneWidget);
     expect(find.byTooltip('Sprache'), findsOneWidget);
+    expect(find.text('Dokument scannen'), findsOneWidget);
     final container = tester.widget<Container>(
       find.byKey(const Key('gp-header-red-border')),
     );
@@ -53,5 +57,27 @@ void main() {
 
     expect(find.text('Gesundheit Plus'), findsOneWidget);
     expect(find.text('Gesundheit Plus entsperren'), findsNothing);
+  });
+
+  testWidgets('language selector persists and translates dashboard labels', (
+    tester,
+  ) async {
+    final db = AppDatabase.memory();
+    addTearDown(db.close);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [appDatabaseProvider.overrideWith((ref) async => db)],
+        child: const MaterialApp(home: DashboardScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byTooltip('Sprache'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.textContaining('English'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Scan Document'), findsOneWidget);
   });
 }
