@@ -44,15 +44,18 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
                   : snapshot.data![1] as List<AiCoachMessage>;
               return Column(
                 children: [
-                  if (!consent)
-                    Container(
-                      width: double.infinity,
-                      color: GpColors.redSurface,
-                      padding: const EdgeInsets.all(12),
-                      child: const Text(
-                        'KI-Kontextfreigabe ist aus. Fragen werden lokal gespeichert, Gesundheitskontext bleibt gesperrt.',
-                      ),
+                  Container(
+                    width: double.infinity,
+                    color: consent
+                        ? const Color(0xFFF0FDF4)
+                        : GpColors.redSurface,
+                    padding: const EdgeInsets.all(12),
+                    child: Text(
+                      consent
+                          ? 'KI-Kontextfreigabe ist aktiv. Lokale Gesundheitsdaten werden nur für diese Antwort zusammengefasst; ein Online-KI-Dienst wird nur genutzt, wenn er in der App konfiguriert ist.'
+                          : 'KI-Kontextfreigabe ist aus. Fragen werden lokal gespeichert, Gesundheitskontext bleibt gesperrt.',
                     ),
+                  ),
                   Expanded(
                     child: ListView(
                       padding: const EdgeInsets.all(16),

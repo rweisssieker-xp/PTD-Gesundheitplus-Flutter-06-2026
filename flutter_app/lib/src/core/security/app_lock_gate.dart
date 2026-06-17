@@ -35,7 +35,12 @@ class _AppLockGateState extends ConsumerState<AppLockGate> {
   @override
   Widget build(BuildContext context) {
     if (_checking) {
-      return const Material(child: Center(child: CircularProgressIndicator()));
+      return const Material(
+        color: Colors.white,
+        child: Center(
+          child: CircularProgressIndicator(color: GpColors.emergencyRed),
+        ),
+      );
     }
     if (!_locked) return widget.child;
     return MaterialApp(
@@ -106,8 +111,16 @@ class _AppLockGateState extends ConsumerState<AppLockGate> {
 
   Future<void> _load() async {
     final lock = ref.read(appLockServiceProvider);
-    final hasPin = await lock.hasPin();
-    final biometricEnabled = hasPin && await lock.isBiometricEnabled();
+    final hasPin = await lock.hasPin().timeout(
+      const Duration(seconds: 3),
+      onTimeout: () => false,
+    );
+    final biometricEnabled = hasPin
+        ? await lock.isBiometricEnabled().timeout(
+            const Duration(seconds: 2),
+            onTimeout: () => false,
+          )
+        : false;
     if (!mounted) return;
     setState(() {
       _locked = hasPin;
