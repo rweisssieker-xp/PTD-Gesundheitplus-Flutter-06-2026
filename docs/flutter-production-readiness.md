@@ -7,7 +7,7 @@ Date: 2026-06-17
 - `flutter doctor -v`: no issues after installing Android SDK command-line tools and accepting Android licenses.
 - `dart format lib test`: clean.
 - `flutter analyze`: no issues.
-- `flutter test`: 75 tests passed.
+- `flutter test`: 78 tests passed.
 - `flutter build apk --debug`: built successfully.
 - `flutter build apk --release`: built successfully with local release keystore.
 - `flutter build appbundle --release`: built successfully with local release keystore.
@@ -53,6 +53,7 @@ The native Flutter shell now mirrors the PWA layout pattern with the first-run s
 - Preventive care exposes local age-based recommendations for due vaccinations and screenings, and can turn recommendations into local reminder-backed Vorsorge items.
 - Anamnesis entries can be encoded into an offline-readable local QR payload for physician handoff.
 - Appointments can be exported on-device as `.ics` calendar files for native calendar app handoff.
+- Appointments can be drafted from spoken-style German text using a deterministic on-device parser for doctor, date, time, reason, specialty, and location.
 - Family-circle check-ins store local safety status, optional notes, and optional current-device location text on-device.
 - Anamnesis, allergies, treatment history, healthcare professionals, appointments, medication, and vaccination screens expose native text-to-speech read-aloud summaries.
 - Scanned documents expose local rule-based medical insights, urgency labels, recognized medical areas, and suggested actions without sending document data off-device.

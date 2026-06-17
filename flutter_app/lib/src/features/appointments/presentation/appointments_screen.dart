@@ -15,6 +15,7 @@ import '../../../shared_ui/gp_voice_navigation.dart';
 import '../data/appointment_repository.dart';
 import '../domain/appointment.dart';
 import '../domain/appointment_ics_builder.dart';
+import '../domain/appointment_text_parser.dart';
 
 class AppointmentsScreen extends ConsumerStatefulWidget {
   const AppointmentsScreen({super.key});
@@ -26,6 +27,15 @@ class AppointmentsScreen extends ConsumerStatefulWidget {
 class _AppointmentsScreenState extends ConsumerState<AppointmentsScreen> {
   int _reload = 0;
   final _notifications = NativeNotificationService();
+  final _assistantText = TextEditingController();
+  AppointmentTextSuggestion? _assistantSuggestion;
+  String? _assistantError;
+
+  @override
+  void dispose() {
+    _assistantText.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -63,6 +73,16 @@ class _AppointmentsScreenState extends ConsumerState<AppointmentsScreen> {
                   const SizedBox(height: 12),
                   GpVoiceNavigation(
                     content: _appointmentVoiceContent(appointments, upcoming),
+                  ),
+                  const SizedBox(height: 16),
+                  _AppointmentTextAssistantCard(
+                    controller: _assistantText,
+                    suggestion: _assistantSuggestion,
+                    error: _assistantError,
+                    onParse: _parseAssistantText,
+                    onSave: _assistantSuggestion?.isComplete == true
+                        ? () => _saveAssistantSuggestion(repo)
+                        : null,
                   ),
                   const SizedBox(height: 16),
                   _CalendarExportCard(
@@ -146,6 +166,65 @@ class _AppointmentsScreenState extends ConsumerState<AppointmentsScreen> {
     });
   }
 
+  void _parseAssistantText() {
+    final input = _assistantText.text.trim();
+    if (input.isEmpty) {
+      setState(() {
+        _assistantSuggestion = null;
+        _assistantError = 'Bitte beschreiben Sie den Termin zuerst.';
+      });
+      return;
+    }
+    final suggestion = const AppointmentTextParser().parse(input);
+    setState(() {
+      _assistantSuggestion = suggestion;
+      _assistantError = suggestion.isComplete
+          ? null
+          : 'Fehlt noch: ${suggestion.missingFields.join(', ')}';
+    });
+  }
+
+  Future<void> _saveAssistantSuggestion(AppointmentRepository repo) async {
+    final suggestion = _assistantSuggestion;
+    if (suggestion == null || !suggestion.isComplete) {
+      _parseAssistantText();
+      return;
+    }
+    final appointment = repo.newAppointment(
+      doctorName: suggestion.doctorName!.trim(),
+      specialty: suggestion.specialty,
+      date: suggestion.date!,
+      time: suggestion.time!,
+      location: suggestion.location,
+      reason: suggestion.reason,
+      notes: 'Aus lokaler Texteingabe erstellt: ${suggestion.originalText}',
+    );
+    await repo.saveAppointment(appointment);
+    try {
+      await _scheduleAppointmentReminder(appointment);
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Termin gespeichert, Erinnerung konnte nicht geplant werden.',
+            ),
+          ),
+        );
+      }
+    }
+    if (!mounted) return;
+    _assistantText.clear();
+    setState(() {
+      _assistantSuggestion = null;
+      _assistantError = null;
+      _reload++;
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Termin aus Texteingabe gespeichert.')),
+    );
+  }
+
   bool _isToday(DateTime date) {
     final now = DateTime.now();
     return date.year == now.year &&
@@ -199,6 +278,183 @@ class _AppointmentsScreenState extends ConsumerState<AppointmentsScreen> {
     await Share.shareXFiles([
       XFile(file.path, mimeType: 'text/calendar', name: fileName),
     ]);
+  }
+}
+
+class _AppointmentTextAssistantCard extends StatelessWidget {
+  const _AppointmentTextAssistantCard({
+    required this.controller,
+    required this.suggestion,
+    required this.error,
+    required this.onParse,
+    required this.onSave,
+  });
+
+  final TextEditingController controller;
+  final AppointmentTextSuggestion? suggestion;
+  final String? error;
+  final VoidCallback onParse;
+  final VoidCallback? onSave;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: const Color(0xFFFDF2F8),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+        side: const BorderSide(color: Color(0xFFFBCFE8), width: 2),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.mic_outlined, color: Color(0xFFDB2777)),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Lokale Termineingabe',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Beschreiben Sie den Termin wie gesprochen. Die App erkennt Arzt, Datum, Uhrzeit und Grund direkt auf dem Gerät.',
+              style: TextStyle(color: GpColors.textSecondary, fontSize: 13),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: controller,
+              minLines: 2,
+              maxLines: 4,
+              decoration: const InputDecoration(
+                labelText: 'Termin beschreiben',
+                hintText:
+                    'Morgen um 14:30 bei Dr. Schmidt wegen Kontrolle in Berlin',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            if (suggestion != null) ...[
+              const SizedBox(height: 12),
+              _AppointmentSuggestionPreview(suggestion: suggestion!),
+            ],
+            if (error != null) ...[
+              const SizedBox(height: 10),
+              Text(
+                error!,
+                style: const TextStyle(
+                  color: GpColors.emergencyRed,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: onParse,
+                    icon: const Icon(Icons.auto_fix_high_outlined),
+                    label: const Text('Erkennen'),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: FilledButton.icon(
+                    onPressed: onSave,
+                    icon: const Icon(Icons.check),
+                    label: const Text('Speichern'),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _AppointmentSuggestionPreview extends StatelessWidget {
+  const _AppointmentSuggestionPreview({required this.suggestion});
+
+  final AppointmentTextSuggestion suggestion;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: GpColors.border, width: 2),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Erkannter Vorschlag',
+              style: TextStyle(fontWeight: FontWeight.w800),
+            ),
+            const SizedBox(height: 8),
+            _PreviewLine(
+              icon: Icons.person_outline,
+              label: suggestion.doctorName ?? 'Arzt fehlt',
+            ),
+            _PreviewLine(
+              icon: Icons.event_outlined,
+              label: suggestion.date == null
+                  ? 'Datum fehlt'
+                  : '${suggestion.date!.day}.${suggestion.date!.month}.${suggestion.date!.year}',
+            ),
+            _PreviewLine(
+              icon: Icons.schedule_outlined,
+              label: suggestion.time ?? 'Uhrzeit fehlt',
+            ),
+            if ((suggestion.specialty ?? '').isNotEmpty)
+              _PreviewLine(
+                icon: Icons.local_hospital_outlined,
+                label: suggestion.specialty!,
+              ),
+            if ((suggestion.location ?? '').isNotEmpty)
+              _PreviewLine(
+                icon: Icons.place_outlined,
+                label: suggestion.location!,
+              ),
+            if ((suggestion.reason ?? '').isNotEmpty)
+              _PreviewLine(icon: Icons.info_outline, label: suggestion.reason!),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PreviewLine extends StatelessWidget {
+  const _PreviewLine({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 4),
+      child: Row(
+        children: [
+          Icon(icon, size: 17, color: GpColors.textSecondary),
+          const SizedBox(width: 6),
+          Expanded(child: Text(label)),
+        ],
+      ),
+    );
   }
 }
 
