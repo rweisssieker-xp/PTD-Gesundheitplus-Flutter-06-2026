@@ -101,6 +101,18 @@ class DashboardScreen extends StatelessWidget {
                   icon: const Icon(GpIcons.weight),
                   label: const Text('Gewicht erfassen'),
                 ),
+                const SizedBox(height: 8),
+                OutlinedButton.icon(
+                  onPressed: () => context.go('/prevention/vaccination'),
+                  icon: const Icon(GpIcons.vaccination),
+                  label: const Text('Impfpass verwalten'),
+                ),
+                const SizedBox(height: 8),
+                OutlinedButton.icon(
+                  onPressed: () => context.go('/prevention/care'),
+                  icon: const Icon(GpIcons.prevention),
+                  label: const Text('Vorsorge planen'),
+                ),
               ],
             ),
           ),

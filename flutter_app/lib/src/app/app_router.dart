@@ -8,6 +8,8 @@ import '../features/emergency/domain/emergency_profile.dart';
 import '../features/emergency/presentation/emergency_profile_screen.dart';
 import '../features/medication/presentation/medication_daily_plan_screen.dart';
 import '../features/medication/presentation/medication_screen.dart';
+import '../features/prevention/presentation/preventive_care_screen.dart';
+import '../features/prevention/presentation/vaccination_screen.dart';
 import '../features/vitals/presentation/blood_pressure_screen.dart';
 import '../features/vitals/presentation/weight_screen.dart';
 import '../shared_ui/feature_shell_screen.dart';
@@ -65,11 +67,11 @@ final appRouter = GoRouter(
     ),
     GoRoute(
       path: '/prevention/vaccination',
-      builder: (context, state) => const FeatureShellScreen(title: 'Impfpass'),
+      builder: (context, state) => const VaccinationScreen(),
     ),
     GoRoute(
       path: '/prevention/care',
-      builder: (context, state) => const FeatureShellScreen(title: 'Vorsorge'),
+      builder: (context, state) => const PreventiveCareScreen(),
     ),
     GoRoute(
       path: '/emergency/profile',

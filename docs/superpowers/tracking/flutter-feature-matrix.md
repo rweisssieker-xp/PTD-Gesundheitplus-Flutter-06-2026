@@ -14,8 +14,8 @@
 | Wechselwirkungen-Checker | `/medication/interaction-checker` | Medication safety and interactions | not started | User can run an AI-supported interaction check after consent. |
 | Blutdruck | `/vitals/blood-pressure` | Vital values | implemented | User can log and list systolic, diastolic, and pulse values locally. |
 | Gewicht | `/vitals/weight` | Vital values | implemented | User can log weight locally and see BMI per entry when height is present. |
-| Impfpass | `/prevention/vaccination` | Prevention and vaccination | not started | User can manage vaccinations and health pass entries. |
-| Vorsorge | `/prevention/care` | Prevention and vaccination | not started | User can manage preventive care reminders. |
+| Impfpass | `/prevention/vaccination` | Prevention and vaccination | implemented | User can create and list local vaccination records with optional booster due date. |
+| Vorsorge | `/prevention/care` | Prevention and vaccination | implemented | User can create local preventive care reminders and mark them done. |
 | Notfallprofil | `/emergency/profile` | Emergency | implemented | Offline emergency payload builder, QR screen, route, and test coverage exist. |
 | Notfall-Einrichtung | `/emergency/setup` | Emergency | not started | User can manage emergency contacts. |
 | Offline-Notfall | `/emergency/offline` | Emergency | not started | Emergency screen works with airplane mode enabled. |

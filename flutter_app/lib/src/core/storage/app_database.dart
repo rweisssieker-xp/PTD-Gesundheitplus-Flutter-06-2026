@@ -178,6 +178,34 @@ class AppDatabase {
       );
     ''');
     _db.execute('''
+      CREATE TABLE IF NOT EXISTS vaccinations (
+        id TEXT PRIMARY KEY,
+        vaccine_name TEXT NOT NULL,
+        target_disease TEXT,
+        vaccinated_at TEXT NOT NULL,
+        next_due_at TEXT,
+        batch_number TEXT,
+        doctor_name TEXT,
+        notes TEXT,
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+      );
+    ''');
+    _db.execute('''
+      CREATE TABLE IF NOT EXISTS preventive_care_items (
+        id TEXT PRIMARY KEY,
+        title TEXT NOT NULL,
+        category TEXT NOT NULL,
+        due_at TEXT NOT NULL,
+        interval_months INTEGER,
+        status TEXT NOT NULL DEFAULT 'offen',
+        doctor_name TEXT,
+        notes TEXT,
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+      );
+    ''');
+    _db.execute('''
       CREATE TABLE IF NOT EXISTS emergency_contacts (
         id TEXT PRIMARY KEY,
         name TEXT NOT NULL,

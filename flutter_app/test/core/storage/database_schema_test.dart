@@ -15,6 +15,8 @@ void main() {
         'allergies',
         'blood_pressure_logs',
         'weight_logs',
+        'vaccinations',
+        'preventive_care_items',
         'emergency_contacts',
         'notifications',
         'consent_settings',

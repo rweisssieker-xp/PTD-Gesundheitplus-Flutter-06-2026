@@ -15,6 +15,8 @@ class AppTables {
   static const allergies = AppTable('allergies');
   static const bloodPressureLogs = AppTable('blood_pressure_logs');
   static const weightLogs = AppTable('weight_logs');
+  static const vaccinations = AppTable('vaccinations');
+  static const preventiveCareItems = AppTable('preventive_care_items');
   static const emergencyContacts = AppTable('emergency_contacts');
   static const notifications = AppTable('notifications');
   static const consentSettings = AppTable('consent_settings');
@@ -28,6 +30,8 @@ class AppTables {
     allergies,
     bloodPressureLogs,
     weightLogs,
+    vaccinations,
+    preventiveCareItems,
     emergencyContacts,
     notifications,
     consentSettings,
