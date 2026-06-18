@@ -10,6 +10,8 @@ import '../../../shared_ui/gp_colors.dart';
 import '../../../shared_ui/gp_icons.dart';
 import '../../../shared_ui/gp_screen.dart';
 import '../../../shared_ui/gp_voice_navigation.dart';
+import '../../health_record/data/health_record_repository.dart';
+import '../../health_record/domain/health_record.dart';
 import '../data/medication_repository.dart';
 import '../domain/medication.dart';
 import '../domain/medication_text_parser.dart';
@@ -46,11 +48,13 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen> {
             Center(child: Text('Datenbankfehler: $error')),
         data: (db) {
           final repo = MedicationRepository(db);
-          return FutureBuilder<List<Medication>>(
+          final healthRepo = HealthRecordRepository(db);
+          return FutureBuilder<_MedicationScreenData>(
             key: ValueKey(_reload),
-            future: repo.list(includeInactive: _showInactive),
+            future: _loadMedicationScreenData(repo, healthRepo),
             builder: (context, snapshot) {
-              final medications = snapshot.data ?? [];
+              final screenData = snapshot.data ?? _MedicationScreenData.empty();
+              final medications = screenData.medications;
               final activeCount = medications.where((med) => med.active).length;
               return ListView(
                 padding: const EdgeInsets.fromLTRB(24, 42, 24, 24),
@@ -58,6 +62,7 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen> {
                   const _MedicationPageTitle(),
                   const SizedBox(height: 20),
                   _AllergyInteractionCheckCard(
+                    checkResult: screenData.allergyCheck,
                     onCheck: () =>
                         context.go('/medication/interaction-checker'),
                   ),
@@ -263,6 +268,39 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen> {
       reminderTimes: medication.reminderTimes,
     );
   }
+
+  Future<_MedicationScreenData> _loadMedicationScreenData(
+    MedicationRepository medicationRepo,
+    HealthRecordRepository healthRepo,
+  ) async {
+    final results = await Future.wait<Object>([
+      medicationRepo.list(includeInactive: _showInactive),
+      healthRepo.checkMedicationAllergies(),
+    ]);
+    return _MedicationScreenData(
+      medications: results[0] as List<Medication>,
+      allergyCheck: results[1] as AllergyMedicationCheckResult,
+    );
+  }
+}
+
+class _MedicationScreenData {
+  const _MedicationScreenData({
+    required this.medications,
+    required this.allergyCheck,
+  });
+
+  factory _MedicationScreenData.empty() => _MedicationScreenData(
+    medications: const [],
+    allergyCheck: AllergyMedicationCheckResult(
+      activeMedicationCount: 0,
+      medicationAllergyCount: 0,
+      conflicts: const [],
+    ),
+  );
+
+  final List<Medication> medications;
+  final AllergyMedicationCheckResult allergyCheck;
 }
 
 String _medicationVoiceContent(List<Medication> medications) {
@@ -326,8 +364,12 @@ class _MedicationPageTitle extends StatelessWidget {
 }
 
 class _AllergyInteractionCheckCard extends StatelessWidget {
-  const _AllergyInteractionCheckCard({required this.onCheck});
+  const _AllergyInteractionCheckCard({
+    required this.checkResult,
+    required this.onCheck,
+  });
 
+  final AllergyMedicationCheckResult checkResult;
   final VoidCallback onCheck;
 
   @override
@@ -375,9 +417,13 @@ class _AllergyInteractionCheckCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 14),
-            const Text(
-              '0 Medikament(e) · 0 Medikamenten-Allergie(n)',
-              style: TextStyle(color: GpColors.textSecondary, fontSize: 13),
+            Text(
+              '${checkResult.activeMedicationCount} Medikament(e) · '
+              '${checkResult.medicationAllergyCount} Medikamenten-Allergie(n)',
+              style: const TextStyle(
+                color: GpColors.textSecondary,
+                fontSize: 13,
+              ),
             ),
             const SizedBox(height: 12),
             const Text(
