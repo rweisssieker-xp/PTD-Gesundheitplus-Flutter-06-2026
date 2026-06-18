@@ -46,46 +46,24 @@ class _PreventiveCareScreenState extends ConsumerState<PreventiveCareScreen> {
               final items = snapshot.data?.items ?? [];
               final recommendations = snapshot.data?.recommendations ?? [];
               final due = items.where((item) => item.isDue).length;
+              final upcoming = items.where(_isUpcoming).length;
+              final active = items.where((item) => !item.isDone).length;
               return ListView(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.fromLTRB(16, 20, 16, 96),
                 children: [
-                  DecoratedBox(
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(colors: GpColors.green),
-                      borderRadius: BorderRadius.circular(8),
+                  _PreventiveCareHeader(due: due),
+                  if (items.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    _ReminderStatsRow(
+                      active: active,
+                      upcoming: upcoming,
+                      total: items.length,
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(20),
-                      child: Row(
-                        children: [
-                          const Icon(
-                            GpIcons.prevention,
-                            color: Colors.white,
-                            size: 46,
-                          ),
-                          const SizedBox(width: 16),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'Vorsorgeplan',
-                                style: TextStyle(color: Colors.white70),
-                              ),
-                              Text(
-                                '$due faellig',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 28,
-                                  fontWeight: FontWeight.w800,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
+                    const SizedBox(height: 16),
+                    const _LocalReminderInfoCard(),
+                  ] else
+                    const SizedBox(height: 16),
+                  if (items.isNotEmpty) const SizedBox(height: 16),
                   if (recommendations.isNotEmpty) ...[
                     _RecommendationPanel(
                       recommendations: recommendations.take(5).toList(),
@@ -158,6 +136,13 @@ class _PreventiveCareScreenState extends ConsumerState<PreventiveCareScreen> {
     );
   }
 
+  bool _isUpcoming(PreventiveCareItem item) {
+    if (item.isDone) return false;
+    final now = DateTime.now();
+    final inThirtyDays = now.add(const Duration(days: 30));
+    return !item.dueAt.isBefore(now) && !item.dueAt.isAfter(inThirtyDays);
+  }
+
   Future<void> _openEditor(PreventionRepository repo) async {
     final saved = await showModalBottomSheet<bool>(
       context: context,
@@ -220,6 +205,219 @@ class _PreventiveCareScreenState extends ConsumerState<PreventiveCareScreen> {
     setState(() => _reload++);
     messenger.showSnackBar(
       SnackBar(content: Text('${recommendation.title} geplant.')),
+    );
+  }
+}
+
+class _PreventiveCareHeader extends StatelessWidget {
+  const _PreventiveCareHeader({required this.due});
+
+  final int due;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Row(
+          children: [
+            Icon(GpIcons.prevention, color: Color(0xFF4F46E5), size: 30),
+            SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Vorsorge & Praevention',
+                    style: TextStyle(
+                      color: GpColors.textPrimary,
+                      fontSize: 24,
+                      fontWeight: FontWeight.w900,
+                      height: 1.1,
+                    ),
+                  ),
+                  SizedBox(height: 3),
+                  Text(
+                    'Personalisierte Gesundheitsempfehlungen',
+                    style: TextStyle(
+                      color: GpColors.textSecondary,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 14),
+        DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(colors: GpColors.green),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Row(
+              children: [
+                const Icon(GpIcons.prevention, color: Colors.white, size: 46),
+                const SizedBox(width: 16),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Vorsorgeplan',
+                      style: TextStyle(color: Colors.white70),
+                    ),
+                    Text(
+                      '$due faellig',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 28,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ReminderStatsRow extends StatelessWidget {
+  const _ReminderStatsRow({
+    required this.active,
+    required this.upcoming,
+    required this.total,
+  });
+
+  final int active;
+  final int upcoming;
+  final int total;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: _ReminderStatTile(
+            icon: Icons.notifications_active_outlined,
+            value: '$active',
+            label: 'Aktive Reminder',
+            color: const Color(0xFF2563EB),
+            background: const Color(0xFFEFF6FF),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: _ReminderStatTile(
+            icon: Icons.calendar_month_outlined,
+            value: '$upcoming',
+            label: 'In 30 Tagen',
+            color: const Color(0xFFF97316),
+            background: const Color(0xFFFFF7ED),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: _ReminderStatTile(
+            icon: Icons.check_circle_outline,
+            value: '$total',
+            label: 'Gesamt',
+            color: const Color(0xFF16A34A),
+            background: const Color(0xFFF0FDF4),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ReminderStatTile extends StatelessWidget {
+  const _ReminderStatTile({
+    required this.icon,
+    required this.value,
+    required this.label,
+    required this.color,
+    required this.background,
+  });
+
+  final IconData icon;
+  final String value;
+  final String label;
+  final Color color;
+  final Color background;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 118,
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withValues(alpha: 0.25), width: 2),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, color: color, size: 22),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: TextStyle(
+              color: color,
+              fontSize: 22,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          Text(
+            label,
+            maxLines: 2,
+            textAlign: TextAlign.center,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: color,
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LocalReminderInfoCard extends StatelessWidget {
+  const _LocalReminderInfoCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: const Color(0xFFEFF6FF),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+        side: const BorderSide(color: Color(0xFFBFDBFE)),
+      ),
+      child: const Padding(
+        padding: EdgeInsets.all(14),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(Icons.info_outline, color: Color(0xFF2563EB)),
+            SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                'Erinnerungen werden lokal auf diesem Geraet geplant. Es gibt keinen Cloud-Sync und keine Server-Speicherung.',
+                style: TextStyle(color: Color(0xFF1D4ED8), fontSize: 13),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
