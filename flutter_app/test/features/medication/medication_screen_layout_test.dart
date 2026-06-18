@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:gesundheitplus/src/core/storage/app_database.dart';
 import 'package:gesundheitplus/src/core/storage/database_provider.dart';
 import 'package:gesundheitplus/src/features/medication/presentation/medication_screen.dart';
@@ -50,5 +51,41 @@ void main() {
       findsOneWidget,
     );
     expect(find.byType(FloatingActionButton), findsNothing);
+  });
+
+  testWidgets('medication allergy interaction CTA opens local checker', (
+    tester,
+  ) async {
+    final db = AppDatabase.memory();
+    addTearDown(db.close);
+
+    final router = GoRouter(
+      initialLocation: '/medication',
+      routes: [
+        GoRoute(
+          path: '/medication',
+          builder: (context, state) => const MedicationScreen(),
+        ),
+        GoRoute(
+          path: '/medication/interaction-checker',
+          builder: (context, state) => const Scaffold(
+            body: Center(child: Text('Lokaler Wechselwirkungscheck')),
+          ),
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [appDatabaseProvider.overrideWith((ref) async => db)],
+        child: MaterialApp.router(routerConfig: router),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Jetzt prüfen'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Lokaler Wechselwirkungscheck'), findsOneWidget);
   });
 }

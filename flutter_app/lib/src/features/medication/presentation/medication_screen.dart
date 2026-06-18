@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../core/notifications/native_notification_service.dart';
@@ -56,7 +57,10 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen> {
                 children: [
                   const _MedicationPageTitle(),
                   const SizedBox(height: 20),
-                  const _AllergyInteractionCheckCard(),
+                  _AllergyInteractionCheckCard(
+                    onCheck: () =>
+                        context.go('/medication/interaction-checker'),
+                  ),
                   const SizedBox(height: 16),
                   _MedicationSummary(activeCount: activeCount),
                   const SizedBox(height: 14),
@@ -322,7 +326,9 @@ class _MedicationPageTitle extends StatelessWidget {
 }
 
 class _AllergyInteractionCheckCard extends StatelessWidget {
-  const _AllergyInteractionCheckCard();
+  const _AllergyInteractionCheckCard({required this.onCheck});
+
+  final VoidCallback onCheck;
 
   @override
   Widget build(BuildContext context) {
@@ -359,7 +365,7 @@ class _AllergyInteractionCheckCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(6),
                     ),
                   ),
-                  onPressed: () {},
+                  onPressed: onCheck,
                   icon: const Icon(Icons.health_and_safety_outlined, size: 16),
                   label: const Text(
                     'Jetzt prüfen',
