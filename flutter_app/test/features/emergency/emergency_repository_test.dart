@@ -59,7 +59,7 @@ void main() {
       INSERT INTO local_profiles (
         id, full_name, date_of_birth, notes, created_at, updated_at
       )
-      VALUES ('default', 'Erika Muster', NULL, 'Diabetes Typ 2', 'now', 'now')
+      VALUES ('default', 'Erika Muster', '1970-01-02T00:00:00.000', 'Diabetes Typ 2', 'now', 'now')
       ''');
     db.execute('''
       INSERT INTO medications (
@@ -86,10 +86,14 @@ void main() {
     );
     final profile = await repo.buildLocalProfile();
     expect(profile.fullName, 'Erika Muster');
+    expect(profile.dateOfBirth, DateTime(1970, 1, 2));
     expect(profile.notes, 'Diabetes Typ 2');
-    expect(profile.medications, contains('ASS'));
-    expect(profile.allergies, contains('Penicillin (Schwer)'));
+    expect(profile.medications, contains('ASS (100mg, taeglich)'));
+    expect(profile.allergies, contains('Penicillin (Schwer, Atemnot)'));
     expect(profile.diagnoses, contains('Asthma'));
+    expect(profile.criticalWarnings, contains('Allergie: Penicillin (Schwer)'));
+    expect(profile.criticalWarnings, contains('Diagnose beachten: Asthma'));
+    expect(profile.immediateActions, contains('Bei akuter Gefahr 112 rufen'));
     expect(profile.contacts.single.name, 'Max Kontakt');
     expect(profile.contacts.single.messenger, '@maxhilfe');
     db.close();

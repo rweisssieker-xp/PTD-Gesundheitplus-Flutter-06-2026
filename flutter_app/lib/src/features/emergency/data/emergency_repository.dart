@@ -80,16 +80,20 @@ class EmergencyRepository {
 
   Future<EmergencyProfile> buildLocalProfile() async {
     final profileRows = _db.select('''
-      SELECT full_name, notes
+      SELECT full_name, date_of_birth, notes
       FROM local_profiles
       WHERE id = 'default'
       LIMIT 1
       ''');
-    final medicationRows = _db.select(
-      "SELECT name FROM medications WHERE active = 1 ORDER BY name ASC LIMIT 20",
-    );
+    final medicationRows = _db.select('''
+      SELECT name, dosage, frequency
+      FROM medications
+      WHERE active = 1
+      ORDER BY name ASC
+      LIMIT 20
+      ''');
     final allergyRows = _db.select('''
-      SELECT substance, severity
+      SELECT substance, reaction, severity
       FROM allergies
       ORDER BY
         CASE severity
@@ -112,20 +116,44 @@ class EmergencyRepository {
     final contacts = await listContacts();
     final profileRow = profileRows.isEmpty ? null : profileRows.first;
     final fullName = (profileRow?['full_name'] as String?)?.trim();
+    final dateOfBirth = _parseDate(profileRow?['date_of_birth'] as String?);
+    final allergies = allergyRows.map((row) {
+      final substance = row['substance'] as String;
+      final severity = row['severity'] as String?;
+      final reaction = row['reaction'] as String?;
+      final suffix = [
+        if (severity != null && severity.isNotEmpty) severity,
+        if (reaction != null && reaction.isNotEmpty) reaction,
+      ].join(', ');
+      return suffix.isEmpty ? substance : '$substance ($suffix)';
+    }).toList();
+    final medications = medicationRows.map((row) {
+      final name = row['name'] as String;
+      final dosage = row['dosage'] as String?;
+      final frequency = row['frequency'] as String?;
+      final suffix = [
+        if (dosage != null && dosage.isNotEmpty) dosage,
+        if (frequency != null && frequency.isNotEmpty) frequency,
+      ].join(', ');
+      return suffix.isEmpty ? name : '$name ($suffix)';
+    }).toList();
+    final diagnoses = diagnosisRows
+        .map((row) => row['title'] as String)
+        .toList();
+    final criticalWarnings = _criticalWarnings(
+      allergies: allergyRows,
+      diagnoses: diagnoses,
+      medications: medications,
+    );
     return EmergencyProfile(
       fullName: fullName == null || fullName.isEmpty ? 'Patient' : fullName,
+      dateOfBirth: dateOfBirth,
       notes:
           (profileRow?['notes'] as String?) ??
           'Lokal auf diesem Gerät gespeichert',
-      medications: medicationRows.map((row) => row['name'] as String).toList(),
-      allergies: allergyRows.map((row) {
-        final substance = row['substance'] as String;
-        final severity = row['severity'] as String?;
-        return severity == null || severity.isEmpty
-            ? substance
-            : '$substance ($severity)';
-      }).toList(),
-      diagnoses: diagnosisRows.map((row) => row['title'] as String).toList(),
+      medications: medications,
+      allergies: allergies,
+      diagnoses: diagnoses,
       contacts: contacts
           .where(
             (contact) => contact.phone != null && contact.phone!.isNotEmpty,
@@ -138,7 +166,58 @@ class EmergencyRepository {
             ),
           )
           .toList(),
+      criticalWarnings: criticalWarnings,
+      immediateActions: _immediateActions(criticalWarnings, contacts),
     );
+  }
+
+  DateTime? _parseDate(String? value) {
+    if (value == null || value.isEmpty) return null;
+    return DateTime.tryParse(value);
+  }
+
+  List<String> _criticalWarnings({
+    required List<Map<String, Object?>> allergies,
+    required List<String> diagnoses,
+    required List<String> medications,
+  }) {
+    final warnings = <String>[];
+    for (final row in allergies) {
+      final severity = row['severity'] as String?;
+      if (severity == 'Lebensbedrohlich' || severity == 'Schwer') {
+        warnings.add(
+          'Allergie: ${row['substance']} (${severity ?? 'kritisch'})',
+        );
+      }
+    }
+    for (final diagnosis in diagnoses) {
+      final lower = diagnosis.toLowerCase();
+      if (lower.contains('asthma') ||
+          lower.contains('diabetes') ||
+          lower.contains('epileps') ||
+          lower.contains('herz') ||
+          lower.contains('infarkt') ||
+          lower.contains('schlaganfall')) {
+        warnings.add('Diagnose beachten: $diagnosis');
+      }
+    }
+    if (medications.length >= 5) {
+      warnings.add('Polypharmazie: ${medications.length} aktive Medikamente');
+    }
+    return warnings.take(10).toList();
+  }
+
+  List<String> _immediateActions(
+    List<String> criticalWarnings,
+    List<EmergencyContact> contacts,
+  ) {
+    return [
+      'QR-Code scannen und Notfalldaten prüfen',
+      if (criticalWarnings.isNotEmpty) 'Kritische Warnungen zuerst beachten',
+      if (contacts.any((contact) => contact.phone?.isNotEmpty ?? false))
+        'Ersten Notfallkontakt telefonisch informieren',
+      'Bei akuter Gefahr 112 rufen',
+    ];
   }
 }
 
