@@ -95,7 +95,11 @@ class _AllergiesScreenState extends ConsumerState<AllergiesScreen> {
                                   ),
                                 ),
                                 SizedBox(width: 12),
-                                Text('Allergie-Check wird vorbereitet...'),
+                                Expanded(
+                                  child: Text(
+                                    'Allergie-Check wird vorbereitet...',
+                                  ),
+                                ),
                               ],
                             ),
                           ),

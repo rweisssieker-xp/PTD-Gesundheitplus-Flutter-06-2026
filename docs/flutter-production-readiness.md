@@ -7,7 +7,7 @@ Date: 2026-06-21
 - `flutter doctor -v`: no issues after installing Android SDK command-line tools and accepting Android licenses.
 - `dart format lib test`: clean.
 - `flutter analyze`: no issues.
-- `flutter test`: 156 tests passed.
+- `flutter test`: 157 tests passed.
 - `flutter test integration_test/app_flow_test.dart`: Android integration flow passed on the local emulator, including first-run local storage selection and core feature route rendering.
 - `flutter build apk --debug`: built successfully.
 - `flutter build apk --release`: built successfully with local release keystore.
@@ -71,6 +71,7 @@ Android embedding disables Impeller explicitly for this emulator-tested build pa
 - Healthcare professionals expose a local Facharzt search with on-device provider suggestions and direct local add, replacing the PWA internet/LLM doctor search with a local-only workflow.
 - Healthcare professionals can be drafted from spoken-style German text using a deterministic on-device parser for name, specialty, address, phone, and email.
 - Allergies expose a local medication conflict check that compares active medications with medication allergies and known local substance-class rules without sending data off-device.
+- Allergy creation, edit, severe warning display, and deletion are covered at widget level against local storage.
 - Allergies can be drafted from spoken-style German text using a deterministic on-device parser for allergen, category, severity, and reaction.
 - Preventive care exposes local age-based recommendations for due vaccinations and screenings, and can turn recommendations into local reminder-backed Vorsorge items.
 - Anamnesis entries can be encoded into an offline-readable local QR payload for physician handoff.
