@@ -23,6 +23,13 @@ void main() {
       status: LocalNotificationStatus.needsReschedule,
       statusDetail: 'Zeitpunkt liegt in der Vergangenheit',
     );
+    await NotificationCenterRepository(db).addNotification(
+      title: 'Wichtige Warnung',
+      body: 'Bitte sofort pruefen',
+      category: 'warning',
+      status: LocalNotificationStatus.systemBlocked,
+      statusDetail: 'System blockiert',
+    );
 
     await tester.pumpWidget(
       ProviderScope(
@@ -38,8 +45,28 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
+    expect(find.text('Benachrichtigungen'), findsOneWidget);
+    expect(find.text('Ungelesene Benachrichtigungen'), findsOneWidget);
+    expect(find.text('1 dringende'), findsOneWidget);
+    expect(find.text('Alle (2)'), findsOneWidget);
+    expect(find.text('Ungelesen (2)'), findsOneWidget);
+    expect(find.text('Wichtig (1)'), findsOneWidget);
+    expect(find.text('Alle als gelesen'), findsOneWidget);
+    expect(find.text('Alle löschen'), findsOneWidget);
     expect(find.text('Erinnerung pruefen'), findsOneWidget);
+    expect(find.text('Wichtige Warnung'), findsOneWidget);
     expect(find.text('Neu planen'), findsOneWidget);
     expect(find.text('Zeitpunkt liegt in der Vergangenheit'), findsOneWidget);
+
+    await tester.tap(find.text('Wichtig (1)'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Wichtige Warnung'), findsOneWidget);
+    expect(find.text('Erinnerung pruefen'), findsNothing);
+
+    await tester.tap(find.text('Alle als gelesen'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Ungelesen (0)'), findsOneWidget);
   });
 }

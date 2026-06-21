@@ -80,6 +80,18 @@ class NotificationCenterRepository {
     _db.execute('UPDATE notifications SET read = 1 WHERE id = ?', [id]);
   }
 
+  Future<void> markAllRead() async {
+    _db.execute('UPDATE notifications SET read = 1 WHERE read = 0');
+  }
+
+  Future<void> deleteNotification(String id) async {
+    _db.execute('DELETE FROM notifications WHERE id = ?', [id]);
+  }
+
+  Future<void> deleteAll() async {
+    _db.execute('DELETE FROM notifications');
+  }
+
   Future<int> _checkMedicationRefills(DateTime now) async {
     final rows = _db.select('''
       SELECT name, dosage, start_date, supply_duration_days,

@@ -26,6 +26,29 @@ void main() {
     db.close();
   });
 
+  test('marks all read and deletes local notifications', () async {
+    final db = AppDatabase.memory();
+    final repo = NotificationCenterRepository(db);
+    await repo.addNotification(
+      title: 'Warnung',
+      body: 'Pruefen',
+      category: 'warning',
+    );
+    await repo.addNotification(
+      title: 'Info',
+      body: 'Hinweis',
+      category: 'info',
+    );
+    await repo.markAllRead();
+    expect((await repo.listNotifications()).every((item) => item.read), isTrue);
+    final firstId = (await repo.listNotifications()).first.id;
+    await repo.deleteNotification(firstId);
+    expect(await repo.listNotifications(), hasLength(1));
+    await repo.deleteAll();
+    expect(await repo.listNotifications(), isEmpty);
+    db.close();
+  });
+
   test('creates proactive local health warnings once per day', () async {
     final db = AppDatabase.memory();
     addTearDown(db.close);
