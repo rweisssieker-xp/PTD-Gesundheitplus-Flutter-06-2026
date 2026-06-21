@@ -30,5 +30,5 @@
 | Datenschutz | `/privacy` | Privacy and storage settings | implemented | User can view local storage count, manage AI context consent, export data, and delete all local data after confirmation. |
 | Speicher-Modus | `/privacy/storage` | Privacy and storage settings | implemented | User sees local-only storage mode, per-table local record counts, and can clear local data after confirmation. |
 | Telegram-Setup | `/settings/telegram` | Communication settings | implemented | User can configure local Telegram handoff preference. |
-| Twilio-Setup | `/settings/sms` | Communication settings | implemented | User sees and stores native SMS handoff configuration without Twilio backend dependency. |
+| Twilio-Setup | `/settings/sms` | Communication settings | implemented | User sees and stores native SMS handoff configuration without Twilio backend dependency, can test SMS/WhatsApp via native apps, and receives visible local debug, phone-format, success, and failure diagnostics. |
 | Onboarding | `/onboarding` | Local profile and security setup | implemented | User completes local profile, PIN, optional biometric unlock when supported, and AI consent setup on-device. |

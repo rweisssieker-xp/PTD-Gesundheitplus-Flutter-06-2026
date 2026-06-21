@@ -103,13 +103,48 @@ void main() {
       '+49 176 123456',
     );
     await tester.tap(find.text('SMS testen'));
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(handoff.launched.single.scheme, 'sms');
+    expect(find.text('Lokale Debug-Info'), findsOneWidget);
+    expect(find.textContaining('E.164 Preview: +49176123456'), findsOneWidget);
+    expect(find.text('SMS Handoff bereit'), findsOneWidget);
 
     await tester.tap(find.text('WhatsApp'));
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(handoff.launched.last.scheme, 'whatsapp');
     expect(handoff.launched.last.toString(), contains('49176123456'));
+    expect(find.text('WhatsApp Handoff bereit'), findsOneWidget);
+  });
+
+  testWidgets('sms setup shows visible failure diagnostics', (tester) async {
+    final db = AppDatabase.memory();
+    final handoff = _FakeHandoff(launchResult: false);
+    addTearDown(db.close);
+
+    await _pump(
+      tester,
+      db,
+      CommunicationSettingsScreen(
+        channel: 'sms',
+        title: 'SMS-Setup',
+        handoff: handoff,
+      ),
+    );
+
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Telefonnummer').first,
+      '0151 2345678',
+    );
+    await tester.tap(find.text('WhatsApp'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Lokale Debug-Info'), findsOneWidget);
+    expect(find.textContaining('E.164 Preview: +491512345678'), findsOneWidget);
+    expect(find.text('WhatsApp Handoff fehlgeschlagen'), findsOneWidget);
+    expect(
+      find.text('Keine passende WhatsApp-App auf diesem Gerät gefunden.'),
+      findsOneWidget,
+    );
   });
 }
 
@@ -129,11 +164,14 @@ Future<void> _pump(WidgetTester tester, AppDatabase db, Widget child) async {
 }
 
 class _FakeHandoff extends PlatformHandoffService {
+  _FakeHandoff({this.launchResult = true});
+
+  final bool launchResult;
   final launched = <Uri>[];
 
   @override
   Future<bool> launch(Uri uri) async {
     launched.add(uri);
-    return true;
+    return launchResult;
   }
 }

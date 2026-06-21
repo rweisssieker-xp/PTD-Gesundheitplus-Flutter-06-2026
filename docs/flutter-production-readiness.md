@@ -7,7 +7,7 @@ Date: 2026-06-21
 - `flutter doctor -v`: no issues after installing Android SDK command-line tools and accepting Android licenses.
 - `dart format lib test`: clean.
 - `flutter analyze`: no issues.
-- `flutter test`: 142 tests passed.
+- `flutter test`: 143 tests passed.
 - `flutter build apk --debug`: built successfully.
 - `flutter build apk --release`: built successfully with local release keystore.
 - `flutter build appbundle --release`: built successfully with local release keystore.
@@ -57,6 +57,7 @@ Android embedding disables Impeller explicitly for this emulator-tested build pa
 - The PWA language switcher is backed by a local on-device preference and translates the native dashboard entry points for German, English, Turkish, Arabic, and Ukrainian.
 - Emergency contacts expose native phone, SMS, WhatsApp, Telegram, system share, and current-location SMS handoff actions from the emergency profile and offline emergency views with visible failure messages when a target app is unavailable.
 - Telegram setup mirrors the PWA guided flow with bot launch, `/start`, `/mychatid`, local connect/disconnect, persisted chat target, and native Telegram test handoff without backend secrets.
+- SMS/WhatsApp setup replaces Twilio backend sending with local native handoffs and keeps the PWA debug posture through E.164 phone preview, generated URI, visible success state, and visible failure diagnostics.
 - Android release builds include network permission for the optional configured online AI responder; local health record features remain on-device and work without backend access.
 - Emergency contacts can be imported from the device address book after explicit contact permission and remain stored locally.
 - Local health-record JSON export and appointment `.ics` export show visible recovery messages when local file creation or native sharing fails.

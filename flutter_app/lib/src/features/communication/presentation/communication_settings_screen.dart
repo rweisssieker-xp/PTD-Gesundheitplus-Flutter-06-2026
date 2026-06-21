@@ -37,6 +37,8 @@ class _CommunicationSettingsScreenState
   bool _enabled = false;
   bool _loaded = false;
   bool _launching = false;
+  _HandoffDebugInfo? _debugInfo;
+  _HandoffResult? _lastResult;
 
   _ChannelConfig get _config => _ChannelConfig.forChannel(widget.channel);
 
@@ -114,6 +116,8 @@ class _CommunicationSettingsScreenState
                       launching: _launching,
                       onSendSms: () => _launchTest(context, sms: true),
                       onSendWhatsApp: () => _launchTest(context, sms: false),
+                      debugInfo: _debugInfo,
+                      result: _lastResult,
                     ),
                   const SizedBox(height: 16),
                   _LocalSettingsCard(
@@ -181,10 +185,35 @@ class _CommunicationSettingsScreenState
       _snack(context, 'Bitte zuerst eine Telefonnummer eintragen');
       return;
     }
+    final type = sms ? 'SMS' : 'WhatsApp';
+    final formattedPhone = _formatGermanPhone(target);
+    final message = _message.text;
     final uri = sms
-        ? PlatformHandoffService.smsUri(target, _message.text)
-        : PlatformHandoffService.whatsappUri(target, _message.text);
-    await _launchUri(context, uri);
+        ? PlatformHandoffService.smsUri(formattedPhone, message)
+        : PlatformHandoffService.whatsappUri(formattedPhone, message);
+    setState(() {
+      _debugInfo = _HandoffDebugInfo(
+        originalPhone: target,
+        formattedPhone: formattedPhone,
+        message: message,
+        type: type,
+        uri: uri,
+      );
+      _lastResult = null;
+    });
+    final ok = await _launchUri(context, uri);
+    if (mounted) {
+      setState(() {
+        _lastResult = _HandoffResult(
+          type: type,
+          success: ok,
+          detail: ok
+              ? 'Native $type-App wurde geöffnet. Versand erfolgt dort nach Bestätigung.'
+              : 'Keine passende $type-App auf diesem Gerät gefunden.',
+          uri: uri,
+        );
+      });
+    }
   }
 
   Future<void> _launchChannelTest(BuildContext context) async {
@@ -200,7 +229,7 @@ class _CommunicationSettingsScreenState
     await _launchTest(context, sms: true);
   }
 
-  Future<void> _launchUri(BuildContext context, Uri uri) async {
+  Future<bool> _launchUri(BuildContext context, Uri uri) async {
     setState(() => _launching = true);
     final ok = await widget.handoff.launch(uri);
     if (context.mounted) {
@@ -212,6 +241,7 @@ class _CommunicationSettingsScreenState
       );
     }
     if (mounted) setState(() => _launching = false);
+    return ok;
   }
 
   void _snack(BuildContext context, String message) {
@@ -219,6 +249,36 @@ class _CommunicationSettingsScreenState
       context,
     ).showSnackBar(SnackBar(content: Text(message)));
   }
+}
+
+class _HandoffDebugInfo {
+  const _HandoffDebugInfo({
+    required this.originalPhone,
+    required this.formattedPhone,
+    required this.message,
+    required this.type,
+    required this.uri,
+  });
+
+  final String originalPhone;
+  final String formattedPhone;
+  final String message;
+  final String type;
+  final Uri uri;
+}
+
+class _HandoffResult {
+  const _HandoffResult({
+    required this.type,
+    required this.success,
+    required this.detail,
+    required this.uri,
+  });
+
+  final String type;
+  final bool success;
+  final String detail;
+  final Uri uri;
 }
 
 class _Header extends StatelessWidget {
@@ -491,6 +551,8 @@ class _SmsSetupCard extends StatelessWidget {
     required this.launching,
     required this.onSendSms,
     required this.onSendWhatsApp,
+    required this.debugInfo,
+    required this.result,
   });
 
   final TextEditingController targetController;
@@ -498,6 +560,8 @@ class _SmsSetupCard extends StatelessWidget {
   final bool launching;
   final VoidCallback onSendSms;
   final VoidCallback onSendWhatsApp;
+  final _HandoffDebugInfo? debugInfo;
+  final _HandoffResult? result;
 
   @override
   Widget build(BuildContext context) {
@@ -550,6 +614,138 @@ class _SmsSetupCard extends StatelessWidget {
                   ),
                 ),
               ],
+            ),
+            if (debugInfo != null) ...[
+              const SizedBox(height: 14),
+              _DebugInfoCard(info: debugInfo!),
+            ],
+            if (result != null) ...[
+              const SizedBox(height: 12),
+              _HandoffResultCard(result: result!),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _DebugInfoCard extends StatelessWidget {
+  const _DebugInfoCard({required this.info});
+
+  final _HandoffDebugInfo info;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: const Color(0xFFF9FAFB),
+        border: Border.all(color: GpColors.border),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const _SectionTitle(
+              icon: Icons.bug_report_outlined,
+              iconColor: Color(0xFF4F46E5),
+              title: 'Lokale Debug-Info',
+            ),
+            const SizedBox(height: 10),
+            _KeyValueLine(label: 'Original', value: info.originalPhone),
+            _KeyValueLine(label: 'E.164 Preview', value: info.formattedPhone),
+            _KeyValueLine(label: 'Typ', value: info.type),
+            _KeyValueLine(label: 'Nachricht', value: info.message),
+            _KeyValueLine(label: 'URI', value: info.uri.toString()),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _HandoffResultCard extends StatelessWidget {
+  const _HandoffResultCard({required this.result});
+
+  final _HandoffResult result;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = result.success
+        ? const Color(0xFF16A34A)
+        : GpColors.emergencyRed;
+    final background = result.success
+        ? const Color(0xFFF0FDF4)
+        : GpColors.redSurface;
+    final border = result.success
+        ? const Color(0xFFBBF7D0)
+        : const Color(0xFFFECACA);
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: background,
+        border: Border.all(color: border, width: 2),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(
+              result.success ? Icons.check_circle : Icons.error_outline,
+              color: color,
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    result.success
+                        ? '${result.type} Handoff bereit'
+                        : '${result.type} Handoff fehlgeschlagen',
+                    style: TextStyle(color: color, fontWeight: FontWeight.w900),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    result.detail,
+                    style: const TextStyle(color: GpColors.textSecondary),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _KeyValueLine extends StatelessWidget {
+  const _KeyValueLine({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 5),
+      child: Text.rich(
+        TextSpan(
+          children: [
+            TextSpan(
+              text: '$label: ',
+              style: const TextStyle(
+                color: GpColors.textPrimary,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+            TextSpan(
+              text: value,
+              style: const TextStyle(color: GpColors.textSecondary),
             ),
           ],
         ),
@@ -880,4 +1076,12 @@ class _ChannelConfig {
 String? _emptyToNull(String value) {
   final trimmed = value.trim();
   return trimmed.isEmpty ? null : trimmed;
+}
+
+String _formatGermanPhone(String phone) {
+  final normalized = phone.replaceAll(RegExp(r'[^0-9+]'), '');
+  if (normalized.startsWith('+')) return normalized;
+  if (normalized.startsWith('00')) return '+${normalized.substring(2)}';
+  if (normalized.startsWith('0')) return '+49${normalized.substring(1)}';
+  return normalized;
 }
