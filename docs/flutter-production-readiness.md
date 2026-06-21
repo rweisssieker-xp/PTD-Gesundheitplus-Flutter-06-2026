@@ -7,7 +7,7 @@ Date: 2026-06-21
 - `flutter doctor -v`: no issues after installing Android SDK command-line tools and accepting Android licenses.
 - `dart format lib test`: clean.
 - `flutter analyze`: no issues.
-- `flutter test`: 153 tests passed.
+- `flutter test`: 155 tests passed.
 - `flutter test integration_test/app_flow_test.dart`: Android integration flow passed on the local emulator, including first-run local storage selection and core feature route rendering.
 - `flutter build apk --debug`: built successfully.
 - `flutter build apk --release`: built successfully with local release keystore.
@@ -51,6 +51,7 @@ Android embedding disables Impeller explicitly for this emulator-tested build pa
 - Medications can be drafted from spoken-style German text using a deterministic on-device parser for medication name, dosage, frequency, prescribing doctor, reason, and reminder times.
 - Medication creation through the native editor is covered end to end at widget level, including persisted reminder times shown back in the local medication list.
 - Medication daily-plan intake can be confirmed from spoken-style German text on-device and stores the local `confirmedByVoice` audit flag.
+- Medication interaction checker consent blocking and high-risk local rule results are covered at widget level and persisted on-device.
 - The notification center shows system notification permission state, links blocked users to app settings, and surfaces per-notification states for active, permission-missing, system-blocked, needs-reschedule, and inactive reminders.
 - Document scanning checks native camera/gallery permissions before opening the picker, links blocked users to app settings, and is covered through the successful local gallery-save contract; repository tests verify encrypted document storage and readback.
 - The dashboard runs local proactive health checks on startup and writes deduplicated on-device alerts for medication refills, high-risk interaction checks, missing/unverified emergency contacts, and incomplete local emergency profile data.
