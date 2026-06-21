@@ -46,6 +46,38 @@ void main() {
     expect(plist, contains('<string>tg</string>'));
   });
 
+  test('native manifests declare health feature permission rationale', () {
+    final androidManifest = File(
+      'android/app/src/main/AndroidManifest.xml',
+    ).readAsStringSync();
+    final iosInfo = File('ios/Runner/Info.plist').readAsStringSync();
+
+    for (final permission in [
+      'android.permission.CAMERA',
+      'android.permission.READ_CONTACTS',
+      'android.permission.POST_NOTIFICATIONS',
+      'android.permission.USE_BIOMETRIC',
+      'android.permission.ACCESS_COARSE_LOCATION',
+      'android.permission.ACCESS_FINE_LOCATION',
+      'android.permission.READ_MEDIA_IMAGES',
+    ]) {
+      expect(androidManifest, contains('android:name="$permission"'));
+    }
+
+    for (final key in [
+      'NSCameraUsageDescription',
+      'NSContactsUsageDescription',
+      'NSPhotoLibraryUsageDescription',
+      'NSFaceIDUsageDescription',
+      'NSLocationWhenInUseUsageDescription',
+    ]) {
+      expect(iosInfo, contains('<key>$key</key>'));
+    }
+
+    expect(iosInfo, contains('lokal als Notfallkontakte importieren'));
+    expect(iosInfo, contains('lokale Notfallfunktionen'));
+  });
+
   test('release privacy and launcher icon artifacts are packaged', () {
     final iosProject = File(
       'ios/Runner.xcodeproj/project.pbxproj',

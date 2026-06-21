@@ -7,7 +7,7 @@ Date: 2026-06-21
 - `flutter doctor -v`: no issues after installing Android SDK command-line tools and accepting Android licenses.
 - `dart format lib test`: clean.
 - `flutter analyze`: no issues.
-- `flutter test`: 163 tests passed.
+- `flutter test`: 164 tests passed.
 - `flutter test integration_test/app_flow_test.dart`: Android integration flow passed on the local emulator, including first-run local storage selection and core feature route rendering.
 - `flutter build apk --debug`: built successfully.
 - `flutter build apk --release`: built successfully with local release keystore.
@@ -58,6 +58,7 @@ Android embedding disables Impeller explicitly for this emulator-tested build pa
 - The iOS bundle display name is set to `Gesundheit Plus`.
 - Android includes Gesundheit-Plus launcher icons for legacy and adaptive/round launcher surfaces.
 - The iOS Runner target includes `PrivacyInfo.xcprivacy` with no tracking declaration and initial Required Reason API entries for app preferences and file metadata access.
+- Native manifest tests cover Android permissions and iOS usage descriptions for camera, photos, contacts, location, notifications, and biometric unlock.
 - The PWA language switcher is backed by a local on-device preference and translates the native dashboard entry points for German, English, Turkish, Arabic, and Ukrainian.
 - Emergency contacts expose native phone, SMS, WhatsApp, Telegram, system share, and current-location SMS handoff actions from the emergency profile and offline emergency views with visible failure messages when a target app is unavailable.
 - Emergency contact setup creation, verification, and deletion are covered at widget level against local storage.
