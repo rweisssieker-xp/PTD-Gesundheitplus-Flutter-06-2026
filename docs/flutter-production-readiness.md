@@ -7,7 +7,7 @@ Date: 2026-06-21
 - `flutter doctor -v`: no issues after installing Android SDK command-line tools and accepting Android licenses.
 - `dart format lib test`: clean.
 - `flutter analyze`: no issues.
-- `flutter test`: 158 tests passed.
+- `flutter test`: 159 tests passed.
 - `flutter test integration_test/app_flow_test.dart`: Android integration flow passed on the local emulator, including first-run local storage selection and core feature route rendering.
 - `flutter build apk --debug`: built successfully.
 - `flutter build apk --release`: built successfully with local release keystore.
@@ -74,6 +74,7 @@ Android embedding disables Impeller explicitly for this emulator-tested build pa
 - Allergy creation, edit, severe warning display, and deletion are covered at widget level against local storage.
 - Allergies can be drafted from spoken-style German text using a deterministic on-device parser for allergen, category, severity, and reaction.
 - Preventive care exposes local age-based recommendations for due vaccinations and screenings, and can turn recommendations into local reminder-backed Vorsorge items.
+- Preventive care manual creation and completion are covered at widget level against local reminder storage.
 - Vaccination creation through the native editor is covered at widget level, including persisted booster due metadata in local storage.
 - Anamnesis entries can be encoded into an offline-readable local QR payload for physician handoff.
 - Treatment history creation, listing, visible read-aloud controls, and deletion are covered at widget level against local storage.
