@@ -63,7 +63,7 @@ void main() {
         .select('PRAGMA table_info(family_check_ins)')
         .map((row) => row['name'])
         .toSet();
-    expect(columns, contains('location_text'));
+    expect(columns, containsAll(['location_text', 'next_checkin_due']));
     db.close();
   });
 

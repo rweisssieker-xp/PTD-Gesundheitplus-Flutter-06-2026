@@ -49,14 +49,16 @@ class CareRepository {
     String? note,
     String? locationText,
     DateTime? checkedAt,
+    DateTime? nextCheckInDue,
   }) async {
+    final checked = checkedAt ?? DateTime.now();
     final now = DateTime.now().toIso8601String();
     _db.execute(
       '''
       INSERT INTO family_check_ins (
-        id, member_id, member_name, status, note, location_text, checked_at, created_at, updated_at
+        id, member_id, member_name, status, note, location_text, checked_at, next_checkin_due, created_at, updated_at
       )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       ''',
       [
         _uuid.v4(),
@@ -65,7 +67,9 @@ class CareRepository {
         status,
         note,
         locationText,
-        (checkedAt ?? DateTime.now()).toIso8601String(),
+        checked.toIso8601String(),
+        (nextCheckInDue ?? checked.add(const Duration(hours: 24)))
+            .toIso8601String(),
         now,
         now,
       ],
@@ -74,7 +78,7 @@ class CareRepository {
 
   Future<List<FamilyCheckIn>> listCheckIns() async {
     final rows = _db.select('''
-      SELECT id, member_id, member_name, status, note, location_text, checked_at
+      SELECT id, member_id, member_name, status, note, location_text, checked_at, next_checkin_due
       FROM family_check_ins
       ORDER BY checked_at DESC
       ''');
@@ -88,6 +92,9 @@ class CareRepository {
             note: row['note'] as String?,
             locationText: row['location_text'] as String?,
             checkedAt: DateTime.parse(row['checked_at'] as String),
+            nextCheckInDue: row['next_checkin_due'] == null
+                ? null
+                : DateTime.parse(row['next_checkin_due'] as String),
           ),
         )
         .toList();

@@ -62,7 +62,9 @@ class _FamilyCircleScreenState extends ConsumerState<FamilyCircleScreen> {
               return ListView(
                 padding: const EdgeInsets.all(16),
                 children: [
-                  _StatusSummary(checkIns: checkIns),
+                  _PageHeader(onRefresh: () => setState(() => _reload++)),
+                  const SizedBox(height: 12),
+                  _StatusSummary(members: members, checkIns: checkIns),
                   const SizedBox(height: 12),
                   _MyCheckInCard(
                     pendingStatus: _pendingStatus,
@@ -76,65 +78,38 @@ class _FamilyCircleScreenState extends ConsumerState<FamilyCircleScreen> {
                     onSubmit: () => _submitOwnCheckIn(repo),
                   ),
                   const SizedBox(height: 16),
-                  DecoratedBox(
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: GpColors.purplePink,
-                      ),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(20),
-                      child: Row(
-                        children: [
-                          const Icon(
-                            GpIcons.family,
-                            color: Colors.white,
-                            size: 46,
-                          ),
-                          const SizedBox(width: 16),
-                          Text(
-                            '${members.length} Personen',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 28,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                  _FamilyCountHeader(count: members.length),
                   const SizedBox(height: 16),
-                  ...members.map(
-                    (member) => Card(
-                      margin: const EdgeInsets.only(bottom: 10),
-                      child: ListTile(
-                        leading: const Icon(GpIcons.family),
-                        title: Text(member.name),
-                        subtitle: Text(
-                          [
-                            member.relationship,
-                            member.role,
-                            member.phone,
-                          ].whereType<String>().join(' • '),
-                        ),
-                        trailing: IconButton(
-                          tooltip: 'Check-in',
-                          icon: const Icon(Icons.check_circle_outline),
-                          onPressed: () async {
-                            await repo.addCheckIn(
-                              memberId: member.id,
-                              memberName: member.name,
-                              status: 'safe',
-                              note: 'Manuell bestaetigt',
-                            );
-                            if (mounted) setState(() => _reload++);
-                          },
+                  Text(
+                    'Familienmitglieder',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: 8),
+                  ...members.map((member) {
+                    final latest = _latestForMember(checkIns, member);
+                    return _FamilyMemberCard(
+                      member: member,
+                      latest: latest,
+                      onSafeCheckIn: () async {
+                        await repo.addCheckIn(
+                          memberId: member.id,
+                          memberName: member.name,
+                          status: 'safe',
+                          note: 'Manuell bestaetigt',
+                        );
+                        if (mounted) setState(() => _reload++);
+                      },
+                    );
+                  }),
+                  if (members.isEmpty)
+                    const Card(
+                      child: Padding(
+                        padding: EdgeInsets.all(24),
+                        child: Text(
+                          'Noch keine Familienmitglieder. Fuegen Sie lokale Kontakte fuer den Sicherheitskreis hinzu.',
                         ),
                       ),
                     ),
-                  ),
                   const SizedBox(height: 8),
                   Text(
                     'Check-ins',
@@ -162,12 +137,21 @@ class _FamilyCircleScreenState extends ConsumerState<FamilyCircleScreen> {
                                   checkIn.locationText!,
                               ].join(' • '),
                             ),
-                            trailing: Icon(
-                              _statusIcon(checkIn.status),
-                              color: _statusColor(checkIn.status),
+                            trailing: Wrap(
+                              spacing: 8,
+                              crossAxisAlignment: WrapCrossAlignment.center,
+                              children: [
+                                if (checkIn.isOverdue) const _OverdueBadge(),
+                                Icon(
+                                  _statusIcon(checkIn.status),
+                                  color: _statusColor(checkIn.status),
+                                ),
+                              ],
                             ),
                           ),
                         ),
+                  const SizedBox(height: 12),
+                  const _HowItWorksCard(),
                 ],
               );
             },
@@ -226,9 +210,52 @@ class _FamilyCircleScreenState extends ConsumerState<FamilyCircleScreen> {
   }
 }
 
-class _StatusSummary extends StatelessWidget {
-  const _StatusSummary({required this.checkIns});
+class _PageHeader extends StatelessWidget {
+  const _PageHeader({required this.onRefresh});
 
+  final VoidCallback onRefresh;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        const Icon(GpIcons.family, color: Color(0xFF2563EB), size: 30),
+        const SizedBox(width: 10),
+        const Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Familien-Sicherheitskreis',
+                style: TextStyle(
+                  color: GpColors.textPrimary,
+                  fontSize: 24,
+                  fontWeight: FontWeight.w900,
+                  height: 1.1,
+                ),
+              ),
+              SizedBox(height: 3),
+              Text(
+                'Status-Updates und Bin-sicher-Check-ins lokal verwalten',
+                style: TextStyle(color: GpColors.textSecondary, fontSize: 14),
+              ),
+            ],
+          ),
+        ),
+        IconButton(
+          tooltip: 'Aktualisieren',
+          onPressed: onRefresh,
+          icon: const Icon(Icons.refresh),
+        ),
+      ],
+    );
+  }
+}
+
+class _StatusSummary extends StatelessWidget {
+  const _StatusSummary({required this.members, required this.checkIns});
+
+  final List<FamilyMember> members;
   final List<FamilyCheckIn> checkIns;
 
   @override
@@ -238,6 +265,12 @@ class _StatusSummary extends StatelessWidget {
       latest.putIfAbsent(checkIn.memberId ?? checkIn.memberName, () => checkIn);
     }
     final values = latest.values;
+    final knownMemberKeys = values.map(
+      (item) => item.memberId ?? item.memberName,
+    );
+    final membersWithoutStatus = members
+        .where((member) => !knownMemberKeys.contains(member.id))
+        .length;
     return Row(
       children: [
         Expanded(
@@ -261,17 +294,96 @@ class _StatusSummary extends StatelessWidget {
         Expanded(
           child: _StatusCountCard(
             label: 'Unbekannt',
-            count: values
-                .where(
-                  (item) =>
-                      item.status != 'safe' && item.status != 'help_needed',
-                )
-                .length,
+            count:
+                membersWithoutStatus +
+                values
+                    .where(
+                      (item) =>
+                          item.status != 'safe' && item.status != 'help_needed',
+                    )
+                    .length,
             color: GpColors.textSecondary,
             background: const Color(0xFFF9FAFB),
           ),
         ),
       ],
+    );
+  }
+}
+
+class _FamilyCountHeader extends StatelessWidget {
+  const _FamilyCountHeader({required this.count});
+
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(colors: GpColors.purplePink),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Row(
+          children: [
+            const Icon(GpIcons.family, color: Colors.white, size: 46),
+            const SizedBox(width: 16),
+            Text(
+              '$count Personen',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 28,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _FamilyMemberCard extends StatelessWidget {
+  const _FamilyMemberCard({
+    required this.member,
+    required this.latest,
+    required this.onSafeCheckIn,
+  });
+
+  final FamilyMember member;
+  final FamilyCheckIn? latest;
+  final VoidCallback onSafeCheckIn;
+
+  @override
+  Widget build(BuildContext context) {
+    final status = latest?.status ?? 'unknown';
+    return Card(
+      margin: const EdgeInsets.only(bottom: 10),
+      child: ListTile(
+        leading: Icon(_statusIcon(status), color: _statusColor(status)),
+        title: Row(
+          children: [
+            Expanded(child: Text(member.name)),
+            if (latest?.isOverdue ?? false) const _OverdueBadge(),
+          ],
+        ),
+        subtitle: Text(
+          [
+            member.relationship,
+            member.role,
+            member.phone,
+            if (latest != null) _statusLabel(status),
+            if (latest?.note != null) latest!.note,
+            if (latest?.locationText != null) latest!.locationText,
+          ].whereType<String>().join(' • '),
+        ),
+        trailing: IconButton(
+          tooltip: 'Check-in',
+          icon: const Icon(Icons.check_circle_outline),
+          onPressed: onSafeCheckIn,
+        ),
+      ),
     );
   }
 }
@@ -542,6 +654,81 @@ class _StatusButton extends StatelessWidget {
   }
 }
 
+class _OverdueBadge extends StatelessWidget {
+  const _OverdueBadge();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFF7ED),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: const Color(0xFFF97316)),
+      ),
+      child: const Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.schedule, size: 13, color: Color(0xFFC2410C)),
+          SizedBox(width: 3),
+          Text(
+            'Überfällig',
+            style: TextStyle(
+              color: Color(0xFFC2410C),
+              fontSize: 11,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HowItWorksCard extends StatelessWidget {
+  const _HowItWorksCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: const Color(0xFFF5F3FF),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+        side: const BorderSide(color: Color(0xFFC4B5FD), width: 2),
+      ),
+      child: const Padding(
+        padding: EdgeInsets.all(14),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(Icons.verified_user_outlined, color: Color(0xFF7C3AED)),
+            SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'So funktioniert der Sicherheitskreis',
+                    style: TextStyle(
+                      color: Color(0xFF5B21B6),
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  SizedBox(height: 6),
+                  Text(
+                    'Jedes Familienmitglied sendet einen Status. Brauche-Hilfe-Check-ins werden hervorgehoben, überfällige lokale Check-ins markiert.',
+                    style: TextStyle(color: Color(0xFF5B21B6), fontSize: 13),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _FamilyMemberEditor extends StatefulWidget {
   const _FamilyMemberEditor({required this.repo});
 
@@ -631,6 +818,18 @@ Color _statusColor(String status) => switch (status) {
   'help_needed' => GpColors.emergencyRed,
   _ => GpColors.textSecondary,
 };
+
+FamilyCheckIn? _latestForMember(
+  List<FamilyCheckIn> checkIns,
+  FamilyMember member,
+) {
+  for (final checkIn in checkIns) {
+    if (checkIn.memberId == member.id || checkIn.memberName == member.name) {
+      return checkIn;
+    }
+  }
+  return null;
+}
 
 String? _emptyToNull(String value) {
   final trimmed = value.trim();

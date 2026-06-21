@@ -23,6 +23,7 @@ class FamilyCheckIn {
     this.note,
     this.locationText,
     required this.checkedAt,
+    this.nextCheckInDue,
   });
 
   final String id;
@@ -32,6 +33,12 @@ class FamilyCheckIn {
   final String? note;
   final String? locationText;
   final DateTime checkedAt;
+  final DateTime? nextCheckInDue;
+
+  bool get isOverdue {
+    final due = nextCheckInDue;
+    return due != null && due.isBefore(DateTime.now());
+  }
 }
 
 class DementiaLog {
