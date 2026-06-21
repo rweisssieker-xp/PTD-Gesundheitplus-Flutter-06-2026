@@ -138,6 +138,44 @@ void main() {
       findsOneWidget,
     );
   });
+
+  testWidgets('privacy delete confirmation clears local data from the screen', (
+    tester,
+  ) async {
+    final db = AppDatabase.memory();
+    addTearDown(db.close);
+    _seedPrivacyData(db);
+
+    tester.view.physicalSize = const Size(430, 1200);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [appDatabaseProvider.overrideWith((ref) async => db)],
+        child: const MaterialApp(home: PrivacyScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(_tableCount(db, 'medications'), 1);
+    expect(_tableCount(db, 'allergies'), 1);
+
+    await tester.tap(find.text('Daten löschen'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(FilledButton, 'Löschen'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Lokale Daten wurden gelöscht.'), findsOneWidget);
+    expect(_tableCount(db, 'medications'), 0);
+    expect(_tableCount(db, 'allergies'), 0);
+  });
+}
+
+int _tableCount(AppDatabase db, String table) {
+  final rows = db.select('SELECT COUNT(*) AS count FROM $table');
+  return rows.first['count'] as int;
 }
 
 void _seedPrivacyData(AppDatabase db) {
