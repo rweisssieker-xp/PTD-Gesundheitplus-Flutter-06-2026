@@ -69,4 +69,42 @@ void main() {
 
     expect(find.text('Ungelesen (0)'), findsOneWidget);
   });
+
+  testWidgets('opens system settings when notifications are blocked', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(430, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final db = AppDatabase.memory();
+    addTearDown(db.close);
+    var settingsOpened = false;
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [appDatabaseProvider.overrideWith((ref) async => db)],
+        child: MaterialApp(
+          home: NotificationCenterScreen(
+            permissionStatus: () async => PermissionStatus.permanentlyDenied,
+            openSettings: () async {
+              settingsOpened = true;
+              return true;
+            },
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(find.text('Benachrichtigungen blockiert'), findsOneWidget);
+    expect(find.textContaining('Systemeinstellungen'), findsOneWidget);
+
+    await tester.tap(find.text('Einstellungen oeffnen'));
+    await tester.pumpAndSettle();
+
+    expect(settingsOpened, isTrue);
+  });
 }

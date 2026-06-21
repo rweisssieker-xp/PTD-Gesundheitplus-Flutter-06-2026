@@ -7,7 +7,7 @@ Date: 2026-06-21
 - `flutter doctor -v`: no issues after installing Android SDK command-line tools and accepting Android licenses.
 - `dart format lib test`: clean.
 - `flutter analyze`: no issues.
-- `flutter test`: 174 tests passed.
+- `flutter test`: 175 tests passed.
 - GitHub Actions workflow `Flutter CI` covers `flutter pub get`, `flutter analyze`, `flutter test`, and Android debug APK build on `main` pushes and pull requests.
 - `flutter test integration_test/app_flow_test.dart`: Android integration flow passed on the local emulator, including first-run local storage selection and core feature route rendering.
 - `flutter build apk --debug`: built successfully.
@@ -55,7 +55,7 @@ Android embedding disables Impeller explicitly for this emulator-tested build pa
 - Medication creation through the native editor is covered end to end at widget level, including persisted reminder times shown back in the local medication list.
 - Medication daily-plan intake can be confirmed from spoken-style German text on-device and stores the local `confirmedByVoice` audit flag.
 - Medication interaction checker consent blocking and high-risk local rule results are covered at widget level and persisted on-device.
-- The notification center shows system notification permission state, links blocked users to app settings, and surfaces per-notification states for active, permission-missing, system-blocked, needs-reschedule, and inactive reminders.
+- The notification center shows system notification permission state, has widget coverage for sending blocked users to app settings, and surfaces per-notification states for active, permission-missing, system-blocked, needs-reschedule, and inactive reminders.
 - Document scanning checks native camera/gallery permissions before opening the picker, links blocked users to app settings, and is covered through the successful local gallery-save contract; repository tests verify encrypted document storage and readback.
 - The dashboard runs local proactive health checks on startup and writes deduplicated on-device alerts for medication refills, high-risk interaction checks, missing/unverified emergency contacts, and incomplete local emergency profile data.
 - The iOS bundle display name is set to `Gesundheit Plus`.
