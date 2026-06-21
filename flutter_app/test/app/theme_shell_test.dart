@@ -44,8 +44,9 @@ void main() {
     expect(find.text('Gesundheit Plus'), findsOneWidget);
     expect(find.text('Nur auf diesem Gerät'), findsOneWidget);
     expect(find.text('Cloud-Synchronisation'), findsOneWidget);
-    expect(find.text('Volle Funktionalität'), findsOneWidget);
-    expect(find.text('Cloud-Sync wählen'), findsOneWidget);
+    expect(find.text('In der nativen App deaktiviert'), findsOneWidget);
+    expect(find.text('Cloud-Sync nicht aktiv'), findsOneWidget);
+    expect(find.text('Cloud-Sync wählen'), findsNothing);
     await tester.ensureVisible(find.text('Lokal speichern wählen'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Lokal speichern wählen'));

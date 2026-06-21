@@ -2,7 +2,7 @@
 
 | PWA Page | Flutter Route | Feature Group | Status | Acceptance Signal |
 | --- | --- | --- | --- | --- |
-| Home | `/` | Dashboard and navigation | implemented | User first sees the PWA-style storage-mode choice, can select local-device storage, and then reaches primary dashboard actions from a native dashboard that mirrors the PWA mobile layout, colors, icons, shell controls, and locally persisted language switching. |
+| Home | `/` | Dashboard and navigation | implemented | User first sees the PWA-style storage-mode choice adapted for the native local-only app, can select local-device storage while Cloud-Sync is clearly unavailable, and then reaches primary dashboard actions from a native dashboard that mirrors the PWA mobile layout, colors, icons, shell controls, and locally persisted language switching. |
 | Gesundheits-Dashboard | `/dashboard/health` | Dashboard and navigation | implemented | User sees local summary cards for medication, appointments, vital values, and alerts. |
 | Anamnese | `/health/anamnesis` | Health record | implemented | User can create, list, delete, hear a native read-aloud summary, and share local medical history entries through an offline-readable QR payload. |
 | Behandlungshistorie | `/health/treatments` | Health record | implemented | User can create, list, delete, sort treatments by date, and hear a native read-aloud summary. |

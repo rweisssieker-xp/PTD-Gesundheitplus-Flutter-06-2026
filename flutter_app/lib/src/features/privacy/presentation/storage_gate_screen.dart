@@ -124,32 +124,25 @@ class _StorageModeChoice extends StatelessWidget {
             const SizedBox(height: 16),
             _ModeCard(
               borderColor: const Color(0xFFBFDBFE),
-              iconColor: const Color(0xFF2563EB),
-              iconBackground: const Color(0xFFDBEAFE),
+              iconColor: const Color(0xFF6B7280),
+              iconBackground: const Color(0xFFF3F4F6),
               icon: Icons.cloud_outlined,
               title: 'Cloud-Synchronisation',
-              titleColor: const Color(0xFF1E40AF),
-              subtitle: 'Volle Funktionalität',
-              subtitleColor: const Color(0xFF2563EB),
-              featureIconColor: const Color(0xFF3B82F6),
+              titleColor: const Color(0xFF374151),
+              subtitle: 'In der nativen App deaktiviert',
+              subtitleColor: const Color(0xFF6B7280),
+              featureIconColor: const Color(0xFF9CA3AF),
               features: const [
-                'Auf allen Geräten verfügbar',
-                'KI-Coach & alle Features voll verfügbar',
-                'Automatisches Backup',
-                'DSGVO-konform, Server in Deutschland',
+                'Keine Gesundheitsdaten-Cloud in dieser Version',
+                'Kein automatischer Server-Abgleich',
+                'Export und Backup laufen lokal auf dem Gerät',
               ],
-              buttonLabel: 'Cloud-Sync wählen',
-              buttonIcon: Icons.cloud_outlined,
-              buttonColors: const [Color(0xFF2563EB), Color(0xFF4F46E5)],
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text(
-                      'Diese native App speichert Gesundheitsdaten ausschließlich lokal.',
-                    ),
-                  ),
-                );
-              },
+              warning:
+                  'Cloud-Sync ist für diese lokale native App absichtlich nicht auswählbar. Nutzen Sie JSON-Export für Backups.',
+              buttonLabel: 'Cloud-Sync nicht aktiv',
+              buttonIcon: Icons.cloud_off_outlined,
+              buttonColors: const [Color(0xFF9CA3AF), Color(0xFF6B7280)],
+              onPressed: null,
             ),
           ],
         ),
@@ -219,7 +212,7 @@ class _ModeCard extends StatelessWidget {
   final String buttonLabel;
   final IconData buttonIcon;
   final List<Color> buttonColors;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
   final String? warning;
 
   @override
@@ -352,7 +345,7 @@ class _GradientChoiceButton extends StatelessWidget {
   final String label;
   final IconData icon;
   final List<Color> colors;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) {
