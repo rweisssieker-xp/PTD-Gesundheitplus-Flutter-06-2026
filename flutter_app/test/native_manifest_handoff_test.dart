@@ -38,6 +38,28 @@ void main() {
     expect(manifest, contains('android:name="android.permission.INTERNET"'));
   });
 
+  test('Android release Gradle config uses store identity and signing', () {
+    final buildGradle = File('android/app/build.gradle.kts').readAsStringSync();
+    final pubspec = File('pubspec.yaml').readAsStringSync();
+
+    expect(
+      buildGradle,
+      contains('namespace = "de.gesundheitplus.gesundheitplus"'),
+    );
+    expect(
+      buildGradle,
+      contains('applicationId = "de.gesundheitplus.gesundheitplus"'),
+    );
+    expect(buildGradle, contains('versionCode = flutter.versionCode'));
+    expect(buildGradle, contains('versionName = flutter.versionName'));
+    expect(buildGradle, contains('create("release")'));
+    expect(
+      buildGradle,
+      contains('signingConfig = signingConfigs.getByName("release")'),
+    );
+    expect(pubspec, contains('version: 1.0.0+1'));
+  });
+
   test('iOS Info.plist declares third-party handoff query schemes', () {
     final plist = File('ios/Runner/Info.plist').readAsStringSync();
 
@@ -136,6 +158,36 @@ void main() {
       expect(readiness, contains('adaptive and round launcher icons'));
       expect(readiness, contains('Release APK'));
       expect(readiness, contains('Release AAB'));
+
+      for (final permissionReason in [
+        'Capture health document images locally.',
+        'Import selected device contacts as local emergency contacts',
+        'Schedule local reminders',
+        'Add current-device location to emergency SMS',
+        'Unlock the local health record with device biometric authentication',
+      ]) {
+        expect(readiness, contains(permissionReason));
+      }
+
+      for (final dataSafetyClaim in [
+        'No automatic backend sharing is implemented.',
+        'Optional AI responder integration is not active by default',
+        'Cloud-Sync is not implemented or selectable',
+        'Twilio backend sending is not bundled',
+        'Structured data is encrypted at rest with SQLCipher.',
+        'Stored health document files are encrypted with AES-GCM',
+      ]) {
+        expect(readiness, contains(dataSafetyClaim));
+      }
+
+      for (final externalGate in [
+        'iOS build/archive must be verified on macOS with Xcode.',
+        'Final store privacy questionnaires must be completed',
+        'Final screenshots must be captured from real rendered devices',
+        'If online AI is enabled in a store build',
+      ]) {
+        expect(readiness, contains(externalGate));
+      }
     },
   );
 }
