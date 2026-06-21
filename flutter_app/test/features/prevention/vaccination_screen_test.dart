@@ -59,6 +59,66 @@ void main() {
     expect(find.text('Implantatpass Knie'), findsOneWidget);
     expect(find.textContaining('Implantatpass'), findsWidgets);
   });
+
+  testWidgets('vaccination screen creates local vaccination records', (
+    tester,
+  ) async {
+    final db = AppDatabase.memory();
+    addTearDown(db.close);
+    await LocalProfileRepository(
+      db,
+    ).saveProfile(fullName: 'Patient', dateOfBirth: DateTime(1990, 1, 1));
+
+    tester.view.physicalSize = const Size(430, 1800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [appDatabaseProvider.overrideWith((ref) => db)],
+        child: const MaterialApp(home: VaccinationScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('0 Impfungen lokal gespeichert'), findsOneWidget);
+    expect(find.text('Noch keine Impfungen'), findsOneWidget);
+
+    await tester.tap(find.widgetWithText(FloatingActionButton, 'Impfung'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Impfung erfassen'), findsOneWidget);
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Impfstoff *'),
+      'Influenza',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Schutz gegen'),
+      'Grippe',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Arzt / Praxis'),
+      'Hausarztpraxis',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Auffrischung in Monaten'),
+      '12',
+    );
+    await tester.tap(find.widgetWithText(FilledButton, 'Speichern'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('1 Impfungen lokal gespeichert'), findsOneWidget);
+    expect(find.text('Influenza'), findsOneWidget);
+    expect(find.textContaining('Grippe'), findsOneWidget);
+    expect(find.textContaining('Hausarztpraxis'), findsOneWidget);
+
+    final records = await PreventionRepository(db).listVaccinations();
+    expect(records.single.vaccineName, 'Influenza');
+    expect(records.single.targetDisease, 'Grippe');
+    expect(records.single.doctorName, 'Hausarztpraxis');
+    expect(records.single.nextDueAt, isNotNull);
+  });
 }
 
 void _seedHealthPass(AppDatabase db) {
