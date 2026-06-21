@@ -61,22 +61,24 @@ class _TreatmentHistoryScreenState
                             size: 46,
                           ),
                           const SizedBox(width: 16),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'Behandlungen',
-                                style: TextStyle(color: Colors.white70),
-                              ),
-                              Text(
-                                '${records.length} Eintraege',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 28,
-                                  fontWeight: FontWeight.w800,
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'Behandlungen',
+                                  style: TextStyle(color: Colors.white70),
                                 ),
-                              ),
-                            ],
+                                Text(
+                                  '${records.length} Eintraege',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 28,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ],
                       ),

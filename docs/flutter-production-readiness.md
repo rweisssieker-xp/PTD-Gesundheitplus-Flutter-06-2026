@@ -7,7 +7,7 @@ Date: 2026-06-21
 - `flutter doctor -v`: no issues after installing Android SDK command-line tools and accepting Android licenses.
 - `dart format lib test`: clean.
 - `flutter analyze`: no issues.
-- `flutter test`: 152 tests passed.
+- `flutter test`: 153 tests passed.
 - `flutter test integration_test/app_flow_test.dart`: Android integration flow passed on the local emulator, including first-run local storage selection and core feature route rendering.
 - `flutter build apk --debug`: built successfully.
 - `flutter build apk --release`: built successfully with local release keystore.
@@ -72,6 +72,7 @@ Android embedding disables Impeller explicitly for this emulator-tested build pa
 - Allergies can be drafted from spoken-style German text using a deterministic on-device parser for allergen, category, severity, and reaction.
 - Preventive care exposes local age-based recommendations for due vaccinations and screenings, and can turn recommendations into local reminder-backed Vorsorge items.
 - Anamnesis entries can be encoded into an offline-readable local QR payload for physician handoff.
+- Treatment history creation, listing, visible read-aloud controls, and deletion are covered at widget level against local storage.
 - Appointments can be exported on-device as `.ics` calendar files for native calendar app handoff.
 - Appointments can be drafted from spoken-style German text using a deterministic on-device parser for doctor, date, time, reason, specialty, and location.
 - Appointment creation through the native editor is covered end to end at widget level, including persisted date/time and local reminder state shown back in the appointment list.
