@@ -63,6 +63,52 @@ void main() {
     expect(find.text('Hoch >130'), findsOneWidget);
   });
 
+  testWidgets('blood pressure screen saves a new local measurement flow', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(430, 1600);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final db = AppDatabase.memory();
+    addTearDown(db.close);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [appDatabaseProvider.overrideWith((ref) async => db)],
+        child: const MaterialApp(home: BloodPressureScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Noch keine Blutdruckwerte'), findsOneWidget);
+
+    await tester.tap(find.text('Messung'));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Systole (mmHg) *'),
+      '142',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Diastole (mmHg) *'),
+      '91',
+    );
+    await tester.enterText(find.widgetWithText(TextField, 'Puls (bpm)'), '73');
+    await tester.tap(find.text('Speichern'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('142/91'), findsWidgets);
+    expect(find.text('73'), findsWidgets);
+
+    final logs = await VitalsRepository(db).listBloodPressure();
+    expect(logs, hasLength(1));
+    expect(logs.single.systolic, 142);
+    expect(logs.single.diastolic, 91);
+    expect(logs.single.pulse, 73);
+    expect(logs.single.context, 'Ruhe');
+  });
+
   testWidgets('weight screen shows PWA dashboard cards and local BMI history', (
     tester,
   ) async {
@@ -102,5 +148,47 @@ void main() {
     expect(find.text('Historie'), findsOneWidget);
     expect(find.text('80.0 kg'), findsWidgets);
     expect(find.textContaining('BMI 24.7'), findsWidgets);
+  });
+
+  testWidgets('weight screen saves a new local weight and BMI flow', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(430, 1500);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final db = AppDatabase.memory();
+    addTearDown(db.close);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [appDatabaseProvider.overrideWith((ref) async => db)],
+        child: const MaterialApp(home: WeightScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Noch keine Gewichtswerte'), findsWidgets);
+
+    await tester.tap(find.text('Messung'));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Gewicht (kg) *'),
+      '79,5',
+    );
+    await tester.enterText(find.widgetWithText(TextField, 'Groesse cm'), '180');
+    await tester.tap(find.text('Speichern'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('79.5 kg'), findsWidgets);
+    expect(find.text('24.5'), findsOneWidget);
+    expect(find.textContaining('BMI 24.5'), findsWidgets);
+
+    final logs = await VitalsRepository(db).listWeight();
+    expect(logs, hasLength(1));
+    expect(logs.single.weightKg, 79.5);
+    expect(logs.single.heightCm, 180);
+    expect(logs.single.bmi, closeTo(24.5, 0.05));
   });
 }
