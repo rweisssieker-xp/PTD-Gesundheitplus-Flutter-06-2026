@@ -295,6 +295,7 @@ void main() {
         'Twilio backend sending is not bundled',
         'Structured data is encrypted at rest with SQLCipher.',
         'Stored health document files are encrypted with AES-GCM',
+        'in-app privacy and legal screen includes a medical disclaimer',
       ]) {
         expect(readiness, contains(dataSafetyClaim));
       }

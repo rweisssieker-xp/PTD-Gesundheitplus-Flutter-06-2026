@@ -57,6 +57,21 @@ void main() {
     expect(find.text('Zweck der Datenverarbeitung'), findsOneWidget);
 
     await tester.scrollUntilVisible(
+      find.text('Medizinischer Hinweis'),
+      280,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.text('Keine Diagnose-App'), findsOneWidget);
+    expect(
+      find.textContaining('ersetzt keine ärztliche Diagnose'),
+      findsOneWidget,
+    );
+    expect(
+      find.text('Bei Beschwerden medizinische Hilfe nutzen'),
+      findsOneWidget,
+    );
+
+    await tester.scrollUntilVisible(
       find.text('Device-only Modus'),
       280,
       scrollable: find.byType(Scrollable).first,

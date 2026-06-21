@@ -123,6 +123,8 @@ class _PrivacyScreenState extends ConsumerState<PrivacyScreen> {
                   const SizedBox(height: 16),
                   const _PurposeCard(),
                   const SizedBox(height: 16),
+                  const _MedicalDisclaimerCard(),
+                  const SizedBox(height: 16),
                   const _LocalModeCard(),
                   const SizedBox(height: 16),
                   const _ExportScopeCard(),
@@ -557,6 +559,37 @@ class _PurposeCard extends StatelessWidget {
           label: 'Aufbewahrung',
           body:
               'Keine erzwungene Aufbewahrung im lokalen Modus; Sie können Daten vollständig löschen.',
+        ),
+      ],
+    );
+  }
+}
+
+class _MedicalDisclaimerCard extends StatelessWidget {
+  const _MedicalDisclaimerCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return const _InfoCard(
+      icon: Icons.health_and_safety_outlined,
+      iconColor: Color(0xFFCA8A04),
+      title: 'Medizinischer Hinweis',
+      tint: Color(0xFFFFFBEB),
+      border: Color(0xFFFDE68A),
+      children: [
+        _InfoLine(
+          icon: Icons.warning_amber_outlined,
+          iconColor: Color(0xFFCA8A04),
+          title: 'Keine Diagnose-App',
+          body:
+              'Gesundheit Plus organisiert lokale Gesundheitsdaten und ersetzt keine ärztliche Diagnose, Behandlung oder Notfallversorgung.',
+        ),
+        _InfoLine(
+          icon: Icons.local_hospital_outlined,
+          iconColor: Color(0xFFCA8A04),
+          title: 'Bei Beschwerden medizinische Hilfe nutzen',
+          body:
+              'Bei akuten Beschwerden, Unsicherheit, Nebenwirkungen oder Notfällen wenden Sie sich an medizinisches Fachpersonal oder den örtlichen Notruf.',
         ),
       ],
     );

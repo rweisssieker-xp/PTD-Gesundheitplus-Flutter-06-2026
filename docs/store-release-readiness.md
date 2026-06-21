@@ -34,6 +34,8 @@ The former Twilio setup is implemented as local native SMS/WhatsApp handoffs wit
 
 Gesundheit Plus is not a medical diagnosis tool and does not replace professional medical advice.
 
+The in-app privacy and legal screen includes a medical disclaimer that labels the app as a local health-record organizer, not a diagnosis, treatment, emergency-care, or medical-advice replacement.
+
 ## Permission Rationale
 
 | Permission / Capability | Platform | Reason |
@@ -116,5 +118,5 @@ Required screenshots should be captured on real devices or reliable simulators/e
 - The Xcode generated Privacy Report must be checked against `PrivacyInfo.xcprivacy` and any third-party SDK manifests before submission.
 - Final store privacy questionnaires must be completed in the store consoles.
 - Final screenshots must be captured from real rendered devices because the current local Android emulator exposes the Flutter UI through accessibility hierarchy but returns a black hardware screenshot surface.
-- Final medical disclaimer/legal text should be reviewed before public distribution.
+- Final legal review of the in-app medical disclaimer should be completed before public distribution.
 - If online AI is enabled in a store build, final privacy answers must name the selected AI endpoint/provider and its data handling terms.

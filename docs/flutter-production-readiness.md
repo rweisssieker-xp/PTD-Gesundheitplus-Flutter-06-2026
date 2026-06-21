@@ -94,6 +94,7 @@ Android embedding disables Impeller explicitly for this emulator-tested build pa
 - The AI coach remains local by default, labels local-only answers, builds consent-gated bounded local context only after explicit consent, and stores a visible recovery answer when an optional configured online responder fails without changing health records.
 - AI consent and revoke are covered at widget level: the coach answers after context consent, privacy settings can revoke the consent, and the next AI question is visibly blocked from health context.
 - Local data deletion is covered through the privacy and storage-mode confirmation flows and verifies that local health, document, and emergency rows are removed after the user confirms deletion.
+- The privacy/legal screen includes a tested medical disclaimer that labels Gesundheit Plus as a local health-record organizer and not a replacement for medical diagnosis, treatment, emergency care, or professional advice.
 - Optional online AI can be enabled at build time with `--dart-define=GESUNDHEIT_PLUS_AI_ENDPOINT=https://...`; when omitted, the AI coach stays local-only.
 
 ## Remaining production gates
