@@ -221,6 +221,29 @@ void main() {
     );
   });
 
+  test('iOS privacy manifest declares no tracking and required reasons', () {
+    final privacyManifest = File(
+      'ios/Runner/PrivacyInfo.xcprivacy',
+    ).readAsStringSync();
+
+    expect(privacyManifest, contains('<key>NSPrivacyTracking</key>'));
+    expect(privacyManifest, contains('<false/>'));
+    expect(privacyManifest, contains('<key>NSPrivacyTrackingDomains</key>'));
+    expect(privacyManifest, contains('<key>NSPrivacyCollectedDataTypes</key>'));
+    expect(privacyManifest, contains('<array/>'));
+    expect(privacyManifest, contains('<key>NSPrivacyAccessedAPITypes</key>'));
+    expect(
+      privacyManifest,
+      contains('<string>NSPrivacyAccessedAPICategoryUserDefaults</string>'),
+    );
+    expect(privacyManifest, contains('<string>CA92.1</string>'));
+    expect(
+      privacyManifest,
+      contains('<string>NSPrivacyAccessedAPICategoryFileTimestamp</string>'),
+    );
+    expect(privacyManifest, contains('<string>C617.1</string>'));
+  });
+
   test(
     'store readiness draft reflects the current local-only release posture',
     () {
