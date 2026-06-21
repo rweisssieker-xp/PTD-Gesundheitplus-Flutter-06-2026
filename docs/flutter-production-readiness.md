@@ -7,7 +7,7 @@ Date: 2026-06-21
 - `flutter doctor -v`: no issues after installing Android SDK command-line tools and accepting Android licenses.
 - `dart format lib test`: clean.
 - `flutter analyze`: no issues.
-- `flutter test`: 147 tests passed.
+- `flutter test`: 148 tests passed.
 - `flutter test integration_test/app_flow_test.dart`: Android integration flow passed on the local emulator, including first-run local storage selection and core feature route rendering.
 - `flutter build apk --debug`: built successfully.
 - `flutter build apk --release`: built successfully with local release keystore.
@@ -72,6 +72,7 @@ Android embedding disables Impeller explicitly for this emulator-tested build pa
 - Anamnesis entries can be encoded into an offline-readable local QR payload for physician handoff.
 - Appointments can be exported on-device as `.ics` calendar files for native calendar app handoff.
 - Appointments can be drafted from spoken-style German text using a deterministic on-device parser for doctor, date, time, reason, specialty, and location.
+- Appointment creation through the native editor is covered end to end at widget level, including persisted date/time and local reminder state shown back in the appointment list.
 - Family-circle check-ins store local safety status, optional notes, and optional current-device location text on-device.
 - Anamnesis, allergies, treatment history, healthcare professionals, appointments, medication, and vaccination screens expose native text-to-speech read-aloud summaries.
 - Scanned documents expose local rule-based medical insights, urgency labels, recognized medical areas, and suggested actions without sending document data off-device.
