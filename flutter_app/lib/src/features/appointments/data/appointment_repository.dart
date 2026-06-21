@@ -147,6 +147,7 @@ class AppointmentRepository {
     String? phone,
     String? email,
     String? notes,
+    DateTime? treatingSince,
   }) {
     return HealthcareProfessional(
       id: _uuid.v4(),
@@ -156,7 +157,7 @@ class AppointmentRepository {
       phone: phone,
       email: email,
       notes: notes,
-      treatingSince: null,
+      treatingSince: treatingSince,
     );
   }
 

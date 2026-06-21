@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/platform/platform_handoff_service.dart';
 import '../../../core/storage/database_provider.dart';
 import '../../../shared_ui/gp_colors.dart';
 import '../../../shared_ui/gp_icons.dart';
@@ -22,15 +23,18 @@ class HealthcareProfessionalsScreen extends ConsumerStatefulWidget {
 class _HealthcareProfessionalsScreenState
     extends ConsumerState<HealthcareProfessionalsScreen> {
   final _directory = const HealthcareProfessionalDirectory();
+  final _listSearch = TextEditingController();
   final _directorySearch = TextEditingController();
   final _assistantText = TextEditingController();
   HealthcareProfessionalTextSuggestion? _assistantSuggestion;
   String? _assistantError;
+  var _listQuery = '';
   var _directoryQuery = '';
   int _reload = 0;
 
   @override
   void dispose() {
+    _listSearch.dispose();
     _directorySearch.dispose();
     _assistantText.dispose();
     super.dispose();
@@ -58,13 +62,31 @@ class _HealthcareProfessionalsScreenState
             future: repo.listProfessionals(),
             builder: (context, snapshot) {
               final professionals = snapshot.data ?? [];
+              final filteredProfessionals = _filterProfessionals(
+                professionals,
+                _listQuery,
+              );
+              final groupedProfessionals = _groupProfessionals(
+                filteredProfessionals,
+              );
               return ListView(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.fromLTRB(16, 20, 16, 96),
                 children: [
-                  _ProfessionalSummary(count: professionals.length),
+                  _ProfessionalHeader(
+                    count: professionals.length,
+                    specialties: _specialtyCount(professionals),
+                    withContact: _contactableCount(professionals),
+                  ),
                   const SizedBox(height: 12),
                   GpVoiceNavigation(
                     content: _professionalsVoiceContent(professionals),
+                  ),
+                  const SizedBox(height: 16),
+                  _ProfessionalSearchFilterCard(
+                    controller: _listSearch,
+                    query: _listQuery,
+                    resultCount: filteredProfessionals.length,
+                    onChanged: (value) => setState(() => _listQuery = value),
                   ),
                   const SizedBox(height: 16),
                   _ProfessionalTextAssistantCard(
@@ -98,39 +120,32 @@ class _HealthcareProfessionalsScreenState
                         ),
                       ),
                     )
-                  else
-                    ...professionals.map(
-                      (item) => Card(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        child: ListTile(
-                          leading: const CircleAvatar(
-                            backgroundColor: Color(0xFFDCFCE7),
-                            child: Icon(
-                              GpIcons.healthcare,
-                              color: Colors.green,
-                            ),
-                          ),
-                          title: Text(
-                            item.name,
-                            style: const TextStyle(fontWeight: FontWeight.w800),
-                          ),
-                          subtitle: Text(
-                            [item.specialty, item.phone, item.email]
-                                .whereType<String>()
-                                .where((value) => value.isNotEmpty)
-                                .join('\n'),
-                          ),
-                          isThreeLine: true,
-                          trailing: IconButton(
-                            icon: const Icon(Icons.delete_outline),
-                            onPressed: () async {
-                              await repo.deleteProfessional(item.id);
-                              _refresh();
-                            },
-                          ),
+                  else if (filteredProfessionals.isEmpty)
+                    const Card(
+                      child: Padding(
+                        padding: EdgeInsets.all(24),
+                        child: Center(
+                          child: Text('Keine Behandler für diese Suche'),
                         ),
                       ),
-                    ),
+                    )
+                  else
+                    for (final entry in groupedProfessionals.entries) ...[
+                      _SpecialtyGroupHeader(
+                        specialty: entry.key,
+                        count: entry.value.length,
+                      ),
+                      const SizedBox(height: 8),
+                      for (final item in entry.value)
+                        _ProfessionalCard(
+                          item: item,
+                          onDelete: () async {
+                            await repo.deleteProfessional(item.id);
+                            _refresh();
+                          },
+                        ),
+                      const SizedBox(height: 8),
+                    ],
                 ],
               );
             },
@@ -234,6 +249,495 @@ class _HealthcareProfessionalsScreenState
       context,
     ).showSnackBar(SnackBar(content: Text('${suggestion.name} übernommen')));
     _refresh();
+  }
+}
+
+List<HealthcareProfessional> _filterProfessionals(
+  List<HealthcareProfessional> professionals,
+  String query,
+) {
+  final normalized = query.trim().toLowerCase();
+  if (normalized.isEmpty) return professionals;
+  return professionals.where((item) {
+    final haystack = [
+      item.name,
+      item.specialty,
+      item.address,
+      item.phone,
+      item.email,
+      item.notes,
+    ].whereType<String>().join(' ').toLowerCase();
+    return haystack.contains(normalized);
+  }).toList();
+}
+
+Map<String, List<HealthcareProfessional>> _groupProfessionals(
+  List<HealthcareProfessional> professionals,
+) {
+  final grouped = <String, List<HealthcareProfessional>>{};
+  for (final item in professionals) {
+    grouped.putIfAbsent(item.specialty, () => []).add(item);
+  }
+  return grouped;
+}
+
+int _specialtyCount(List<HealthcareProfessional> professionals) =>
+    professionals.map((item) => item.specialty).toSet().length;
+
+int _contactableCount(List<HealthcareProfessional> professionals) =>
+    professionals.where((item) {
+      return (item.phone ?? '').trim().isNotEmpty ||
+          (item.email ?? '').trim().isNotEmpty;
+    }).length;
+
+class _ProfessionalHeader extends StatelessWidget {
+  const _ProfessionalHeader({
+    required this.count,
+    required this.specialties,
+    required this.withContact,
+  });
+
+  final int count;
+  final int specialties;
+  final int withContact;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Row(
+          children: [
+            Icon(GpIcons.healthcare, color: Color(0xFF16A34A), size: 30),
+            SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Heilberufe',
+                    style: TextStyle(
+                      color: GpColors.textPrimary,
+                      fontSize: 24,
+                      fontWeight: FontWeight.w900,
+                      height: 1.1,
+                    ),
+                  ),
+                  SizedBox(height: 3),
+                  Text(
+                    'Ihre Aerzte und Behandler',
+                    style: TextStyle(
+                      color: GpColors.textSecondary,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 14),
+        DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(colors: GpColors.green),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(18),
+            child: Row(
+              children: [
+                const Icon(GpIcons.healthcare, color: Colors.white, size: 46),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Text(
+                    '$count Behandler gespeichert',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
+        Row(
+          children: [
+            Expanded(
+              child: _ProfessionalStatTile(
+                icon: Icons.local_hospital_outlined,
+                value: '$specialties',
+                label: 'Fachrichtungen',
+                color: const Color(0xFF16A34A),
+                background: const Color(0xFFF0FDF4),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: _ProfessionalStatTile(
+                icon: Icons.call_outlined,
+                value: '$withContact',
+                label: 'Kontaktbereit',
+                color: const Color(0xFF2563EB),
+                background: const Color(0xFFEFF6FF),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _ProfessionalStatTile extends StatelessWidget {
+  const _ProfessionalStatTile({
+    required this.icon,
+    required this.value,
+    required this.label,
+    required this.color,
+    required this.background,
+  });
+
+  final IconData icon;
+  final String value;
+  final String label;
+  final Color color;
+  final Color background;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 104,
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withValues(alpha: 0.25), width: 2),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, color: color, size: 22),
+          const SizedBox(height: 3),
+          Text(
+            value,
+            style: TextStyle(
+              color: color,
+              fontSize: 22,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: color,
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ProfessionalSearchFilterCard extends StatelessWidget {
+  const _ProfessionalSearchFilterCard({
+    required this.controller,
+    required this.query,
+    required this.resultCount,
+    required this.onChanged,
+  });
+
+  final TextEditingController controller;
+  final String query;
+  final int resultCount;
+  final ValueChanged<String> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Row(
+              children: [
+                Icon(Icons.search, color: Color(0xFF16A34A)),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Meine Behandler durchsuchen',
+                    style: TextStyle(
+                      color: GpColors.textPrimary,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              key: const ValueKey('professional-list-search'),
+              controller: controller,
+              onChanged: onChanged,
+              textInputAction: TextInputAction.search,
+              decoration: InputDecoration(
+                prefixIcon: const Icon(Icons.search),
+                hintText: 'Name, Fachrichtung, Ort oder Kontakt suchen',
+                suffixIcon: query.isEmpty
+                    ? null
+                    : IconButton(
+                        tooltip: 'Suche loeschen',
+                        onPressed: () {
+                          controller.clear();
+                          onChanged('');
+                        },
+                        icon: const Icon(Icons.close),
+                      ),
+                border: const OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              query.trim().isEmpty
+                  ? 'Alle gespeicherten Behandler'
+                  : '$resultCount Treffer lokal gefunden',
+              style: const TextStyle(
+                color: GpColors.textSecondary,
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SpecialtyGroupHeader extends StatelessWidget {
+  const _SpecialtyGroupHeader({required this.specialty, required this.count});
+
+  final String specialty;
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            specialty,
+            style: const TextStyle(
+              color: GpColors.textPrimary,
+              fontSize: 18,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+        ),
+        _SoftCountBadge(label: '$count'),
+      ],
+    );
+  }
+}
+
+class _ProfessionalCard extends StatelessWidget {
+  const _ProfessionalCard({required this.item, required this.onDelete});
+
+  final HealthcareProfessional item;
+  final VoidCallback onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    final address = item.address?.trim();
+    final phone = item.phone?.trim();
+    final email = item.email?.trim();
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const CircleAvatar(
+                  radius: 24,
+                  backgroundColor: Color(0xFFDCFCE7),
+                  child: Icon(GpIcons.healthcare, color: Color(0xFF16A34A)),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        item.name,
+                        style: const TextStyle(
+                          color: GpColors.textPrimary,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      Text(
+                        item.specialty,
+                        style: const TextStyle(
+                          color: Color(0xFF16A34A),
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  tooltip: 'Entfernen',
+                  icon: const Icon(Icons.delete_outline),
+                  onPressed: onDelete,
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            if (address != null && address.isNotEmpty)
+              _ProfessionalInfoLine(icon: Icons.place_outlined, text: address),
+            if (phone != null && phone.isNotEmpty)
+              _ProfessionalInfoLine(icon: Icons.phone_outlined, text: phone),
+            if (email != null && email.isNotEmpty)
+              _ProfessionalInfoLine(icon: Icons.email_outlined, text: email),
+            if (item.treatingSince != null)
+              _ProfessionalInfoLine(
+                icon: Icons.calendar_month_outlined,
+                text: 'In Behandlung seit ${_date(item.treatingSince!)}',
+              ),
+            if ((item.notes ?? '').trim().isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Text(
+                item.notes!.trim(),
+                style: const TextStyle(
+                  color: GpColors.textSecondary,
+                  fontSize: 13,
+                ),
+              ),
+            ],
+            if ((phone ?? '').isNotEmpty ||
+                (email ?? '').isNotEmpty ||
+                (address ?? '').isNotEmpty) ...[
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  if ((phone ?? '').isNotEmpty)
+                    OutlinedButton.icon(
+                      onPressed: () => _launchOrSnack(
+                        context,
+                        PlatformHandoffService.telUri(phone!),
+                        'Telefon-App konnte nicht geoeffnet werden.',
+                      ),
+                      icon: const Icon(Icons.phone_outlined, size: 18),
+                      label: const Text('Anrufen'),
+                    ),
+                  if ((email ?? '').isNotEmpty)
+                    OutlinedButton.icon(
+                      onPressed: () => _launchOrSnack(
+                        context,
+                        Uri(scheme: 'mailto', path: email),
+                        'E-Mail-App konnte nicht geoeffnet werden.',
+                      ),
+                      icon: const Icon(Icons.email_outlined, size: 18),
+                      label: const Text('E-Mail'),
+                    ),
+                  if ((address ?? '').isNotEmpty)
+                    OutlinedButton.icon(
+                      onPressed: () => _launchOrSnack(
+                        context,
+                        Uri(
+                          scheme: 'geo',
+                          path: '0,0',
+                          queryParameters: {'q': address},
+                        ),
+                        'Karten-App konnte nicht geoeffnet werden.',
+                      ),
+                      icon: const Icon(Icons.map_outlined, size: 18),
+                      label: const Text('Karte'),
+                    ),
+                ],
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ProfessionalInfoLine extends StatelessWidget {
+  const _ProfessionalInfoLine({required this.icon, required this.text});
+
+  final IconData icon;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 5),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 17, color: GpColors.textSecondary),
+          const SizedBox(width: 7),
+          Expanded(
+            child: Text(
+              text,
+              style: const TextStyle(color: GpColors.textSecondary),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SoftCountBadge extends StatelessWidget {
+  const _SoftCountBadge({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: const Color(0xFFEFF6FF),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(
+          color: Color(0xFF2563EB),
+          fontWeight: FontWeight.w900,
+        ),
+      ),
+    );
+  }
+}
+
+Future<void> _launchOrSnack(
+  BuildContext context,
+  Uri uri,
+  String failureMessage,
+) async {
+  final messenger = ScaffoldMessenger.of(context);
+  final launched = await const PlatformHandoffService().launch(uri);
+  if (!launched) {
+    messenger.showSnackBar(SnackBar(content: Text(failureMessage)));
   }
 }
 
@@ -426,47 +930,7 @@ String _professionalsVoiceContent(List<HealthcareProfessional> professionals) {
   return 'Heilberufe. ${professionals.length} Behandler gespeichert. $details.';
 }
 
-class _ProfessionalSummary extends StatelessWidget {
-  const _ProfessionalSummary({required this.count});
-
-  final int count;
-
-  @override
-  Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(colors: GpColors.green),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Row(
-          children: [
-            const Icon(GpIcons.healthcare, color: Colors.white, size: 46),
-            const SizedBox(width: 16),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Gespeicherte Behandler',
-                  style: TextStyle(color: Colors.white70),
-                ),
-                Text(
-                  '$count',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 36,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
+String _date(DateTime value) => '${value.day}.${value.month}.${value.year}';
 
 class _DoctorSearchCard extends StatelessWidget {
   const _DoctorSearchCard({
@@ -714,6 +1178,7 @@ class _ProfessionalEditorState extends State<_ProfessionalEditor> {
   final _address = TextEditingController();
   final _phone = TextEditingController();
   final _email = TextEditingController();
+  final _treatingSince = TextEditingController();
   final _notes = TextEditingController();
 
   @override
@@ -752,6 +1217,14 @@ class _ProfessionalEditorState extends State<_ProfessionalEditor> {
             TextField(
               controller: _email,
               decoration: const InputDecoration(labelText: 'E-Mail'),
+            ),
+            TextField(
+              controller: _treatingSince,
+              keyboardType: TextInputType.datetime,
+              decoration: const InputDecoration(
+                labelText: 'In Behandlung seit',
+                hintText: 'TT.MM.JJJJ oder JJJJ-MM-TT',
+              ),
             ),
             TextField(
               controller: _notes,
@@ -797,8 +1270,22 @@ class _ProfessionalEditorState extends State<_ProfessionalEditor> {
         phone: _phone.text.trim(),
         email: _email.text.trim(),
         notes: _notes.text.trim(),
+        treatingSince: _parseDateInput(_treatingSince.text),
       ),
     );
     if (mounted) Navigator.pop(context, true);
   }
+}
+
+DateTime? _parseDateInput(String value) {
+  final trimmed = value.trim();
+  if (trimmed.isEmpty) return null;
+  final iso = DateTime.tryParse(trimmed);
+  if (iso != null) return iso;
+  final match = RegExp(r'^(\d{1,2})\.(\d{1,2})\.(\d{4})$').firstMatch(trimmed);
+  if (match == null) return null;
+  final day = int.parse(match.group(1)!);
+  final month = int.parse(match.group(2)!);
+  final year = int.parse(match.group(3)!);
+  return DateTime(year, month, day);
 }
