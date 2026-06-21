@@ -7,7 +7,7 @@ Date: 2026-06-21
 - `flutter doctor -v`: no issues after installing Android SDK command-line tools and accepting Android licenses.
 - `dart format lib test`: clean.
 - `flutter analyze`: no issues.
-- `flutter test`: 173 tests passed.
+- `flutter test`: 174 tests passed.
 - GitHub Actions workflow `Flutter CI` covers `flutter pub get`, `flutter analyze`, `flutter test`, and Android debug APK build on `main` pushes and pull requests.
 - `flutter test integration_test/app_flow_test.dart`: Android integration flow passed on the local emulator, including first-run local storage selection and core feature route rendering.
 - `flutter build apk --debug`: built successfully.
@@ -64,6 +64,7 @@ Android embedding disables Impeller explicitly for this emulator-tested build pa
 - iOS release configuration is covered for bundle identity, Info.plist use, Apple generic versioning, and Flutter-driven build name/build number.
 - The iOS Runner target includes `PrivacyInfo.xcprivacy` with no tracking declaration, empty tracking domains/data-type arrays, and tested Required Reason API entries for app preferences and file metadata access.
 - Native manifest tests cover Android permissions and iOS usage descriptions for camera, photos, contacts, location, notifications, and biometric unlock.
+- Native manifest tests also assert that unused microphone and calendar permissions are not requested; spoken-style input is text-based and appointments export as user-controlled `.ics` files.
 - Store readiness tests cover the local-only release posture, permission rationale, data-safety claims, encryption claims, and remaining external store gates documented for Play Store and App Store submission.
 - The PWA language switcher is backed by a local on-device preference and translates the native dashboard entry points for German, English, Turkish, Arabic, and Ukrainian.
 - Emergency contacts expose native phone, SMS, WhatsApp, Telegram, system share, and current-location SMS handoff actions from the emergency profile and offline emergency views with visible failure messages when a target app is unavailable.

@@ -49,6 +49,11 @@ The in-app privacy and legal screen includes a medical disclaimer that labels th
 | Internet | Android, iOS | Contact an optional configured online AI responder after explicit AI context consent; local health record features work without network. |
 | Phone/SMS/WhatsApp/Telegram/share handoff | Android, iOS | Let the user contact emergency contacts through native apps; SMS/WhatsApp setup uses local handoff diagnostics instead of a bundled Twilio backend. |
 
+Permissions intentionally not requested:
+
+- Microphone: spoken-style input is entered as text and parsed on-device; the current native release does not capture audio.
+- Calendar read/write: appointments are exported as user-controlled `.ics` files through native sharing instead of silently reading or writing device calendars.
+
 ## Google Play Data Safety Draft
 
 Data collected by the app and stored locally on device:

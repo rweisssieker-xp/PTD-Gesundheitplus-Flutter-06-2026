@@ -196,6 +196,30 @@ void main() {
     expect(iosInfo, contains('lokale Notfallfunktionen'));
   });
 
+  test('native manifests avoid unused microphone and calendar permissions', () {
+    final androidManifest = File(
+      'android/app/src/main/AndroidManifest.xml',
+    ).readAsStringSync();
+    final iosInfo = File('ios/Runner/Info.plist').readAsStringSync();
+
+    for (final permission in [
+      'android.permission.RECORD_AUDIO',
+      'android.permission.READ_CALENDAR',
+      'android.permission.WRITE_CALENDAR',
+    ]) {
+      expect(androidManifest, isNot(contains(permission)));
+    }
+
+    for (final key in [
+      'NSMicrophoneUsageDescription',
+      'NSCalendarsUsageDescription',
+      'NSCalendarsFullAccessUsageDescription',
+      'NSCalendarsWriteOnlyAccessUsageDescription',
+    ]) {
+      expect(iosInfo, isNot(contains(key)));
+    }
+  });
+
   test('release privacy and launcher icon artifacts are packaged', () {
     final iosProject = File(
       'ios/Runner.xcodeproj/project.pbxproj',
@@ -286,6 +310,13 @@ void main() {
         'Unlock the local health record with device biometric authentication',
       ]) {
         expect(readiness, contains(permissionReason));
+      }
+
+      for (final omittedPermissionClaim in [
+        'Microphone: spoken-style input is entered as text',
+        'Calendar read/write: appointments are exported',
+      ]) {
+        expect(readiness, contains(omittedPermissionClaim));
       }
 
       for (final dataSafetyClaim in [
