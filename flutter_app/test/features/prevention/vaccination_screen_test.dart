@@ -25,7 +25,15 @@ void main() {
       batchNumber: 'ABC123',
       doctorName: 'Hausarztpraxis',
     );
-    _seedHealthPass(db);
+    await repo.addHealthPass(
+      passType: 'Implantatpass',
+      title: 'Implantatpass Knie',
+      implantedAt: DateTime(2026, 6, 1),
+      manufacturer: 'MediCorp',
+      model: 'K-42',
+      material: 'Titan',
+      serialNumber: 'SN123',
+    );
 
     tester.view.physicalSize = const Size(430, 1900);
     tester.view.devicePixelRatio = 1;
@@ -58,6 +66,8 @@ void main() {
 
     expect(find.text('Implantatpass Knie'), findsOneWidget);
     expect(find.textContaining('Implantatpass'), findsWidgets);
+    expect(find.textContaining('MediCorp'), findsOneWidget);
+    expect(find.textContaining('SN123'), findsOneWidget);
   });
 
   testWidgets('vaccination screen creates local vaccination records', (
@@ -119,22 +129,77 @@ void main() {
     expect(records.single.doctorName, 'Hausarztpraxis');
     expect(records.single.nextDueAt, isNotNull);
   });
-}
 
-void _seedHealthPass(AppDatabase db) {
-  db.execute('''
-    INSERT INTO health_documents (
-      id, title, category, local_path, encrypted, captured_at, created_at, updated_at
-    )
-    VALUES (
-      'pass-1',
-      'Implantatpass Knie',
-      'Implantatpass',
-      '/tmp/implantatpass.pdf',
-      1,
-      '2026-06-01T00:00:00.000',
-      'now',
-      'now'
-    )
-    ''');
+  testWidgets('vaccination screen manages local health passes', (tester) async {
+    final db = AppDatabase.memory();
+    addTearDown(db.close);
+    await LocalProfileRepository(
+      db,
+    ).saveProfile(fullName: 'Patient', dateOfBirth: DateTime(1990, 1, 1));
+
+    tester.view.physicalSize = const Size(430, 2200);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [appDatabaseProvider.overrideWith((ref) => db)],
+        child: const MaterialApp(home: VaccinationScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Paesse (0)'));
+    await tester.pumpAndSettle();
+    expect(find.text('Noch keine Gesundheitspaesse'), findsOneWidget);
+
+    await tester.tap(find.widgetWithText(FloatingActionButton, 'Pass'));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Bezeichnung *'),
+      'Herzschrittmacherpass',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Implantationsdatum'),
+      '2025-05-04',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Hersteller'),
+      'CardioTech',
+    );
+    await tester.enterText(find.widgetWithText(TextField, 'Modell'), 'CT-7');
+    await tester.enterText(find.widgetWithText(TextField, 'Material'), 'Titan');
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Seriennummer'),
+      'SN-999',
+    );
+    await tester.tap(find.widgetWithText(FilledButton, 'Speichern'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Paesse (1)'), findsOneWidget);
+    expect(find.text('Herzschrittmacherpass'), findsOneWidget);
+    expect(find.textContaining('CardioTech'), findsOneWidget);
+    expect(find.textContaining('SN-999'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Bearbeiten'));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Bezeichnung *'),
+      'Herzschrittmacherpass aktualisiert',
+    );
+    await tester.enterText(find.widgetWithText(TextField, 'Modell'), 'CT-8');
+    await tester.tap(find.widgetWithText(FilledButton, 'Speichern'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Herzschrittmacherpass aktualisiert'), findsOneWidget);
+    expect(find.textContaining('CT-8'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Loeschen'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Paesse (0)'), findsOneWidget);
+    expect(find.text('Noch keine Gesundheitspaesse'), findsOneWidget);
+    expect(await PreventionRepository(db).listHealthPasses(), isEmpty);
+  });
 }

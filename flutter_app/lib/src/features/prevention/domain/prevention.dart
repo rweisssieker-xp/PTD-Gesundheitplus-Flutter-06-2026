@@ -49,6 +49,30 @@ class PreventiveCareItem {
   bool get isDue => !isDone && !dueAt.isAfter(DateTime.now());
 }
 
+class HealthPass {
+  const HealthPass({
+    required this.id,
+    required this.passType,
+    required this.title,
+    this.implantedAt,
+    this.manufacturer,
+    this.model,
+    this.material,
+    this.serialNumber,
+    this.notes,
+  });
+
+  final String id;
+  final String passType;
+  final String title;
+  final DateTime? implantedAt;
+  final String? manufacturer;
+  final String? model;
+  final String? material;
+  final String? serialNumber;
+  final String? notes;
+}
+
 class PreventionRecommendation {
   const PreventionRecommendation({
     required this.title,

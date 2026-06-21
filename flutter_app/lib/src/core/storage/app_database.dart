@@ -262,6 +262,21 @@ class AppDatabase {
       );
     ''');
     _db.execute('''
+      CREATE TABLE IF NOT EXISTS health_passes (
+        id TEXT PRIMARY KEY,
+        pass_type TEXT NOT NULL,
+        title TEXT NOT NULL,
+        implanted_at TEXT,
+        manufacturer TEXT,
+        model TEXT,
+        material TEXT,
+        serial_number TEXT,
+        notes TEXT,
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+      );
+    ''');
+    _db.execute('''
       CREATE TABLE IF NOT EXISTS preventive_care_items (
         id TEXT PRIMARY KEY,
         title TEXT NOT NULL,

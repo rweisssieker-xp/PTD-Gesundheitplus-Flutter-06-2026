@@ -37,6 +37,48 @@ void main() {
     db.close();
   });
 
+  test('stores updates and deletes local health passes', () async {
+    final db = AppDatabase.memory();
+    final repo = PreventionRepository(db);
+    final created = await repo.addHealthPass(
+      passType: 'Implantatpass',
+      title: 'Implantatpass Knie',
+      implantedAt: DateTime(2024, 5, 1),
+      manufacturer: 'MediCorp',
+      model: 'K-42',
+      material: 'Titan',
+      serialNumber: 'SN123',
+      notes: 'MRT-Hinweis beachten',
+    );
+
+    var passes = await repo.listHealthPasses();
+    expect(passes.single.title, 'Implantatpass Knie');
+    expect(passes.single.manufacturer, 'MediCorp');
+    expect(passes.single.serialNumber, 'SN123');
+
+    await repo.updateHealthPass(
+      created.id,
+      passType: 'Endoprothese',
+      title: 'Knie-Endoprothese',
+      implantedAt: DateTime(2024, 5, 2),
+      manufacturer: 'MediCorp',
+      model: 'K-43',
+      material: 'Keramik',
+      serialNumber: 'SN124',
+      notes: 'Kontrolle jaehrlich',
+    );
+
+    passes = await repo.listHealthPasses();
+    expect(passes.single.passType, 'Endoprothese');
+    expect(passes.single.title, 'Knie-Endoprothese');
+    expect(passes.single.model, 'K-43');
+    expect(passes.single.material, 'Keramik');
+
+    await repo.deleteHealthPass(created.id);
+    expect(await repo.listHealthPasses(), isEmpty);
+    db.close();
+  });
+
   test('generates local age-based prevention recommendations', () async {
     final db = AppDatabase.memory();
     addTearDown(db.close);

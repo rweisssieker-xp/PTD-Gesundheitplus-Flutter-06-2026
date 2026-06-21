@@ -59,7 +59,7 @@ Permissions intentionally not requested:
 Data collected by the app and stored locally on device:
 
 - Personal info: profile name, date of birth, emergency contacts, family members.
-- Health and fitness: medication, allergies, diagnoses/history, appointments, vitals, vaccinations, preventive care, health documents, emergency profile, AI coach message history.
+- Health and fitness: medication, allergies, diagnoses/history, appointments, vitals, vaccinations, structured health passes, preventive care, health documents, emergency profile, AI coach message history.
 - Location: only when the user requests current-location emergency/family features.
 - Photos/files: document images selected or captured by the user.
 

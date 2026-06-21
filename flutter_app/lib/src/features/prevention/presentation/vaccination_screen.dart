@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/storage/database_provider.dart';
-import '../../../features/documents/data/document_repository.dart';
-import '../../../features/documents/domain/health_document.dart';
 import '../../../shared_ui/gp_colors.dart';
 import '../../../shared_ui/gp_database_error.dart';
 import '../../../shared_ui/gp_icons.dart';
@@ -29,10 +27,17 @@ class _VaccinationScreenState extends ConsumerState<VaccinationScreen> {
     return GpScreen(
       floatingActionButton: FloatingActionButton.extended(
         onPressed: dbAsync.hasValue
-            ? () => _openEditor(PreventionRepository(dbAsync.requireValue))
+            ? () {
+                final repo = PreventionRepository(dbAsync.requireValue);
+                if (_tab == 0) {
+                  _openEditor(repo);
+                } else {
+                  _openHealthPassEditor(repo);
+                }
+              }
             : null,
-        icon: const Icon(Icons.add),
-        label: const Text('Impfung'),
+        icon: Icon(_tab == 0 ? Icons.add : Icons.file_present_outlined),
+        label: Text(_tab == 0 ? 'Impfung' : 'Pass'),
       ),
       body: dbAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -42,10 +47,9 @@ class _VaccinationScreenState extends ConsumerState<VaccinationScreen> {
         ),
         data: (db) {
           final repo = PreventionRepository(db);
-          final documentRepo = DocumentRepository(db);
           return FutureBuilder<_VaccinationDashboardData>(
             key: ValueKey(_reload),
-            future: _loadDashboard(repo, documentRepo),
+            future: _loadDashboard(repo),
             builder: (context, snapshot) {
               final data = snapshot.data ?? _VaccinationDashboardData.empty();
               final records = data.vaccinations;
@@ -95,7 +99,11 @@ class _VaccinationScreenState extends ConsumerState<VaccinationScreen> {
                   if (_tab == 0)
                     _VaccinationList(records: records)
                   else
-                    _HealthPassList(documents: passes),
+                    _HealthPassList(
+                      passes: passes,
+                      onEdit: (pass) => _openHealthPassEditor(repo, pass),
+                      onDelete: (pass) => _deleteHealthPass(repo, pass),
+                    ),
                 ],
               );
             },
@@ -114,14 +122,24 @@ class _VaccinationScreenState extends ConsumerState<VaccinationScreen> {
     if (saved == true) setState(() => _reload++);
   }
 
+  Future<void> _openHealthPassEditor(
+    PreventionRepository repo, [
+    HealthPass? pass,
+  ]) async {
+    final saved = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => _HealthPassEditor(repo: repo, pass: pass),
+    );
+    if (saved == true) setState(() => _reload++);
+  }
+
   Future<_VaccinationDashboardData> _loadDashboard(
     PreventionRepository repo,
-    DocumentRepository documentRepo,
   ) async {
     final vaccinations = await repo.listVaccinations();
     final recommendations = await repo.generateRecommendations();
-    final documents = await documentRepo.listDocuments();
-    final healthPasses = documents.where(_isHealthPassDocument).toList();
+    final healthPasses = await repo.listHealthPasses();
     return _VaccinationDashboardData(
       vaccinations: vaccinations,
       recommendations: recommendations
@@ -129,6 +147,18 @@ class _VaccinationScreenState extends ConsumerState<VaccinationScreen> {
           .toList(),
       healthPasses: healthPasses,
     );
+  }
+
+  Future<void> _deleteHealthPass(
+    PreventionRepository repo,
+    HealthPass pass,
+  ) async {
+    await repo.deleteHealthPass(pass.id);
+    if (!mounted) return;
+    setState(() => _reload++);
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('${pass.title} geloescht.')));
   }
 
   Future<void> _planVaccinationRecommendation(
@@ -166,7 +196,7 @@ class _VaccinationDashboardData {
 
   final List<VaccinationRecord> vaccinations;
   final List<PreventionRecommendation> recommendations;
-  final List<HealthDocument> healthPasses;
+  final List<HealthPass> healthPasses;
 }
 
 String _vaccinationVoiceContent(List<VaccinationRecord> records) {
@@ -261,6 +291,176 @@ class _VaccinationEditorState extends State<_VaccinationEditor> {
           : DateTime(now.year, now.month + months, now.day),
       doctorName: _emptyToNull(_doctor.text),
     );
+    if (mounted) Navigator.pop(context, true);
+  }
+}
+
+class _HealthPassEditor extends StatefulWidget {
+  const _HealthPassEditor({required this.repo, this.pass});
+
+  final PreventionRepository repo;
+  final HealthPass? pass;
+
+  @override
+  State<_HealthPassEditor> createState() => _HealthPassEditorState();
+}
+
+class _HealthPassEditorState extends State<_HealthPassEditor> {
+  final _passType = TextEditingController(text: 'Implantatpass');
+  final _title = TextEditingController();
+  final _implantedAt = TextEditingController();
+  final _manufacturer = TextEditingController();
+  final _model = TextEditingController();
+  final _material = TextEditingController();
+  final _serialNumber = TextEditingController();
+  final _notes = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    final pass = widget.pass;
+    if (pass == null) return;
+    _passType.text = pass.passType;
+    _title.text = pass.title;
+    _implantedAt.text = pass.implantedAt == null
+        ? ''
+        : _inputDate(pass.implantedAt!);
+    _manufacturer.text = pass.manufacturer ?? '';
+    _model.text = pass.model ?? '';
+    _material.text = pass.material ?? '';
+    _serialNumber.text = pass.serialNumber ?? '';
+    _notes.text = pass.notes ?? '';
+  }
+
+  @override
+  void dispose() {
+    _passType.dispose();
+    _title.dispose();
+    _implantedAt.dispose();
+    _manufacturer.dispose();
+    _model.dispose();
+    _material.dispose();
+    _serialNumber.dispose();
+    _notes.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final editing = widget.pass != null;
+    return Padding(
+      padding: EdgeInsets.only(
+        left: 16,
+        right: 16,
+        top: 16,
+        bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+      ),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              editing
+                  ? 'Gesundheitspass bearbeiten'
+                  : 'Gesundheitspass erfassen',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            DropdownButtonFormField<String>(
+              initialValue: _passType.text,
+              decoration: const InputDecoration(labelText: 'Pass-Typ *'),
+              items:
+                  const [
+                        'Implantatpass',
+                        'Endoprothese',
+                        'Herzschrittmacher',
+                        'Insulinpumpe',
+                        'ICD',
+                        'Stent',
+                        'Allergiepass',
+                        'Diabetikerausweis',
+                        'Marcumar-Pass',
+                        'Mutterpass',
+                        'Sonstiger Pass',
+                      ]
+                      .map(
+                        (value) =>
+                            DropdownMenuItem(value: value, child: Text(value)),
+                      )
+                      .toList(),
+              onChanged: (value) => _passType.text = value ?? _passType.text,
+            ),
+            TextField(
+              controller: _title,
+              decoration: const InputDecoration(labelText: 'Bezeichnung *'),
+            ),
+            TextField(
+              controller: _implantedAt,
+              keyboardType: TextInputType.datetime,
+              decoration: const InputDecoration(
+                labelText: 'Implantationsdatum',
+                hintText: 'JJJJ-MM-TT',
+              ),
+            ),
+            TextField(
+              controller: _manufacturer,
+              decoration: const InputDecoration(labelText: 'Hersteller'),
+            ),
+            TextField(
+              controller: _model,
+              decoration: const InputDecoration(labelText: 'Modell'),
+            ),
+            TextField(
+              controller: _material,
+              decoration: const InputDecoration(labelText: 'Material'),
+            ),
+            TextField(
+              controller: _serialNumber,
+              decoration: const InputDecoration(labelText: 'Seriennummer'),
+            ),
+            TextField(
+              controller: _notes,
+              decoration: const InputDecoration(labelText: 'Notizen'),
+              minLines: 2,
+              maxLines: 4,
+            ),
+            const SizedBox(height: 16),
+            FilledButton(onPressed: _save, child: const Text('Speichern')),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _save() async {
+    final passType = _passType.text.trim();
+    final title = _title.text.trim();
+    if (passType.isEmpty || title.isEmpty) return;
+    final implantedAt = _parseInputDate(_implantedAt.text);
+    final pass = widget.pass;
+    if (pass == null) {
+      await widget.repo.addHealthPass(
+        passType: passType,
+        title: title,
+        implantedAt: implantedAt,
+        manufacturer: _emptyToNull(_manufacturer.text),
+        model: _emptyToNull(_model.text),
+        material: _emptyToNull(_material.text),
+        serialNumber: _emptyToNull(_serialNumber.text),
+        notes: _emptyToNull(_notes.text),
+      );
+    } else {
+      await widget.repo.updateHealthPass(
+        pass.id,
+        passType: passType,
+        title: title,
+        implantedAt: implantedAt,
+        manufacturer: _emptyToNull(_manufacturer.text),
+        model: _emptyToNull(_model.text),
+        material: _emptyToNull(_material.text),
+        serialNumber: _emptyToNull(_serialNumber.text),
+        notes: _emptyToNull(_notes.text),
+      );
+    }
     if (mounted) Navigator.pop(context, true);
   }
 }
@@ -784,37 +984,104 @@ class _VaccinationList extends StatelessWidget {
 }
 
 class _HealthPassList extends StatelessWidget {
-  const _HealthPassList({required this.documents});
+  const _HealthPassList({
+    required this.passes,
+    required this.onEdit,
+    required this.onDelete,
+  });
 
-  final List<HealthDocument> documents;
+  final List<HealthPass> passes;
+  final ValueChanged<HealthPass> onEdit;
+  final ValueChanged<HealthPass> onDelete;
 
   @override
   Widget build(BuildContext context) {
-    if (documents.isEmpty) {
+    if (passes.isEmpty) {
       return const _EmptyState(
         icon: Icons.file_present_outlined,
         title: 'Noch keine Gesundheitspaesse',
         body:
-            'Implantatpaesse, Allergiepaesse oder aehnliche Dokumente koennen ueber den Dokumenten-Scan abgelegt werden.',
+            'Implantatpaesse, Allergiepaesse oder aehnliche Ausweise werden strukturiert lokal gespeichert.',
       );
     }
     return Column(
       children: [
-        for (final document in documents)
+        for (final pass in passes)
           Card(
             margin: const EdgeInsets.only(bottom: 10),
-            child: ListTile(
-              leading: const Icon(
-                Icons.file_present_outlined,
-                color: Color(0xFF16A34A),
+            child: Padding(
+              padding: const EdgeInsets.all(14),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(
+                    Icons.file_present_outlined,
+                    color: Color(0xFF16A34A),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _SoftBadge(
+                          label: pass.passType,
+                          color: const Color(0xFF3730A3),
+                          background: const Color(0xFFE0E7FF),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          pass.title,
+                          style: const TextStyle(
+                            color: GpColors.textPrimary,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                        if (pass.implantedAt != null)
+                          Text(
+                            'Datum ${_date(pass.implantedAt!)}',
+                            style: const TextStyle(
+                              color: GpColors.textSecondary,
+                              fontSize: 13,
+                            ),
+                          ),
+                        if (_passDetails(pass).isNotEmpty) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            _passDetails(pass),
+                            style: const TextStyle(
+                              color: GpColors.textSecondary,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
+                        if (pass.notes != null) ...[
+                          const SizedBox(height: 6),
+                          Text(
+                            pass.notes!,
+                            style: const TextStyle(
+                              color: GpColors.textSecondary,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    tooltip: 'Bearbeiten',
+                    onPressed: () => onEdit(pass),
+                    icon: const Icon(Icons.edit_outlined),
+                  ),
+                  IconButton(
+                    tooltip: 'Loeschen',
+                    onPressed: () => onDelete(pass),
+                    icon: const Icon(
+                      Icons.delete_outline,
+                      color: GpColors.emergencyRed,
+                    ),
+                  ),
+                ],
               ),
-              title: Text(document.title),
-              subtitle: Text(
-                '${document.category} • ${_date(document.capturedAt)}',
-              ),
-              trailing: document.encrypted
-                  ? const Icon(Icons.lock_outline, color: Color(0xFF16A34A))
-                  : null,
             ),
           ),
       ],
@@ -919,21 +1186,32 @@ class _SoftBadge extends StatelessWidget {
   }
 }
 
-bool _isHealthPassDocument(HealthDocument document) {
-  final text = '${document.title} ${document.category}'.toLowerCase();
-  return text.contains('pass') ||
-      text.contains('implantat') ||
-      text.contains('allergie') ||
-      text.contains('notfall') ||
-      text.contains('ausweis');
-}
-
 int _monthsUntil(DateTime date) {
   final now = DateTime.now();
   return (date.year - now.year) * 12 + date.month - now.month;
 }
 
 String _date(DateTime value) => '${value.day}.${value.month}.${value.year}';
+
+String _inputDate(DateTime value) =>
+    '${value.year.toString().padLeft(4, '0')}-'
+    '${value.month.toString().padLeft(2, '0')}-'
+    '${value.day.toString().padLeft(2, '0')}';
+
+DateTime? _parseInputDate(String value) {
+  final trimmed = value.trim();
+  if (trimmed.isEmpty) return null;
+  return DateTime.tryParse(trimmed);
+}
+
+String _passDetails(HealthPass pass) {
+  return [
+    if (pass.manufacturer != null) 'Hersteller: ${pass.manufacturer}',
+    if (pass.model != null) 'Modell: ${pass.model}',
+    if (pass.material != null) 'Material: ${pass.material}',
+    if (pass.serialNumber != null) 'Seriennummer: ${pass.serialNumber}',
+  ].join(' • ');
+}
 
 String? _emptyToNull(String value) {
   final trimmed = value.trim();

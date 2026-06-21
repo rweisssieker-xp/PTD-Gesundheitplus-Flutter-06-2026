@@ -65,6 +65,114 @@ class PreventionRepository {
         .toList();
   }
 
+  Future<HealthPass> addHealthPass({
+    required String passType,
+    required String title,
+    DateTime? implantedAt,
+    String? manufacturer,
+    String? model,
+    String? material,
+    String? serialNumber,
+    String? notes,
+  }) async {
+    final now = DateTime.now().toIso8601String();
+    final id = _uuid.v4();
+    _db.execute(
+      '''
+      INSERT INTO health_passes (
+        id, pass_type, title, implanted_at, manufacturer, model, material,
+        serial_number, notes, created_at, updated_at
+      )
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ''',
+      [
+        id,
+        passType,
+        title,
+        implantedAt?.toIso8601String(),
+        manufacturer,
+        model,
+        material,
+        serialNumber,
+        notes,
+        now,
+        now,
+      ],
+    );
+    return HealthPass(
+      id: id,
+      passType: passType,
+      title: title,
+      implantedAt: implantedAt,
+      manufacturer: manufacturer,
+      model: model,
+      material: material,
+      serialNumber: serialNumber,
+      notes: notes,
+    );
+  }
+
+  Future<void> updateHealthPass(
+    String id, {
+    required String passType,
+    required String title,
+    DateTime? implantedAt,
+    String? manufacturer,
+    String? model,
+    String? material,
+    String? serialNumber,
+    String? notes,
+  }) async {
+    _db.execute(
+      '''
+      UPDATE health_passes
+      SET pass_type = ?, title = ?, implanted_at = ?, manufacturer = ?,
+          model = ?, material = ?, serial_number = ?, notes = ?, updated_at = ?
+      WHERE id = ?
+      ''',
+      [
+        passType,
+        title,
+        implantedAt?.toIso8601String(),
+        manufacturer,
+        model,
+        material,
+        serialNumber,
+        notes,
+        DateTime.now().toIso8601String(),
+        id,
+      ],
+    );
+  }
+
+  Future<void> deleteHealthPass(String id) async {
+    _db.execute('DELETE FROM health_passes WHERE id = ?', [id]);
+  }
+
+  Future<List<HealthPass>> listHealthPasses() async {
+    final rows = _db.select('''
+      SELECT id, pass_type, title, implanted_at, manufacturer, model, material,
+             serial_number, notes
+      FROM health_passes
+      ORDER BY COALESCE(implanted_at, created_at) DESC
+      ''');
+    return rows
+        .map(
+          (row) => HealthPass(
+            id: row['id'] as String,
+            passType: row['pass_type'] as String,
+            title: row['title'] as String,
+            implantedAt: _date(row['implanted_at']),
+            manufacturer: row['manufacturer'] as String?,
+            model: row['model'] as String?,
+            material: row['material'] as String?,
+            serialNumber: row['serial_number'] as String?,
+            notes: row['notes'] as String?,
+          ),
+        )
+        .toList();
+  }
+
   Future<PreventiveCareItem> addPreventiveCare({
     required String title,
     required String category,

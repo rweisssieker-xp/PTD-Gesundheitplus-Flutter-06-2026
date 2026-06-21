@@ -81,6 +81,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(_tableCount(db, 'medications'), 1);
+    expect(_tableCount(db, 'health_passes'), 1);
     expect(_tableCount(db, 'health_documents'), 1);
     expect(_tableCount(db, 'emergency_contacts'), 1);
 
@@ -91,6 +92,7 @@ void main() {
 
     expect(find.text('Lokale Daten wurden gelöscht.'), findsOneWidget);
     expect(_tableCount(db, 'medications'), 0);
+    expect(_tableCount(db, 'health_passes'), 0);
     expect(_tableCount(db, 'health_documents'), 0);
     expect(_tableCount(db, 'emergency_contacts'), 0);
   });
@@ -136,6 +138,12 @@ void _seedStorageData(AppDatabase db) {
       id, name, active, reminder_times_json, created_at, updated_at
     )
     VALUES ('med-1', 'ASS', 1, '[]', 'now', 'now')
+    ''');
+  db.execute('''
+    INSERT INTO health_passes (
+      id, pass_type, title, manufacturer, created_at, updated_at
+    )
+    VALUES ('pass-1', 'Implantatpass', 'Implantatpass Knie', 'MediCorp', 'now', 'now')
     ''');
   db.execute('''
     INSERT INTO health_documents (

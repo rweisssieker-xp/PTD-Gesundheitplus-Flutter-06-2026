@@ -442,6 +442,7 @@ class _StoredDataCard extends StatelessWidget {
             'preventive_care_items',
             'blood_pressure_logs',
             'weight_logs',
+            'health_passes',
             'health_documents',
           ]),
           bullets: const [

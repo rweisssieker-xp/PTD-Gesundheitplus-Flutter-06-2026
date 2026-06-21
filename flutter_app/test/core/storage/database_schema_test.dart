@@ -20,6 +20,7 @@ void main() {
         'blood_pressure_logs',
         'weight_logs',
         'vaccinations',
+        'health_passes',
         'preventive_care_items',
         'health_documents',
         'emergency_contacts',
@@ -86,6 +87,28 @@ void main() {
     expect(
       columns,
       containsAll(['file_key', 'file_nonce', 'file_mac', 'encrypted']),
+    );
+    db.close();
+  });
+
+  test('health passes include PWA parity fields', () {
+    final db = AppDatabase.memory();
+    final columns = db
+        .select('PRAGMA table_info(health_passes)')
+        .map((row) => row['name'])
+        .toSet();
+    expect(
+      columns,
+      containsAll([
+        'pass_type',
+        'title',
+        'implanted_at',
+        'manufacturer',
+        'model',
+        'material',
+        'serial_number',
+        'notes',
+      ]),
     );
     db.close();
   });

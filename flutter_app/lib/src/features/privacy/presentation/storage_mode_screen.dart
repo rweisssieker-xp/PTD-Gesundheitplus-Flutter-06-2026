@@ -372,6 +372,7 @@ class _LocalCountsCard extends StatelessWidget {
           'blood_pressure_logs',
           'weight_logs',
           'vaccinations',
+          'health_passes',
           'preventive_care_items',
         ]),
       ),

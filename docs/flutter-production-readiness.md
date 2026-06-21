@@ -7,7 +7,7 @@ Date: 2026-06-21
 - `flutter doctor -v`: no issues after installing Android SDK command-line tools and accepting Android licenses.
 - `dart format lib test`: clean.
 - `flutter analyze`: no issues.
-- `flutter test`: 176 tests passed.
+- `flutter test`: 179 tests passed.
 - GitHub Actions workflow `Flutter CI` covers `flutter pub get`, `flutter analyze`, `flutter test`, and Android debug APK build on `main` pushes and pull requests.
 - `flutter test integration_test/app_flow_test.dart`: Android integration flow passed on the local emulator, including first-run local storage selection and core feature route rendering.
 - `flutter build apk --debug`: built successfully.
@@ -86,6 +86,7 @@ Android embedding disables Impeller explicitly for this emulator-tested build pa
 - Preventive care exposes local age-based recommendations for due vaccinations and screenings, and can turn recommendations into local reminder-backed Vorsorge items.
 - Preventive care manual creation and completion are covered at widget level against local reminder storage.
 - Vaccination creation through the native editor is covered at widget level, including persisted booster due metadata in local storage.
+- The Impfpass screen now stores health passes as structured local records, with create, edit, list, and delete coverage for pass type, implant date, manufacturer, model, material, and serial number.
 - Anamnesis entries can be encoded into an offline-readable local QR payload for physician handoff.
 - Treatment history creation, listing, visible read-aloud controls, and deletion are covered at widget level against local storage.
 - Blood pressure and weight entry flows are covered at widget level, including persisted local measurements and local BMI calculation.

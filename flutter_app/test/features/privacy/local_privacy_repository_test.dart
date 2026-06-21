@@ -20,6 +20,12 @@ void main() {
     final db = AppDatabase.memory();
     final repo = LocalPrivacyRepository(db);
     db.execute('''
+      INSERT INTO health_passes (
+        id, pass_type, title, serial_number, created_at, updated_at
+      )
+      VALUES ('pass-1', 'Herzschrittmacher', 'Schrittmacherpass', 'SN-1', 'now', 'now')
+    ''');
+    db.execute('''
       INSERT INTO medications (
         id, name, active, reminder_times_json, created_at, updated_at
       )
