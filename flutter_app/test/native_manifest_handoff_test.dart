@@ -3,6 +3,26 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('GitHub CI runs Flutter quality gates for main', () {
+    final workflow = File(
+      '../.github/workflows/flutter-ci.yml',
+    ).readAsStringSync();
+
+    expect(workflow, contains('pull_request:'));
+    expect(workflow, contains('branches:'));
+    expect(workflow, contains('- main'));
+    expect(workflow, contains('uses: actions/checkout@v4'));
+    expect(workflow, contains('uses: actions/setup-java@v4'));
+    expect(workflow, contains('java-version: "17"'));
+    expect(workflow, contains('uses: subosito/flutter-action@v2'));
+    expect(workflow, contains('working-directory: flutter_app'));
+    expect(workflow, contains('run: flutter pub get'));
+    expect(workflow, contains('run: flutter analyze'));
+    expect(workflow, contains('run: flutter test'));
+    expect(workflow, contains('run: flutter build apk --debug'));
+    expect(workflow, contains('uses: actions/upload-artifact@v4'));
+  });
+
   test('native app identity is aligned for both stores', () {
     final androidManifest = File(
       'android/app/src/main/AndroidManifest.xml',

@@ -7,7 +7,8 @@ Date: 2026-06-21
 - `flutter doctor -v`: no issues after installing Android SDK command-line tools and accepting Android licenses.
 - `dart format lib test`: clean.
 - `flutter analyze`: no issues.
-- `flutter test`: 170 tests passed.
+- `flutter test`: 171 tests passed.
+- GitHub Actions workflow `Flutter CI` covers `flutter pub get`, `flutter analyze`, `flutter test`, and Android debug APK build on `main` pushes and pull requests.
 - `flutter test integration_test/app_flow_test.dart`: Android integration flow passed on the local emulator, including first-run local storage selection and core feature route rendering.
 - `flutter build apk --debug`: built successfully.
 - `flutter build apk --release`: built successfully with local release keystore.
