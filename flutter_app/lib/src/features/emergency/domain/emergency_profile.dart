@@ -6,6 +6,7 @@ class EmergencyProfile {
     required this.medications,
     required this.allergies,
     required this.diagnoses,
+    this.healthPasses = const [],
     required this.contacts,
     this.criticalWarnings = const [],
     this.immediateActions = const [],
@@ -17,6 +18,7 @@ class EmergencyProfile {
   final List<String> medications;
   final List<String> allergies;
   final List<String> diagnoses;
+  final List<String> healthPasses;
   final List<EmergencyContactSummary> contacts;
   final List<String> criticalWarnings;
   final List<String> immediateActions;

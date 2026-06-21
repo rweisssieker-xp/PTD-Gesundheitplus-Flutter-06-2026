@@ -79,6 +79,15 @@ void main() {
       )
       VALUES ('history-1', 'Diagnose', 'Asthma', NULL, 1, 'now', 'now')
       ''');
+    db.execute('''
+      INSERT INTO health_passes (
+        id, pass_type, title, implanted_at, manufacturer, model, serial_number, created_at, updated_at
+      )
+      VALUES (
+        'pass-1', 'Implantatpass', 'Knieprothese',
+        '2024-05-01T00:00:00.000', 'MediCorp', 'K-42', 'SN123', 'now', 'now'
+      )
+      ''');
     await repo.addContact(
       name: 'Max Kontakt',
       phone: '112233',
@@ -91,6 +100,12 @@ void main() {
     expect(profile.medications, contains('ASS (100mg, taeglich)'));
     expect(profile.allergies, contains('Penicillin (Schwer, Atemnot)'));
     expect(profile.diagnoses, contains('Asthma'));
+    expect(
+      profile.healthPasses,
+      contains(
+        'Implantatpass: Knieprothese (01.05.2024, MediCorp, K-42, SN SN123)',
+      ),
+    );
     expect(profile.criticalWarnings, contains('Allergie: Penicillin (Schwer)'));
     expect(profile.criticalWarnings, contains('Diagnose beachten: Asthma'));
     expect(profile.immediateActions, contains('Bei akuter Gefahr 112 rufen'));

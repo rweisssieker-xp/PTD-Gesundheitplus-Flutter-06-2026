@@ -12,6 +12,7 @@ class EmergencyPayloadBuilder {
       'medications': profile.medications.take(20).toList(),
       'allergies': profile.allergies.take(20).toList(),
       'diagnoses': profile.diagnoses.take(20).toList(),
+      'healthPasses': profile.healthPasses.take(10).toList(),
       'criticalWarnings': profile.criticalWarnings.take(10).toList(),
       'immediateActions': profile.immediateActions.take(10).toList(),
       'contacts': profile.contacts

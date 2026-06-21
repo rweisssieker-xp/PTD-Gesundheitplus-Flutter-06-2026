@@ -64,6 +64,12 @@ class EmergencyProfileScreen extends ConsumerWidget {
                     values: profile.allergies,
                     empty: 'Keine Allergien gespeichert',
                   ),
+                  _Section(
+                    title: 'Gesundheitspässe',
+                    icon: GpIcons.vaccination,
+                    values: profile.healthPasses,
+                    empty: 'Keine Gesundheitspässe gespeichert',
+                  ),
                   EmergencyContactsSection(contacts: profile.contacts),
                 ],
               );

@@ -50,6 +50,14 @@ void main() {
     expect(find.text('ASS (100mg, taeglich)'), findsOneWidget);
 
     await tester.scrollUntilVisible(
+      find.text('Gesundheitspässe'),
+      280,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.text('Gesundheitspässe'), findsOneWidget);
+    expect(find.textContaining('Implantatpass: Knieprothese'), findsOneWidget);
+
+    await tester.scrollUntilVisible(
       find.text('Sperrbildschirm vorbereiten'),
       280,
       scrollable: find.byType(Scrollable).first,
@@ -106,6 +114,12 @@ void main() {
     expect(payload['allergies'], contains('Penicillin (Schwer, Atemnot)'));
     expect(payload['diagnoses'], contains('Asthma'));
     expect(
+      payload['healthPasses'],
+      contains(
+        'Implantatpass: Knieprothese (01.05.2024, MediCorp, K-42, SN SN123)',
+      ),
+    );
+    expect(
       payload['contacts'],
       contains(
         allOf(
@@ -141,6 +155,15 @@ void _seedEmergencyData(AppDatabase db) {
       id, category, title, details, active, created_at, updated_at
     )
     VALUES ('history-1', 'Diagnose', 'Asthma', NULL, 1, 'now', 'now')
+  ''');
+  db.execute('''
+    INSERT INTO health_passes (
+      id, pass_type, title, implanted_at, manufacturer, model, serial_number, created_at, updated_at
+    )
+    VALUES (
+      'pass-1', 'Implantatpass', 'Knieprothese',
+      '2024-05-01T00:00:00.000', 'MediCorp', 'K-42', 'SN123', 'now', 'now'
+    )
   ''');
   db.execute('''
     INSERT INTO emergency_contacts (

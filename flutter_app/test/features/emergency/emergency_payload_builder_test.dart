@@ -13,6 +13,7 @@ void main() {
       medications: const ['Ramipril 5mg'],
       allergies: const ['Penicillin'],
       diagnoses: const ['Hypertonie'],
+      healthPasses: const ['Implantatpass: Knieprothese (SN SN123)'],
       criticalWarnings: const ['Allergie: Penicillin (Schwer)'],
       immediateActions: const ['Bei akuter Gefahr 112 rufen'],
       contacts: const [
@@ -24,6 +25,7 @@ void main() {
     expect(decoded['fullName'], 'Max Muster');
     expect(decoded['dateOfBirth'], '1980-05-04T00:00:00.000');
     expect(decoded['medications'], ['Ramipril 5mg']);
+    expect(decoded['healthPasses'], ['Implantatpass: Knieprothese (SN SN123)']);
     expect(decoded['criticalWarnings'], ['Allergie: Penicillin (Schwer)']);
     expect(decoded['immediateActions'], ['Bei akuter Gefahr 112 rufen']);
     expect(decoded['contacts'][0]['phone'], '+491234567');

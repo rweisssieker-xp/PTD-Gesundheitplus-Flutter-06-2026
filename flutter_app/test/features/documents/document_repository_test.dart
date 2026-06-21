@@ -42,10 +42,18 @@ void main() {
       INSERT INTO notifications (id, title, body, category, read, created_at)
       VALUES ('n1', 'Test', 'Body', 'system', 0, '2026-06-17T00:00:00')
       ''');
+    db.execute('''
+      INSERT INTO health_passes (
+        id, pass_type, title, manufacturer, serial_number, created_at, updated_at
+      )
+      VALUES ('pass-1', 'Implantatpass', 'Knieprothese', 'MediCorp', 'SN123', 'now', 'now')
+      ''');
     final file = await DocumentRepository(db).exportHealthRecord(temp.path);
     final json = jsonDecode(file.readAsStringSync()) as Map<String, dynamic>;
     expect(json['storageMode'], 'local-device');
     expect(json['data']['notifications'], isNotEmpty);
+    expect(json['data']['health_passes'], isNotEmpty);
+    expect(json['data']['health_passes'].single['title'], 'Knieprothese');
     db.close();
     temp.deleteSync(recursive: true);
   });

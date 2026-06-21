@@ -113,6 +113,12 @@ class EmergencyRepository {
       ORDER BY title ASC
       LIMIT 20
       ''');
+    final healthPassRows = _db.select('''
+      SELECT pass_type, title, implanted_at, manufacturer, model, serial_number
+      FROM health_passes
+      ORDER BY COALESCE(implanted_at, created_at) DESC
+      LIMIT 10
+      ''');
     final contacts = await listContacts();
     final profileRow = profileRows.isEmpty ? null : profileRows.first;
     final fullName = (profileRow?['full_name'] as String?)?.trim();
@@ -140,6 +146,7 @@ class EmergencyRepository {
     final diagnoses = diagnosisRows
         .map((row) => row['title'] as String)
         .toList();
+    final healthPasses = healthPassRows.map(_formatHealthPass).toList();
     final criticalWarnings = _criticalWarnings(
       allergies: allergyRows,
       diagnoses: diagnoses,
@@ -154,6 +161,7 @@ class EmergencyRepository {
       medications: medications,
       allergies: allergies,
       diagnoses: diagnoses,
+      healthPasses: healthPasses,
       contacts: contacts
           .where(
             (contact) => contact.phone != null && contact.phone!.isNotEmpty,
@@ -169,6 +177,24 @@ class EmergencyRepository {
       criticalWarnings: criticalWarnings,
       immediateActions: _immediateActions(criticalWarnings, contacts),
     );
+  }
+
+  String _formatHealthPass(Map<String, Object?> row) {
+    final passType = row['pass_type'] as String;
+    final title = row['title'] as String;
+    final implantedAt = _parseDate(row['implanted_at'] as String?);
+    final manufacturer = row['manufacturer'] as String?;
+    final model = row['model'] as String?;
+    final serialNumber = row['serial_number'] as String?;
+    final details = [
+      if (implantedAt != null)
+        '${implantedAt.day.toString().padLeft(2, '0')}.${implantedAt.month.toString().padLeft(2, '0')}.${implantedAt.year}',
+      if (manufacturer != null && manufacturer.isNotEmpty) manufacturer,
+      if (model != null && model.isNotEmpty) model,
+      if (serialNumber != null && serialNumber.isNotEmpty) 'SN $serialNumber',
+    ].join(', ');
+    final label = '$passType: $title';
+    return details.isEmpty ? label : '$label ($details)';
   }
 
   DateTime? _parseDate(String? value) {

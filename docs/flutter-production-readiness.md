@@ -71,6 +71,7 @@ Android embedding disables Impeller explicitly for this emulator-tested build pa
 - Emergency contacts expose native phone, SMS, WhatsApp, Telegram, system share, and current-location SMS handoff actions from the emergency profile and offline emergency views with visible failure messages when a target app is unavailable.
 - Emergency contact setup creation, verification, and deletion are covered at widget level against local storage.
 - The offline emergency QR copy action is covered at widget level and validates that the copied JSON payload contains local profile, medication, allergy, diagnosis, and emergency contact records.
+- Structured health passes are included in the offline emergency profile, visible offline emergency screen, QR payload, and local JSON export.
 - Telegram setup mirrors the PWA guided flow with bot launch, `/start`, `/mychatid`, local connect/disconnect, persisted chat target, and native Telegram test handoff without backend secrets.
 - SMS/WhatsApp setup replaces Twilio backend sending with local native handoffs and keeps the PWA debug posture through E.164 phone preview, generated URI, visible success state, and visible failure diagnostics.
 - Android release builds include network permission for the optional configured online AI responder; local health record features remain on-device and work without backend access.
