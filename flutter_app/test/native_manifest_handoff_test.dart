@@ -60,6 +60,30 @@ void main() {
     expect(pubspec, contains('version: 1.0.0+1'));
   });
 
+  test('iOS release config uses Flutter versioning and bundle identity', () {
+    final iosProject = File(
+      'ios/Runner.xcodeproj/project.pbxproj',
+    ).readAsStringSync();
+    final iosInfo = File('ios/Runner/Info.plist').readAsStringSync();
+    final pubspec = File('pubspec.yaml').readAsStringSync();
+
+    expect(
+      iosProject,
+      contains('PRODUCT_BUNDLE_IDENTIFIER = de.gesundheitplus.gesundheitplus'),
+    );
+    expect(
+      iosProject,
+      contains('CURRENT_PROJECT_VERSION = "\$(FLUTTER_BUILD_NUMBER)"'),
+    );
+    expect(iosProject, contains('INFOPLIST_FILE = Runner/Info.plist'));
+    expect(iosProject, contains('VERSIONING_SYSTEM = "apple-generic"'));
+    expect(iosInfo, contains('<key>CFBundleShortVersionString</key>'));
+    expect(iosInfo, contains('<string>\$(FLUTTER_BUILD_NAME)</string>'));
+    expect(iosInfo, contains('<key>CFBundleVersion</key>'));
+    expect(iosInfo, contains('<string>\$(FLUTTER_BUILD_NUMBER)</string>'));
+    expect(pubspec, contains('version: 1.0.0+1'));
+  });
+
   test('iOS Info.plist declares third-party handoff query schemes', () {
     final plist = File('ios/Runner/Info.plist').readAsStringSync();
 
