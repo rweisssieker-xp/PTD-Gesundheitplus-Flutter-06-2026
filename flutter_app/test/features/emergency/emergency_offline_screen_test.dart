@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gesundheitplus/src/core/storage/app_database.dart';
 import 'package:gesundheitplus/src/core/storage/database_provider.dart';
@@ -52,6 +55,65 @@ void main() {
       scrollable: find.byType(Scrollable).first,
     );
     expect(find.text('Sperrbildschirm vorbereiten'), findsOneWidget);
+  });
+
+  testWidgets('copies offline emergency QR payload with local records', (
+    tester,
+  ) async {
+    String? copiedText;
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      (call) async {
+        if (call.method == 'Clipboard.setData') {
+          final data = call.arguments as Map<dynamic, dynamic>;
+          copiedText = data['text'] as String?;
+        }
+        return null;
+      },
+    );
+    addTearDown(
+      () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        null,
+      ),
+    );
+
+    final db = AppDatabase.memory();
+    addTearDown(db.close);
+    _seedEmergencyData(db);
+
+    tester.view.physicalSize = const Size(430, 2200);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [appDatabaseProvider.overrideWith((ref) async => db)],
+        child: const MaterialApp(home: EmergencyOfflineScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('QR-Daten kopieren'));
+    await tester.pumpAndSettle();
+
+    final payload = jsonDecode(copiedText!) as Map<String, dynamic>;
+
+    expect(payload['source'], 'Gesundheit Plus');
+    expect(payload['fullName'], 'Erika Muster');
+    expect(payload['medications'], contains('ASS (100mg, taeglich)'));
+    expect(payload['allergies'], contains('Penicillin (Schwer, Atemnot)'));
+    expect(payload['diagnoses'], contains('Asthma'));
+    expect(
+      payload['contacts'],
+      contains(
+        allOf(
+          containsPair('name', 'Max Kontakt'),
+          containsPair('phone', '+491234'),
+        ),
+      ),
+    );
   });
 }
 
