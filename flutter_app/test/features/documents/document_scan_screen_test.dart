@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -157,4 +160,105 @@ void main() {
     expect(pickedSource, ImageSource.gallery);
     expect(find.textContaining('Galerie-Zugriff ist blockiert'), findsNothing);
   });
+
+  testWidgets(
+    'saves selected gallery document through local storage contract',
+    (tester) async {
+      tester.view.physicalSize = const Size(430, 1800);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      final db = AppDatabase.memory();
+      final temp = Directory.systemTemp.createTempSync('gp_doc_scan_widget');
+      addTearDown(db.close);
+      addTearDown(() {
+        if (temp.existsSync()) temp.deleteSync(recursive: true);
+      });
+
+      final source = File('${temp.path}${Platform.pathSeparator}labor.txt')
+        ..writeAsStringSync('HbA1c 7.1');
+      final saved = <String, Object?>{};
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [appDatabaseProvider.overrideWith((ref) => db)],
+          child: MaterialApp(
+            home: DocumentScanScreen(
+              permissionGate: (_) async => true,
+              imagePicker: (_) async =>
+                  XFile(source.path, name: 'labor.txt', mimeType: 'text/plain'),
+              storageDirectoryProvider: () =>
+                  SynchronousFuture<Directory>(temp),
+              documentSaver:
+                  ({
+                    required db,
+                    required title,
+                    required category,
+                    required sourcePath,
+                    required documentsDir,
+                    mimeType,
+                    capturedAt,
+                    notes,
+                  }) {
+                    saved.addAll({
+                      'db': db,
+                      'title': title,
+                      'category': category,
+                      'sourcePath': sourcePath,
+                      'documentsDir': documentsDir,
+                      'mimeType': mimeType,
+                      'capturedAt': capturedAt,
+                      'notes': notes,
+                    });
+                    return SynchronousFuture<void>(null);
+                  },
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Laborbefund'));
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Titel *'),
+        'Labor Juni',
+      );
+      await tester.scrollUntilVisible(
+        find.text('Galerie'),
+        360,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.tap(find.text('Galerie'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('labor.txt'), findsOneWidget);
+      expect(find.text('Bereit zum lokalen Speichern'), findsOneWidget);
+
+      await tester.scrollUntilVisible(
+        find.text('Dokument lokal speichern'),
+        360,
+        scrollable: find.byType(Scrollable).first,
+      );
+      final saveButton = find.ancestor(
+        of: find.text('Dokument lokal speichern'),
+        matching: find.bySubtype<ButtonStyleButton>(),
+      );
+      final save = tester.widget<ButtonStyleButton>(saveButton).onPressed;
+      expect(save, isNotNull);
+      save!();
+      await tester.pump();
+
+      expect(find.text('Dokument lokal gespeichert'), findsOneWidget);
+      expect(saved['db'], same(db));
+      expect(saved['title'], 'Labor Juni');
+      expect(saved['category'], 'Laborbefund');
+      expect(saved['sourcePath'], source.path);
+      expect(saved['documentsDir'], temp.path);
+      expect(saved['mimeType'], 'text/plain');
+      expect(saved['capturedAt'], isNull);
+      expect(saved['notes'], isNull);
+    },
+  );
 }

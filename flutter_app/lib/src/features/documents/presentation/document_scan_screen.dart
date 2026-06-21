@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -5,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../../../core/platform/permission_service.dart';
+import '../../../core/storage/app_database.dart';
 import '../../../core/storage/database_provider.dart';
 import '../../../shared_ui/gp_colors.dart';
 import '../../../shared_ui/gp_icons.dart';
@@ -15,6 +18,18 @@ import 'medical_insights_card.dart';
 
 typedef DocumentImagePicker = Future<XFile?> Function(ImageSource source);
 typedef DocumentPermissionGate = Future<bool> Function(ImageSource source);
+typedef DocumentStorageDirectoryProvider = Future<Directory> Function();
+typedef DocumentSaver =
+    Future<void> Function({
+      required AppDatabase db,
+      required String title,
+      required String category,
+      required String sourcePath,
+      required String documentsDir,
+      String? mimeType,
+      DateTime? capturedAt,
+      String? notes,
+    });
 
 class DocumentScanScreen extends ConsumerStatefulWidget {
   const DocumentScanScreen({
@@ -22,13 +37,20 @@ class DocumentScanScreen extends ConsumerStatefulWidget {
     DocumentImagePicker? imagePicker,
     DocumentPermissionGate? permissionGate,
     Future<bool> Function()? openSettings,
+    DocumentStorageDirectoryProvider? storageDirectoryProvider,
+    DocumentSaver? documentSaver,
   }) : imagePicker = imagePicker ?? _defaultPickImage,
        permissionGate = permissionGate ?? _defaultPermissionGate,
-       openSettings = openSettings ?? _defaultOpenSettings;
+       openSettings = openSettings ?? _defaultOpenSettings,
+       storageDirectoryProvider =
+           storageDirectoryProvider ?? _defaultStorageDirectoryProvider,
+       documentSaver = documentSaver ?? _defaultDocumentSaver;
 
   final DocumentImagePicker imagePicker;
   final DocumentPermissionGate permissionGate;
   final Future<bool> Function() openSettings;
+  final DocumentStorageDirectoryProvider storageDirectoryProvider;
+  final DocumentSaver documentSaver;
 
   @override
   ConsumerState<DocumentScanScreen> createState() => _DocumentScanScreenState();
@@ -205,8 +227,9 @@ class _DocumentScanScreenState extends ConsumerState<DocumentScanScreen> {
     if (title.isEmpty || _picked == null) return;
     setState(() => _saving = true);
     final db = ref.read(appDatabaseProvider).requireValue;
-    final dir = await getApplicationDocumentsDirectory();
-    await DocumentRepository(db).addDocument(
+    final dir = await widget.storageDirectoryProvider();
+    await widget.documentSaver(
+      db: db,
       title: title,
       category: _selectedType.label,
       sourcePath: _picked!.path,
@@ -654,6 +677,31 @@ Future<bool> _defaultPermissionGate(ImageSource source) {
 
 Future<bool> _defaultOpenSettings() {
   return const PermissionService().openSystemSettings();
+}
+
+Future<Directory> _defaultStorageDirectoryProvider() {
+  return getApplicationDocumentsDirectory();
+}
+
+Future<void> _defaultDocumentSaver({
+  required AppDatabase db,
+  required String title,
+  required String category,
+  required String sourcePath,
+  required String documentsDir,
+  String? mimeType,
+  DateTime? capturedAt,
+  String? notes,
+}) async {
+  await DocumentRepository(db).addDocument(
+    title: title,
+    category: category,
+    sourcePath: sourcePath,
+    documentsDir: documentsDir,
+    mimeType: mimeType,
+    capturedAt: capturedAt,
+    notes: notes,
+  );
 }
 
 class _PermissionWarningCard extends StatelessWidget {
