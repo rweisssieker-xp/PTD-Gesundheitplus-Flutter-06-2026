@@ -7,7 +7,7 @@ Date: 2026-06-21
 - `flutter doctor -v`: no issues after installing Android SDK command-line tools and accepting Android licenses.
 - `dart format lib test`: clean.
 - `flutter analyze`: no issues.
-- `flutter test`: 146 tests passed.
+- `flutter test`: 147 tests passed.
 - `flutter test integration_test/app_flow_test.dart`: Android integration flow passed on the local emulator, including first-run local storage selection and core feature route rendering.
 - `flutter build apk --debug`: built successfully.
 - `flutter build apk --release`: built successfully with local release keystore.
@@ -49,6 +49,7 @@ Android embedding disables Impeller explicitly for this emulator-tested build pa
 - Document files copied into app storage are encrypted with AES-GCM before being stored; the file encryption metadata is held in the SQLCipher database. Stored document files are removed during the privacy data wipe before their metadata rows are deleted.
 - Medication, appointment, preventive-care, and dementia-support reminders are scheduled as native local notifications on-device.
 - Medications can be drafted from spoken-style German text using a deterministic on-device parser for medication name, dosage, frequency, prescribing doctor, reason, and reminder times.
+- Medication creation through the native editor is covered end to end at widget level, including persisted reminder times shown back in the local medication list.
 - Medication daily-plan intake can be confirmed from spoken-style German text on-device and stores the local `confirmedByVoice` audit flag.
 - The notification center shows system notification permission state, links blocked users to app settings, and surfaces per-notification states for active, permission-missing, system-blocked, needs-reschedule, and inactive reminders.
 - Document scanning checks native camera/gallery permissions before opening the picker and links blocked users to app settings.

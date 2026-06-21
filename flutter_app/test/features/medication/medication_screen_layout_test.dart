@@ -104,6 +104,68 @@ void main() {
 
     expect(find.text('Lokaler Wechselwirkungscheck'), findsOneWidget);
   });
+
+  testWidgets('adds medication with local reminder data from editor', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(430, 1800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final db = AppDatabase.memory();
+    addTearDown(db.close);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [appDatabaseProvider.overrideWith((ref) async => db)],
+        child: const MaterialApp(home: MedicationScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.scrollUntilVisible(
+      find.text('Erstes Medikament hinzufuegen'),
+      80,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.text('Erstes Medikament hinzufuegen'));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Medikamentenname *'),
+      'Ramipril',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Dosierung *'),
+      '5mg',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Haeufigkeit *'),
+      '1x taeglich',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Einnahmezeiten'),
+      'morgens',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Erinnerungszeiten, kommagetrennt'),
+      '08:00, 20:00',
+    );
+
+    await tester.tap(find.widgetWithText(FilledButton, 'Speichern'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Ramipril'), findsOneWidget);
+    expect(find.text('5mg • 1x taeglich'), findsOneWidget);
+    expect(find.text('morgens'), findsOneWidget);
+    expect(find.text('Erinnerungen: 08:00, 20:00'), findsOneWidget);
+
+    final saved = await MedicationRepository(db).listActive();
+    expect(saved.single.name, 'Ramipril');
+    expect(saved.single.reminderEnabled, isTrue);
+    expect(saved.single.reminderTimes, ['08:00', '20:00']);
+  });
 }
 
 Medication _medication({
