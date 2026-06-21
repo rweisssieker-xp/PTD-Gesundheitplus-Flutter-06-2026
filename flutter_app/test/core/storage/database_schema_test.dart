@@ -89,4 +89,14 @@ void main() {
     );
     db.close();
   });
+
+  test('blood pressure logs include PWA context field', () {
+    final db = AppDatabase.memory();
+    final columns = db
+        .select('PRAGMA table_info(blood_pressure_logs)')
+        .map((row) => row['name'])
+        .toSet();
+    expect(columns, contains('context'));
+    db.close();
+  });
 }

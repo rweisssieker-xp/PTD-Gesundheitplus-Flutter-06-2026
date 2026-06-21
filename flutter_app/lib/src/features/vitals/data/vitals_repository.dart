@@ -13,20 +13,22 @@ class VitalsRepository {
     required int systolic,
     required int diastolic,
     int? pulse,
+    String context = 'Ruhe',
     DateTime? measuredAt,
     String? notes,
   }) async {
     final now = DateTime.now().toIso8601String();
     _db.execute(
       '''
-      INSERT INTO blood_pressure_logs (id, systolic, diastolic, pulse, measured_at, notes, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO blood_pressure_logs (id, systolic, diastolic, pulse, context, measured_at, notes, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
       ''',
       [
         _uuid.v4(),
         systolic,
         diastolic,
         pulse,
+        context,
         (measuredAt ?? DateTime.now()).toIso8601String(),
         notes,
         now,
@@ -37,7 +39,7 @@ class VitalsRepository {
 
   Future<List<BloodPressureLog>> listBloodPressure() async {
     final rows = _db.select(
-      'SELECT id, systolic, diastolic, pulse, measured_at, notes FROM blood_pressure_logs ORDER BY measured_at DESC',
+      'SELECT id, systolic, diastolic, pulse, context, measured_at, notes FROM blood_pressure_logs ORDER BY measured_at DESC',
     );
     return rows
         .map(
@@ -46,11 +48,16 @@ class VitalsRepository {
             systolic: row['systolic'] as int,
             diastolic: row['diastolic'] as int,
             pulse: row['pulse'] as int?,
+            context: row['context'] as String,
             measuredAt: DateTime.parse(row['measured_at'] as String),
             notes: row['notes'] as String?,
           ),
         )
         .toList();
+  }
+
+  Future<void> deleteBloodPressure(String id) async {
+    _db.execute('DELETE FROM blood_pressure_logs WHERE id = ?', [id]);
   }
 
   Future<void> addWeight({
@@ -92,5 +99,9 @@ class VitalsRepository {
           ),
         )
         .toList();
+  }
+
+  Future<void> deleteWeight(String id) async {
+    _db.execute('DELETE FROM weight_logs WHERE id = ?', [id]);
   }
 }

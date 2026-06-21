@@ -224,12 +224,18 @@ class AppDatabase {
         systolic INTEGER NOT NULL,
         diastolic INTEGER NOT NULL,
         pulse INTEGER,
+        context TEXT NOT NULL DEFAULT 'Ruhe',
         measured_at TEXT NOT NULL,
         notes TEXT,
         created_at TEXT NOT NULL,
         updated_at TEXT NOT NULL
       );
     ''');
+    _ensureColumn(
+      'blood_pressure_logs',
+      'context',
+      "TEXT NOT NULL DEFAULT 'Ruhe'",
+    );
     _db.execute('''
       CREATE TABLE IF NOT EXISTS weight_logs (
         id TEXT PRIMARY KEY,

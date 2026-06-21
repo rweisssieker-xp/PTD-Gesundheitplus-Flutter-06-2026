@@ -4,6 +4,7 @@ class BloodPressureLog {
     required this.systolic,
     required this.diastolic,
     required this.pulse,
+    required this.context,
     required this.measuredAt,
     required this.notes,
   });
@@ -12,6 +13,7 @@ class BloodPressureLog {
   final int systolic;
   final int diastolic;
   final int? pulse;
+  final String context;
   final DateTime measuredAt;
   final String? notes;
 }
