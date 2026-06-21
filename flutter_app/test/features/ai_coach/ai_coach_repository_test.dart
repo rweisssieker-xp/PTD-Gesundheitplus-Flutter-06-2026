@@ -57,6 +57,12 @@ void main() {
         reaction: 'Ausschlag',
         severity: 'Schwer',
       );
+      db.execute('''
+        INSERT INTO health_passes (
+          id, pass_type, title, manufacturer, model, serial_number, created_at, updated_at
+        )
+        VALUES ('pass-1', 'Implantatpass', 'Knieprothese', 'MediCorp', 'K-42', 'SN123', 'now', 'now')
+        ''');
       String? capturedContext;
       final answer = await AiCoachRepository(
         db,
@@ -70,6 +76,10 @@ void main() {
       expect(answer.consentUsed, isTrue);
       expect(capturedContext, contains('Ramipril 5mg'));
       expect(capturedContext, contains('Penicillin'));
+      expect(
+        capturedContext,
+        contains('Implantatpass Knieprothese MediCorp K-42 SN123'),
+      );
     },
   );
 

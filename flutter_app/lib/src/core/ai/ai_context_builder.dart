@@ -4,6 +4,7 @@ class AiContextBuilder {
     required List<String> medications,
     required List<String> allergies,
     required List<String> diagnoses,
+    List<String> healthPasses = const [],
   }) {
     if (!consentAllowed) {
       throw StateError('AI context requires user consent');
@@ -13,6 +14,7 @@ class AiContextBuilder {
       'Aktive Medikamente: ${_join(medications)}',
       'Allergien: ${_join(allergies)}',
       'Diagnosen: ${_join(diagnoses)}',
+      'Gesundheitspaesse: ${_join(healthPasses)}',
     ].join('\n');
   }
 

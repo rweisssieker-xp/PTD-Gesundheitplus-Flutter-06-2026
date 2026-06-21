@@ -143,11 +143,31 @@ class AiCoachRepository {
           ''')
         .map((row) => row['title'] as String)
         .toList();
+    final healthPasses = _db
+        .select('''
+          SELECT pass_type, title, manufacturer, model, serial_number
+          FROM health_passes
+          ORDER BY COALESCE(implanted_at, created_at) DESC
+          LIMIT 10
+          ''')
+        .map((row) {
+          return [
+                row['pass_type'] as String,
+                row['title'] as String,
+                row['manufacturer'] as String?,
+                row['model'] as String?,
+                row['serial_number'] as String?,
+              ]
+              .where((value) => value != null && value.trim().isNotEmpty)
+              .join(' ');
+        })
+        .toList();
     return AiContextBuilder().build(
       consentAllowed: consentAllowed,
       medications: medications,
       allergies: allergies,
       diagnoses: diagnoses,
+      healthPasses: healthPasses,
     );
   }
 }

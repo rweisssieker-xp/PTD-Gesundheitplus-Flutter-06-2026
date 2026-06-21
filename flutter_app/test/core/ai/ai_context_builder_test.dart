@@ -10,6 +10,7 @@ void main() {
         medications: const ['Ramipril 5mg'],
         allergies: const ['Penicillin'],
         diagnoses: const ['Hypertonie'],
+        healthPasses: const ['Implantatpass Knieprothese'],
       ),
       throwsA(isA<StateError>()),
     );
@@ -22,9 +23,14 @@ void main() {
       medications: const ['Ramipril 5mg'],
       allergies: const ['Penicillin'],
       diagnoses: const ['Hypertonie'],
+      healthPasses: const ['Implantatpass Knieprothese MediCorp K-42'],
     );
     expect(context, contains('Aktive Medikamente: Ramipril 5mg'));
     expect(context, contains('Allergien: Penicillin'));
     expect(context, contains('Diagnosen: Hypertonie'));
+    expect(
+      context,
+      contains('Gesundheitspaesse: Implantatpass Knieprothese MediCorp K-42'),
+    );
   });
 }
