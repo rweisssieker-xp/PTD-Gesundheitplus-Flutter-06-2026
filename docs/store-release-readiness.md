@@ -1,6 +1,6 @@
 # Store Release Readiness
 
-Date: 2026-06-18
+Date: 2026-06-21
 
 This file captures store-facing metadata and privacy answers that can be derived from the current native Flutter implementation. It does not replace final review in the Apple Developer and Google Play Console accounts.
 
@@ -11,6 +11,8 @@ This file captures store-facing metadata and privacy answers that can be derived
 - iOS bundle id: `de.gesundheitplus.gesundheitplus`
 - Category recommendation: Medical / Health & Fitness, depending on store policy review.
 - Positioning: Local-first digital health record for medication, appointments, emergency profile, documents, preventive care, family check-ins, and consent-gated local AI support.
+- Current release evidence: Release APK and Release AAB build successfully on Windows with the local release keystore; iOS archive verification still requires macOS/Xcode.
+- Store assets in repo: Android legacy, adaptive and round launcher icons; iOS AppIcon asset catalog; bundled iOS `PrivacyInfo.xcprivacy`.
 
 ## Short Description Draft
 
@@ -26,6 +28,10 @@ The AI coach is local by default. Health context is only summarized after explic
 
 Online AI is enabled only when the release build is configured with `GESUNDHEIT_PLUS_AI_ENDPOINT`. Without that build setting, the AI coach uses the local-only fallback.
 
+Cloud-Sync is not active in the native app. The first launch screen shows local-device storage as the only selectable mode and labels cloud sync as unavailable.
+
+The former Twilio setup is implemented as local native SMS/WhatsApp handoffs with phone-number preview, generated URI diagnostics, and visible failure messages. No Twilio backend credential is bundled.
+
 Gesundheit Plus is not a medical diagnosis tool and does not replace professional medical advice.
 
 ## Permission Rationale
@@ -39,7 +45,7 @@ Gesundheit Plus is not a medical diagnosis tool and does not replace professiona
 | Location while in use | Android, iOS | Add current-device location to emergency SMS and family check-ins when the user explicitly requests it. |
 | Biometrics / Face ID | Android, iOS | Unlock the local health record with device biometric authentication when enabled by the user. |
 | Internet | Android, iOS | Contact an optional configured online AI responder after explicit AI context consent; local health record features work without network. |
-| Phone/SMS/WhatsApp/Telegram/share handoff | Android, iOS | Let the user contact emergency contacts through native apps. |
+| Phone/SMS/WhatsApp/Telegram/share handoff | Android, iOS | Let the user contact emergency contacts through native apps; SMS/WhatsApp setup uses local handoff diagnostics instead of a bundled Twilio backend. |
 
 ## Google Play Data Safety Draft
 
@@ -56,6 +62,8 @@ Data sharing:
 - User-initiated sharing can happen through native share sheets, phone, SMS, WhatsApp, Telegram, calendar file export, QR payloads, and exported health-record files.
 - Optional AI responder integration is not active by default and is consent-gated.
 - Network access is only needed for the optional configured online AI responder; local health record features do not require a backend.
+- Cloud-Sync is not implemented or selectable in the current native release.
+- Twilio backend sending is not bundled; SMS and WhatsApp communication uses explicit user-initiated native app handoff.
 
 Security:
 
@@ -89,7 +97,7 @@ Data linked to user:
 
 Required screenshots should be captured on real devices or reliable simulators/emulators after selecting local-device storage:
 
-- Storage-mode first launch
+- Storage-mode first launch with Cloud-Sync visibly unavailable
 - Onboarding with local reminder permission setup
 - Home dashboard with emergency button, action grid, carousel, and footer
 - Medication list and daily plan
@@ -97,7 +105,10 @@ Required screenshots should be captured on real devices or reliable simulators/e
 - Emergency profile / offline emergency
 - Document scan and scanned documents
 - Privacy / local storage mode
+- SMS/WhatsApp setup with local handoff diagnostics
+- Telegram setup with local connect/test handoff
 - AI coach with local-only explanation
+- Launcher icon shown on Android/iOS home screen or app library where store screenshots require it
 
 ## External Gates
 

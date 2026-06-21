@@ -3,6 +3,23 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('native app identity is aligned for both stores', () {
+    final androidManifest = File(
+      'android/app/src/main/AndroidManifest.xml',
+    ).readAsStringSync();
+    final iosProject = File(
+      'ios/Runner.xcodeproj/project.pbxproj',
+    ).readAsStringSync();
+    final iosInfo = File('ios/Runner/Info.plist').readAsStringSync();
+
+    expect(androidManifest, contains('android:label="Gesundheit Plus"'));
+    expect(
+      iosProject,
+      contains('PRODUCT_BUNDLE_IDENTIFIER = de.gesundheitplus.gesundheitplus'),
+    );
+    expect(iosInfo, contains('<string>Gesundheit Plus</string>'));
+  });
+
   test('Android manifest declares package visibility for handoff schemes', () {
     final manifest = File(
       'android/app/src/main/AndroidManifest.xml',
@@ -28,4 +45,65 @@ void main() {
     expect(plist, contains('<string>whatsapp</string>'));
     expect(plist, contains('<string>tg</string>'));
   });
+
+  test('release privacy and launcher icon artifacts are packaged', () {
+    final iosProject = File(
+      'ios/Runner.xcodeproj/project.pbxproj',
+    ).readAsStringSync();
+    final privacyManifest = File(
+      'ios/Runner/PrivacyInfo.xcprivacy',
+    ).readAsStringSync();
+
+    expect(iosProject, contains('PrivacyInfo.xcprivacy in Resources'));
+    expect(privacyManifest, contains('<key>NSPrivacyTracking</key>'));
+    expect(privacyManifest, contains('<false/>'));
+    expect(
+      iosProject,
+      contains('ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon'),
+    );
+    expect(
+      File(
+        'ios/Runner/Assets.xcassets/AppIcon.appiconset/'
+        'Icon-App-1024x1024@1x.png',
+      ).existsSync(),
+      isTrue,
+    );
+
+    for (final density in ['mdpi', 'hdpi', 'xhdpi', 'xxhdpi', 'xxxhdpi']) {
+      expect(
+        File(
+          'android/app/src/main/res/mipmap-$density/ic_launcher.png',
+        ).existsSync(),
+        isTrue,
+      );
+    }
+    expect(
+      File(
+        'android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml',
+      ).existsSync(),
+      isTrue,
+    );
+    expect(
+      File(
+        'android/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml',
+      ).existsSync(),
+      isTrue,
+    );
+  });
+
+  test(
+    'store readiness draft reflects the current local-only release posture',
+    () {
+      final readiness = File(
+        '../docs/store-release-readiness.md',
+      ).readAsStringSync();
+
+      expect(readiness, contains('Date: 2026-06-21'));
+      expect(readiness, contains('Cloud-Sync is not active'));
+      expect(readiness, contains('local native SMS/WhatsApp handoffs'));
+      expect(readiness, contains('adaptive and round launcher icons'));
+      expect(readiness, contains('Release APK'));
+      expect(readiness, contains('Release AAB'));
+    },
+  );
 }
