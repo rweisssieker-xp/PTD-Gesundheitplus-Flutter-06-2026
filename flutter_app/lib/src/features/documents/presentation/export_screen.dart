@@ -65,7 +65,11 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
           ),
           const SizedBox(height: 16),
           FilledButton.icon(
-            onPressed: dbAsync.hasValue && !_working ? _createExport : null,
+            key: const Key('health-export-create-button'),
+            onPressed:
+                !_working && (dbAsync.hasValue || widget.exporter != null)
+                ? _createExport
+                : null,
             icon: const Icon(Icons.file_download_outlined),
             label: const Text('Exportdatei erstellen'),
           ),
@@ -79,6 +83,7 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
               ),
             ),
             OutlinedButton.icon(
+              key: const Key('health-export-share-button'),
               onPressed: _shareExport,
               icon: const Icon(Icons.ios_share_outlined),
               label: const Text('Teilen'),

@@ -7,7 +7,7 @@ Date: 2026-06-21
 - `flutter doctor -v`: no issues after installing Android SDK command-line tools and accepting Android licenses.
 - `dart format lib test`: clean.
 - `flutter analyze`: no issues.
-- `flutter test`: 149 tests passed.
+- `flutter test`: 150 tests passed.
 - `flutter test integration_test/app_flow_test.dart`: Android integration flow passed on the local emulator, including first-run local storage selection and core feature route rendering.
 - `flutter build apk --debug`: built successfully.
 - `flutter build apk --release`: built successfully with local release keystore.
@@ -65,6 +65,7 @@ Android embedding disables Impeller explicitly for this emulator-tested build pa
 - Android release builds include network permission for the optional configured online AI responder; local health record features remain on-device and work without backend access.
 - Emergency contacts can be imported from the device address book after explicit contact permission and remain stored locally.
 - Local health-record JSON export and appointment `.ics` export show visible recovery messages when local file creation or native sharing fails.
+- Local health-record JSON export is covered at widget level for the success path, including generated JSON content and native share handoff callback.
 - Healthcare professionals expose a local Facharzt search with on-device provider suggestions and direct local add, replacing the PWA internet/LLM doctor search with a local-only workflow.
 - Healthcare professionals can be drafted from spoken-style German text using a deterministic on-device parser for name, specialty, address, phone, and email.
 - Allergies expose a local medication conflict check that compares active medications with medication allergies and known local substance-class rules without sending data off-device.
