@@ -123,42 +123,13 @@ class _PrivacyScreenState extends ConsumerState<PrivacyScreen> {
                   const SizedBox(height: 16),
                   const _PurposeCard(),
                   const SizedBox(height: 16),
-                  const _ContactCard(),
+                  const _LocalModeCard(),
                   const SizedBox(height: 16),
-                  const Card(
-                    child: ListTile(
-                      leading: Icon(Icons.phone_android_outlined),
-                      title: Text('Device-only Modus'),
-                      subtitle: Text(
-                        'Medikation, Termine, Vitalwerte und Notfalldaten werden lokal auf diesem Gerät gespeichert.',
-                      ),
-                    ),
-                  ),
-                  Card(
-                    child: ListTile(
-                      leading: const Icon(Icons.download_outlined),
-                      title: const Text('Daten exportieren'),
-                      subtitle: const Text(
-                        'Lokale Gesundheitsakte als JSON-Datei sichern.',
-                      ),
-                      trailing: const Icon(Icons.chevron_right),
-                      onTap: () => context.go('/export'),
-                    ),
-                  ),
-                  Card(
-                    color: const Color(0xFFFEF2F2),
-                    child: ListTile(
-                      leading: const Icon(
-                        Icons.delete_forever_outlined,
-                        color: GpColors.emergencyRed,
-                      ),
-                      title: const Text('Alle lokalen Daten löschen'),
-                      subtitle: const Text(
-                        'Entfernt Gesundheitsdaten, Kontakte, Dokument-Metadaten, Einstellungen und Nachrichten von diesem Gerät.',
-                      ),
-                      onTap: data == null ? null : () => _confirmClear(repo),
-                    ),
-                  ),
+                  const _ExportScopeCard(),
+                  const SizedBox(height: 16),
+                  const _DeleteScopeCard(),
+                  const SizedBox(height: 16),
+                  const _ContactCard(),
                 ],
               );
             },
@@ -173,8 +144,39 @@ class _PrivacyScreenState extends ConsumerState<PrivacyScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Alle lokalen Daten löschen?'),
-        content: const Text(
-          'Diese Aktion kann nicht rückgängig gemacht werden. Exportiere die Daten vorher, wenn du eine Sicherung behalten möchtest.',
+        content: const SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _WarningPanel(
+                title: 'WARNUNG: Unwiderrufliche Löschung',
+                body:
+                    'Alle lokalen Gesundheitsdaten, Kontakte, Dokument-Metadaten, Einstellungen und KI-Profile werden permanent von diesem Gerät gelöscht.',
+              ),
+              SizedBox(height: 12),
+              _DialogSection(
+                title: 'Betroffen sind:',
+                lines: [
+                  'Alle medizinischen Einträge',
+                  'Notfallkontakte und vorbereitete Nachrichten',
+                  'Dokument-Metadaten und lokale Dokumentdateien',
+                  'KI-Analysen, Coach-Nachrichten und Empfehlungen',
+                  'App-, Datenschutz- und Kommunikations-Einstellungen',
+                ],
+              ),
+              SizedBox(height: 10),
+              Text(
+                'Nicht betroffen: App-Installation und Betriebssystem-Berechtigungen bleiben bestehen. Sie können die App danach weiter lokal nutzen.',
+                style: TextStyle(color: GpColors.textSecondary),
+              ),
+              SizedBox(height: 10),
+              Text(
+                'Exportiere die Daten vorher, wenn du eine Sicherung behalten möchtest.',
+                style: TextStyle(color: GpColors.textSecondary),
+              ),
+            ],
+          ),
         ),
         actions: [
           TextButton(
@@ -197,6 +199,85 @@ class _PrivacyScreenState extends ConsumerState<PrivacyScreen> {
     setState(() => _reload++);
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Lokale Daten wurden gelöscht.')),
+    );
+  }
+}
+
+class _WarningPanel extends StatelessWidget {
+  const _WarningPanel({required this.title, required this.body});
+
+  final String title;
+  final String body;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: GpColors.redSurface,
+        border: Border.all(color: const Color(0xFFFECACA)),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(
+                  Icons.warning_amber_outlined,
+                  color: GpColors.emergencyRed,
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: const TextStyle(
+                      color: GpColors.emergencyRed,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Text(
+              body,
+              style: const TextStyle(color: GpColors.redDark, fontSize: 13),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _DialogSection extends StatelessWidget {
+  const _DialogSection({required this.title, required this.lines});
+
+  final String title;
+  final List<String> lines;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(title, style: const TextStyle(fontWeight: FontWeight.w900)),
+        const SizedBox(height: 6),
+        for (final line in lines)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 3),
+            child: Text(
+              '• $line',
+              style: const TextStyle(
+                color: GpColors.textSecondary,
+                fontSize: 13,
+              ),
+            ),
+          ),
+      ],
     );
   }
 }
@@ -515,6 +596,106 @@ class _ContactCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _LocalModeCard extends StatelessWidget {
+  const _LocalModeCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return const _InfoCard(
+      icon: Icons.phone_android_outlined,
+      iconColor: Color(0xFF0D9488),
+      title: 'Device-only Modus',
+      tint: Color(0xFFF0FDFA),
+      border: Color(0xFF99F6E4),
+      children: [
+        _InfoLine(
+          icon: Icons.offline_pin_outlined,
+          iconColor: Color(0xFF0D9488),
+          title: 'Alles lokal auf dem Gerät',
+          body:
+              'Medikation, Termine, Vitalwerte, Notfalldaten und Einstellungen bleiben im lokalen App-Speicher.',
+        ),
+        _InfoLine(
+          icon: Icons.cloud_off_outlined,
+          iconColor: Color(0xFF0D9488),
+          title: 'Keine Cloud-Synchronisation',
+          body:
+              'Im nativen Offline-Modus gibt es keinen Server-Abgleich und keine Account-Pflicht.',
+        ),
+      ],
+    );
+  }
+}
+
+class _ExportScopeCard extends StatelessWidget {
+  const _ExportScopeCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return _InfoCard(
+      icon: Icons.download_outlined,
+      iconColor: const Color(0xFF2563EB),
+      title: 'Exportumfang',
+      children: [
+        const _DialogSection(
+          title: 'Der JSON-Export enthält:',
+          lines: [
+            'Profil- und App-Einstellungen',
+            'Medizinische Daten wie Medikamente, Allergien und Vitalwerte',
+            'Notfallkontakte, Termine und Benachrichtigungen',
+            'Dokument-Metadaten ohne externe Cloud-Kopie',
+          ],
+        ),
+        DecoratedBox(
+          decoration: BoxDecoration(
+            color: const Color(0xFFDBEAFE),
+            border: Border.all(color: const Color(0xFFBFDBFE)),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: const Padding(
+            padding: EdgeInsets.all(12),
+            child: Text(
+              'Hinweis: Große Dokumentdateien werden auf dem Gerät verwaltet; der Export beschreibt sie über Metadaten und lokale Pfade.',
+              style: TextStyle(color: Color(0xFF1E3A8A), fontSize: 12),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _DeleteScopeCard extends StatelessWidget {
+  const _DeleteScopeCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return const _InfoCard(
+      icon: Icons.delete_forever_outlined,
+      iconColor: GpColors.emergencyRed,
+      title: 'Löschumfang',
+      tint: GpColors.redSurface,
+      border: Color(0xFFFECACA),
+      children: [
+        _InfoLine(
+          icon: Icons.delete_sweep_outlined,
+          iconColor: GpColors.emergencyRed,
+          title: 'Betroffen sind alle lokalen Gesundheitsdaten',
+          body:
+              'Medizinische Einträge, Notfallkontakte, Dokument-Metadaten, KI-Profile und Einstellungen werden entfernt.',
+        ),
+        _InfoLine(
+          icon: Icons.phone_android_outlined,
+          iconColor: Color(0xFF6B7280),
+          title: 'Nicht betroffen ist die App-Installation',
+          body:
+              'Nach der Löschung bleibt die App nutzbar und startet wieder mit leerem lokalen Speicher.',
+        ),
+      ],
     );
   }
 }

@@ -55,7 +55,88 @@ void main() {
       scrollable: find.byType(Scrollable).first,
     );
     expect(find.text('Zweck der Datenverarbeitung'), findsOneWidget);
+
+    await tester.scrollUntilVisible(
+      find.text('Device-only Modus'),
+      280,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.text('Alles lokal auf dem Gerät'), findsOneWidget);
+    expect(find.text('Keine Cloud-Synchronisation'), findsOneWidget);
+
+    await tester.scrollUntilVisible(
+      find.text('Exportumfang'),
+      280,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.text('Der JSON-Export enthält:'), findsOneWidget);
+    expect(
+      find.textContaining('Profil- und App-Einstellungen'),
+      findsOneWidget,
+    );
+    expect(
+      find.textContaining('Dokument-Metadaten ohne externe Cloud-Kopie'),
+      findsOneWidget,
+    );
+
+    await tester.scrollUntilVisible(
+      find.text('Löschumfang'),
+      280,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(
+      find.text('Betroffen sind alle lokalen Gesundheitsdaten'),
+      findsOneWidget,
+    );
+    expect(
+      find.text('Nicht betroffen ist die App-Installation'),
+      findsOneWidget,
+    );
+
+    await tester.scrollUntilVisible(
+      find.text('Fragen zum Datenschutz?'),
+      280,
+      scrollable: find.byType(Scrollable).first,
+    );
     expect(find.text('Fragen zum Datenschutz?'), findsOneWidget);
+  });
+
+  testWidgets('privacy delete dialog explains affected local data', (
+    tester,
+  ) async {
+    final db = AppDatabase.memory();
+    addTearDown(db.close);
+    _seedPrivacyData(db);
+
+    tester.view.physicalSize = const Size(430, 1200);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [appDatabaseProvider.overrideWith((ref) async => db)],
+        child: const MaterialApp(home: PrivacyScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Daten löschen'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Alle lokalen Daten löschen?'), findsOneWidget);
+    expect(find.text('WARNUNG: Unwiderrufliche Löschung'), findsOneWidget);
+    expect(find.text('Betroffen sind:'), findsOneWidget);
+    expect(
+      find.text(
+        'Nicht betroffen: App-Installation und Betriebssystem-Berechtigungen bleiben bestehen. Sie können die App danach weiter lokal nutzen.',
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.textContaining('KI-Analysen, Coach-Nachrichten und Empfehlungen'),
+      findsOneWidget,
+    );
   });
 }
 
