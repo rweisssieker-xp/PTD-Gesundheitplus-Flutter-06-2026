@@ -8,6 +8,7 @@ Date: 2026-06-21
 - `dart format lib test`: clean.
 - `flutter analyze`: no issues.
 - `flutter test`: 146 tests passed.
+- `flutter test integration_test/app_flow_test.dart`: Android integration flow passed on the local emulator, including first-run local storage selection and core feature route rendering.
 - `flutter build apk --debug`: built successfully.
 - `flutter build apk --release`: built successfully with local release keystore.
 - `flutter build appbundle --release`: built successfully with local release keystore.
