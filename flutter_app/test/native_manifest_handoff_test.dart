@@ -38,6 +38,17 @@ void main() {
     expect(manifest, contains('android:name="android.permission.INTERNET"'));
   });
 
+  test('native transport security disallows cleartext traffic', () {
+    final androidManifest = File(
+      'android/app/src/main/AndroidManifest.xml',
+    ).readAsStringSync();
+    final iosInfo = File('ios/Runner/Info.plist').readAsStringSync();
+
+    expect(androidManifest, contains('android:usesCleartextTraffic="false"'));
+    expect(iosInfo, isNot(contains('<key>NSAppTransportSecurity</key>')));
+    expect(iosInfo, isNot(contains('<key>NSAllowsArbitraryLoads</key>')));
+  });
+
   test('Android startup keeps light shell and disables Impeller fallback', () {
     final manifest = File(
       'android/app/src/main/AndroidManifest.xml',

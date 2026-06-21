@@ -10,6 +10,13 @@ void main() {
     expect(config.buildResponder(), isNull);
   });
 
+  test('rejects non-https online responder endpoints', () {
+    const config = AiCoachResponderConfig(endpoint: ' http://example.test/ai ');
+
+    expect(config.isConfigured, isFalse);
+    expect(config.buildResponder(), isNull);
+  });
+
   test('builds online responder from configured endpoint', () async {
     final dio = Dio()
       ..interceptors.add(

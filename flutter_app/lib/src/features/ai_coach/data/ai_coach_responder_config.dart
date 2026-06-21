@@ -10,12 +10,20 @@ class AiCoachResponderConfig {
 
   final String endpoint;
 
-  bool get isConfigured => endpoint.trim().isNotEmpty;
+  bool get isConfigured => _httpsEndpoint != null;
 
   AiCoachResponder? buildResponder({Dio? dio}) {
+    final configuredEndpoint = _httpsEndpoint;
+    if (configuredEndpoint == null) return null;
+    final client = AiClient(dio: dio ?? Dio(), endpoint: configuredEndpoint);
+    return client.ask;
+  }
+
+  String? get _httpsEndpoint {
     final trimmedEndpoint = endpoint.trim();
     if (trimmedEndpoint.isEmpty) return null;
-    final client = AiClient(dio: dio ?? Dio(), endpoint: trimmedEndpoint);
-    return client.ask;
+    final uri = Uri.tryParse(trimmedEndpoint);
+    if (uri == null || !uri.hasScheme || uri.scheme != 'https') return null;
+    return trimmedEndpoint;
   }
 }

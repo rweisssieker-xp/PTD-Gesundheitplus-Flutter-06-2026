@@ -7,7 +7,7 @@ Date: 2026-06-21
 - `flutter doctor -v`: no issues after installing Android SDK command-line tools and accepting Android licenses.
 - `dart format lib test`: clean.
 - `flutter analyze`: no issues.
-- `flutter test`: 167 tests passed.
+- `flutter test`: 169 tests passed.
 - `flutter test integration_test/app_flow_test.dart`: Android integration flow passed on the local emulator, including first-run local storage selection and core feature route rendering.
 - `flutter build apk --debug`: built successfully.
 - `flutter build apk --release`: built successfully with local release keystore.
@@ -69,6 +69,7 @@ Android embedding disables Impeller explicitly for this emulator-tested build pa
 - Telegram setup mirrors the PWA guided flow with bot launch, `/start`, `/mychatid`, local connect/disconnect, persisted chat target, and native Telegram test handoff without backend secrets.
 - SMS/WhatsApp setup replaces Twilio backend sending with local native handoffs and keeps the PWA debug posture through E.164 phone preview, generated URI, visible success state, and visible failure diagnostics.
 - Android release builds include network permission for the optional configured online AI responder; local health record features remain on-device and work without backend access.
+- Optional online AI responder endpoints must use HTTPS, Android cleartext traffic is disabled, and iOS keeps App Transport Security defaults without arbitrary-load exceptions.
 - Emergency contacts can be imported from the device address book after explicit contact permission and remain stored locally.
 - Local health-record JSON export and appointment `.ics` export show visible recovery messages when local file creation or native sharing fails.
 - Local health-record JSON export is covered at widget level for the success path, including generated JSON content and native share handoff callback.
