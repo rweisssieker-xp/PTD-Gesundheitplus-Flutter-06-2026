@@ -24,7 +24,10 @@ class _StorageGateScreenState extends ConsumerState<StorageGateScreen> {
         child: Center(child: CircularProgressIndicator()),
       ),
       error: (error, stackTrace) => _StorageGateScaffold(
-        child: Center(child: Text('Datenbankfehler: $error')),
+        child: _StorageGateError(
+          message: error.toString(),
+          onRetry: () => ref.invalidate(appDatabaseProvider),
+        ),
       ),
       data: (db) {
         final repo = StorageModeRepository(db);
@@ -40,6 +43,99 @@ class _StorageGateScreenState extends ConsumerState<StorageGateScreen> {
           },
         );
       },
+    );
+  }
+}
+
+class _StorageGateError extends StatelessWidget {
+  const _StorageGateError({required this.message, required this.onRetry});
+
+  final String message;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(24),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border.all(color: const Color(0xFFFECACA), width: 2),
+          borderRadius: BorderRadius.circular(8),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x14000000),
+              blurRadius: 8,
+              offset: Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Icon(
+                Icons.lock_clock_outlined,
+                color: GpColors.emergencyRed,
+                size: 44,
+              ),
+              const SizedBox(height: 12),
+              const Text(
+                'Lokaler Speicher nicht verfügbar',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: GpColors.textPrimary,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Gesundheit Plus konnte die verschlüsselte lokale Datenbank oder den Geräteschlüssel nicht öffnen. Ihre Daten werden nicht in eine Cloud übertragen.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: GpColors.textSecondary,
+                  fontSize: 14,
+                  height: 1.35,
+                ),
+              ),
+              const SizedBox(height: 14),
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  color: GpColors.redSurface,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: Text(
+                    message,
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: GpColors.redDark,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 14),
+              FilledButton.icon(
+                onPressed: onRetry,
+                icon: const Icon(Icons.refresh),
+                label: const Text('Erneut versuchen'),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Wenn der Fehler bleibt, prüfen Sie Gerätespeicher, Gerätesperre und App-Berechtigungen oder starten Sie das Gerät neu.',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: GpColors.textSecondary, fontSize: 12),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

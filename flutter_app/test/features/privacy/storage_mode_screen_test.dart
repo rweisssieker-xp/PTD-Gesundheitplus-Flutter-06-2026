@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:gesundheitplus/src/core/storage/app_database.dart';
 import 'package:gesundheitplus/src/core/storage/database_provider.dart';
 import 'package:gesundheitplus/src/features/privacy/data/storage_mode_repository.dart';
+import 'package:gesundheitplus/src/features/privacy/presentation/storage_gate_screen.dart';
 import 'package:gesundheitplus/src/features/privacy/presentation/storage_mode_screen.dart';
 
 void main() {
@@ -92,6 +93,35 @@ void main() {
     expect(_tableCount(db, 'medications'), 0);
     expect(_tableCount(db, 'health_documents'), 0);
     expect(_tableCount(db, 'emergency_contacts'), 0);
+  });
+
+  testWidgets('storage gate shows local database recovery state', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(430, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          appDatabaseProvider.overrideWith(
+            (ref) async => throw StateError('secure key unavailable'),
+          ),
+        ],
+        child: const MaterialApp(home: StorageGateScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Lokaler Speicher nicht verfügbar'), findsOneWidget);
+    expect(
+      find.textContaining('verschlüsselte lokale Datenbank'),
+      findsOneWidget,
+    );
+    expect(find.textContaining('secure key unavailable'), findsOneWidget);
+    expect(find.text('Erneut versuchen'), findsOneWidget);
   });
 }
 
