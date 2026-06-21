@@ -80,6 +80,10 @@ class _CommunicationSettingsScreenState
                     config: config,
                     enabled: _enabled,
                     target: _target.text,
+                    launching: _launching,
+                    onTest: _enabled && _target.text.trim().isNotEmpty
+                        ? () => _launchChannelTest(context)
+                        : null,
                     onDisconnect: _enabled
                         ? () async {
                             setState(() => _enabled = false);
@@ -101,6 +105,7 @@ class _CommunicationSettingsScreenState
                       targetController: _target,
                       onCopy: _copy,
                       onOpenBot: () => _launchTelegramBot(context),
+                      onConnect: () => _connectChannel(repo),
                     )
                   else
                     _SmsSetupCard(
@@ -146,6 +151,18 @@ class _CommunicationSettingsScreenState
     }
   }
 
+  Future<void> _connectChannel(CommunicationPreferencesRepository repo) async {
+    if (_target.text.trim().isEmpty) {
+      _snack(context, 'Bitte zuerst Telegram-Chat oder Benutzer eintragen');
+      return;
+    }
+    setState(() => _enabled = true);
+    await _save(repo, showSnack: false);
+    if (mounted) {
+      _snack(context, '${_config.shortName} lokal verbunden');
+    }
+  }
+
   Future<void> _copy(BuildContext context, String text) async {
     await Clipboard.setData(ClipboardData(text: text));
     if (context.mounted) _snack(context, 'In Zwischenablage kopiert');
@@ -168,6 +185,19 @@ class _CommunicationSettingsScreenState
         ? PlatformHandoffService.smsUri(target, _message.text)
         : PlatformHandoffService.whatsappUri(target, _message.text);
     await _launchUri(context, uri);
+  }
+
+  Future<void> _launchChannelTest(BuildContext context) async {
+    final target = _target.text.trim();
+    if (target.isEmpty) {
+      _snack(context, 'Bitte zuerst ein Ziel eintragen');
+      return;
+    }
+    if (widget.channel == 'telegram') {
+      await _launchUri(context, PlatformHandoffService.telegramUri(target));
+      return;
+    }
+    await _launchTest(context, sms: true);
   }
 
   Future<void> _launchUri(BuildContext context, Uri uri) async {
@@ -233,12 +263,16 @@ class _StatusCard extends StatelessWidget {
     required this.config,
     required this.enabled,
     required this.target,
+    required this.launching,
+    required this.onTest,
     required this.onDisconnect,
   });
 
   final _ChannelConfig config;
   final bool enabled;
   final String target;
+  final bool launching;
+  final VoidCallback? onTest;
   final VoidCallback? onDisconnect;
 
   @override
@@ -291,10 +325,21 @@ class _StatusCard extends StatelessWidget {
               ),
             ],
             const SizedBox(height: 12),
-            OutlinedButton.icon(
-              onPressed: onDisconnect,
-              icon: const Icon(Icons.link_off),
-              label: const Text('Trennen'),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                OutlinedButton.icon(
+                  onPressed: launching ? null : onTest,
+                  icon: const Icon(Icons.send_outlined),
+                  label: const Text('Test-Nachricht senden'),
+                ),
+                const SizedBox(height: 8),
+                OutlinedButton.icon(
+                  onPressed: launching ? null : onDisconnect,
+                  icon: const Icon(Icons.link_off),
+                  label: const Text('Trennen'),
+                ),
+              ],
             ),
           ],
         ),
@@ -341,11 +386,13 @@ class _TelegramSetupSteps extends StatelessWidget {
     required this.targetController,
     required this.onCopy,
     required this.onOpenBot,
+    required this.onConnect,
   });
 
   final TextEditingController targetController;
   final Future<void> Function(BuildContext context, String text) onCopy;
   final VoidCallback onOpenBot;
+  final VoidCallback onConnect;
 
   static const _botUrl = 'https://t.me/GesundheitPlusBot';
 
@@ -392,16 +439,43 @@ class _TelegramSetupSteps extends StatelessWidget {
         const SizedBox(height: 12),
         _StepCard(
           number: 3,
+          title: 'Holen Sie Ihre Chat-ID',
+          body:
+              'Der Bot zeigt die Chat-ID, wenn Sie den Befehl unten senden. Benutzername oder t.me-Link funktionieren ebenfalls.',
+          children: [
+            _CommandBox(
+              command: '/mychatid',
+              onCopy: () => onCopy(context, '/mychatid'),
+            ),
+            const SizedBox(height: 10),
+            const _HintBox(
+              text: 'Die Chat-ID sieht z.B. so aus: 123456789 oder -987654321.',
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        _StepCard(
+          number: 4,
+          active: true,
           title: 'Chat oder Benutzer speichern',
           body:
-              'Tragen Sie Ihren Telegram-Benutzer, eine t.me-Adresse oder eine Telefonnummer ein.',
+              'Tragen Sie Ihre Chat-ID, Ihren Telegram-Benutzer, eine t.me-Adresse oder eine Telefonnummer ein und aktivieren Sie den lokalen Handoff.',
           children: [
             TextField(
               controller: targetController,
               decoration: const InputDecoration(
-                labelText: 'Telegram Benutzer / Chat',
-                hintText: '@name, t.me/name oder +49176...',
+                labelText: 'Telegram Chat-ID / Benutzer / Chat',
+                hintText: '123456789, @name, t.me/name oder +49176...',
               ),
+            ),
+            const SizedBox(height: 12),
+            FilledButton.icon(
+              style: FilledButton.styleFrom(
+                backgroundColor: const Color(0xFF16A34A),
+              ),
+              onPressed: onConnect,
+              icon: const Icon(Icons.check_circle_outline),
+              label: const Text('Verbinden'),
             ),
           ],
         ),
@@ -652,6 +726,39 @@ class _CommandBox extends StatelessWidget {
             icon: const Icon(Icons.copy, color: Colors.white),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _HintBox extends StatelessWidget {
+  const _HintBox({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: const Color(0xFFFEFCE8),
+        border: Border.all(color: const Color(0xFFFEF08A)),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(10),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Icon(Icons.info_outline, color: Color(0xFFCA8A04), size: 18),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                text,
+                style: const TextStyle(color: Color(0xFF713F12), fontSize: 12),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

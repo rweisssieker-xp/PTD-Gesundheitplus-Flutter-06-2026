@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:gesundheitplus/src/core/platform/platform_handoff_service.dart';
 import 'package:gesundheitplus/src/core/storage/app_database.dart';
 import 'package:gesundheitplus/src/core/storage/database_provider.dart';
+import 'package:gesundheitplus/src/features/communication/data/communication_preferences_repository.dart';
 import 'package:gesundheitplus/src/features/communication/presentation/communication_settings_screen.dart';
 
 void main() {
@@ -33,11 +34,47 @@ void main() {
     expect(find.text('Öffnen Sie den Gesundheit Plus Bot'), findsOneWidget);
     expect(find.text('Starten Sie den Chat'), findsOneWidget);
     expect(find.text('/start'), findsOneWidget);
+    expect(find.text('Holen Sie Ihre Chat-ID'), findsOneWidget);
+    expect(find.text('/mychatid'), findsOneWidget);
+    expect(find.text('Chat oder Benutzer speichern'), findsOneWidget);
 
     await tester.tap(find.text('Bot öffnen'));
     await tester.pump();
     expect(handoff.launched.single.scheme, 'tg');
     expect(handoff.launched.single.toString(), contains('GesundheitPlusBot'));
+
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Telegram Chat-ID / Benutzer / Chat'),
+      '@pflegekontakt',
+    );
+    await tester.ensureVisible(find.text('Verbinden'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Verbinden'));
+    await tester.pumpAndSettle();
+
+    final pref = await CommunicationPreferencesRepository(db).get('telegram');
+    expect(pref.enabled, isTrue);
+    expect(pref.targetValue, '@pflegekontakt');
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pumpAndSettle();
+    await _pump(
+      tester,
+      db,
+      CommunicationSettingsScreen(
+        channel: 'telegram',
+        title: 'Telegram-Setup',
+        handoff: handoff,
+      ),
+    );
+
+    expect(find.text('Telegram lokal aktiviert'), findsOneWidget);
+    expect(find.text('Test-Nachricht senden'), findsOneWidget);
+
+    await tester.tap(find.text('Test-Nachricht senden'));
+    await tester.pump();
+    expect(handoff.launched.last.scheme, 'tg');
+    expect(handoff.launched.last.toString(), contains('pflegekontakt'));
   });
 
   testWidgets('sms setup offers local sms and whatsapp handoff tests', (
