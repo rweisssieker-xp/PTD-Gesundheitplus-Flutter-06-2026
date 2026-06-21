@@ -77,6 +77,7 @@ Security:
 - Structured data is encrypted at rest with SQLCipher.
 - Stored health document files are encrypted with AES-GCM, with file metadata protected by the encrypted database.
 - The database key is stored through platform secure storage.
+- Android automatic app backup is disabled, and Android data extraction rules exclude local databases, files, shared preferences, and external app files from cloud backup and device transfer.
 - App access can be protected with PIN and optional biometrics.
 - Local data wipe is available in privacy settings.
 

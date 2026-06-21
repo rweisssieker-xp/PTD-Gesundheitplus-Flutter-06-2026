@@ -69,6 +69,26 @@ void main() {
     expect(iosInfo, isNot(contains('<key>NSAllowsArbitraryLoads</key>')));
   });
 
+  test('Android release disables automatic health data backup', () {
+    final androidManifest = File(
+      'android/app/src/main/AndroidManifest.xml',
+    ).readAsStringSync();
+    final extractionRules = File(
+      'android/app/src/main/res/xml/data_extraction_rules.xml',
+    ).readAsStringSync();
+
+    expect(androidManifest, contains('android:allowBackup="false"'));
+    expect(androidManifest, contains('android:fullBackupContent="false"'));
+    expect(
+      androidManifest,
+      contains('android:dataExtractionRules="@xml/data_extraction_rules"'),
+    );
+
+    for (final domain in ['database', 'file', 'sharedpref', 'external']) {
+      expect(extractionRules, contains('<exclude domain="$domain" path="."'));
+    }
+  });
+
   test('Android startup keeps light shell and disables Impeller fallback', () {
     final manifest = File(
       'android/app/src/main/AndroidManifest.xml',
@@ -326,6 +346,7 @@ void main() {
         'Twilio backend sending is not bundled',
         'Structured data is encrypted at rest with SQLCipher.',
         'Stored health document files are encrypted with AES-GCM',
+        'Android automatic app backup is disabled',
         'in-app privacy and legal screen includes a medical disclaimer',
       ]) {
         expect(readiness, contains(dataSafetyClaim));

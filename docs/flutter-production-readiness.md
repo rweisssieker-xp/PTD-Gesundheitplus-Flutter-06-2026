@@ -7,7 +7,7 @@ Date: 2026-06-21
 - `flutter doctor -v`: no issues after installing Android SDK command-line tools and accepting Android licenses.
 - `dart format lib test`: clean.
 - `flutter analyze`: no issues.
-- `flutter test`: 175 tests passed.
+- `flutter test`: 176 tests passed.
 - GitHub Actions workflow `Flutter CI` covers `flutter pub get`, `flutter analyze`, `flutter test`, and Android debug APK build on `main` pushes and pull requests.
 - `flutter test integration_test/app_flow_test.dart`: Android integration flow passed on the local emulator, including first-run local storage selection and core feature route rendering.
 - `flutter build apk --debug`: built successfully.
@@ -45,6 +45,7 @@ Android embedding disables Impeller explicitly for this emulator-tested build pa
 - First launch shows a PWA-parity storage choice adapted for the native local-only app; selecting local persists the local-device mode on-device before opening the dashboard, while Cloud-Sync is visibly unavailable rather than selectable.
 - Onboarding saves the local profile, PIN/biometric preference, AI consent, and requests native notification permission for local reminders with a visible recovery hint if permission is not granted.
 - The database encryption key is generated on-device and stored through `flutter_secure_storage`, backed by iOS Keychain / Android Keystore.
+- Android automatic app backup is disabled and tested, with Android data extraction rules excluding local databases, files, shared preferences, and external app files from backup/transfer.
 - App access is protected by local PIN and optional device biometric unlock where supported.
 - The first-run storage gate shows a tested recovery state if the encrypted database or secure device key cannot be opened, with a retry action and clear local-only wording.
 - Feature screens share the same tested local database recovery component with retry action instead of exposing raw database exception text.
