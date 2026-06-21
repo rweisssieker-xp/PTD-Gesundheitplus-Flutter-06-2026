@@ -7,6 +7,7 @@ import 'package:gesundheitplus/src/core/storage/database_provider.dart';
 import 'package:gesundheitplus/src/core/security/app_lock_service.dart';
 import 'package:gesundheitplus/src/core/security/security_providers.dart';
 import 'package:gesundheitplus/src/features/dashboard/presentation/dashboard_screen.dart';
+import 'package:gesundheitplus/src/features/dashboard/presentation/health_dashboard_screen.dart';
 import 'package:gesundheitplus/src/shared_ui/gp_icons.dart';
 
 void main() {
@@ -111,6 +112,35 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Scan Document'), findsOneWidget);
+  });
+
+  testWidgets('feature screens show local database recovery state', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(430, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          appDatabaseProvider.overrideWith(
+            (ref) async => throw StateError('database locked'),
+          ),
+        ],
+        child: const MaterialApp(home: HealthDashboardScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Lokale Daten nicht verfügbar'), findsOneWidget);
+    expect(
+      find.textContaining('verschlüsselte lokale Gesundheitsakte'),
+      findsOneWidget,
+    );
+    expect(find.textContaining('database locked'), findsOneWidget);
+    expect(find.text('Erneut versuchen'), findsOneWidget);
   });
 
   testWidgets('dashboard grids keep PWA spacing without implicit padding', (

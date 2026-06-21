@@ -5,6 +5,7 @@ import 'package:permission_handler/permission_handler.dart';
 import '../../../core/platform/permission_service.dart';
 import '../../../core/storage/database_provider.dart';
 import '../../../shared_ui/gp_colors.dart';
+import '../../../shared_ui/gp_database_error.dart';
 import '../../../shared_ui/gp_screen.dart';
 import '../data/notification_center_repository.dart';
 
@@ -35,8 +36,10 @@ class _NotificationCenterScreenState
     return GpScreen(
       body: dbAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stackTrace) =>
-            Center(child: Text('Datenbankfehler: $error')),
+        error: (error, stackTrace) => GpDatabaseError(
+          error: error,
+          onRetry: () => ref.invalidate(appDatabaseProvider),
+        ),
         data: (db) {
           final repo = NotificationCenterRepository(db);
           return FutureBuilder<List<LocalNotificationItem>>(

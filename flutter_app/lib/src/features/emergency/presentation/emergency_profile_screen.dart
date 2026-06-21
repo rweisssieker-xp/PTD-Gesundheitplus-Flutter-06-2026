@@ -4,6 +4,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../../core/storage/database_provider.dart';
 import '../../../shared_ui/gp_colors.dart';
+import '../../../shared_ui/gp_database_error.dart';
 import '../../../shared_ui/gp_icons.dart';
 import '../../../shared_ui/gp_screen.dart';
 import '../data/emergency_repository.dart';
@@ -20,8 +21,10 @@ class EmergencyProfileScreen extends ConsumerWidget {
     return GpScreen(
       body: dbAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stackTrace) =>
-            Center(child: Text('Datenbankfehler: $error')),
+        error: (error, stackTrace) => GpDatabaseError(
+          error: error,
+          onRetry: () => ref.invalidate(appDatabaseProvider),
+        ),
         data: (db) {
           final repo = EmergencyRepository(db);
           return FutureBuilder<EmergencyProfile>(

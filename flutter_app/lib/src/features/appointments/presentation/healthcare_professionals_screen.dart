@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/platform/platform_handoff_service.dart';
 import '../../../core/storage/database_provider.dart';
 import '../../../shared_ui/gp_colors.dart';
+import '../../../shared_ui/gp_database_error.dart';
 import '../../../shared_ui/gp_icons.dart';
 import '../../../shared_ui/gp_screen.dart';
 import '../../../shared_ui/gp_voice_navigation.dart';
@@ -53,8 +54,10 @@ class _HealthcareProfessionalsScreenState
       ),
       body: dbAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stackTrace) =>
-            Center(child: Text('Datenbankfehler: $error')),
+        error: (error, stackTrace) => GpDatabaseError(
+          error: error,
+          onRetry: () => ref.invalidate(appDatabaseProvider),
+        ),
         data: (db) {
           final repo = AppointmentRepository(db);
           return FutureBuilder<List<HealthcareProfessional>>(
