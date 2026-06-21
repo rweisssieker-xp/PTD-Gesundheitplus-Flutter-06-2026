@@ -7,7 +7,7 @@ Date: 2026-06-21
 - `flutter doctor -v`: no issues after installing Android SDK command-line tools and accepting Android licenses.
 - `dart format lib test`: clean.
 - `flutter analyze`: no issues.
-- `flutter test`: 166 tests passed.
+- `flutter test`: 167 tests passed.
 - `flutter test integration_test/app_flow_test.dart`: Android integration flow passed on the local emulator, including first-run local storage selection and core feature route rendering.
 - `flutter build apk --debug`: built successfully.
 - `flutter build apk --release`: built successfully with local release keystore.
@@ -35,8 +35,8 @@ Keep a secure backup of the generated upload keystore and passwords before publi
 The authoritative feature matrix is `docs/superpowers/tracking/flutter-feature-matrix.md`.
 All rows are implemented and the router no longer uses placeholder feature shells.
 The native Flutter shell now mirrors the PWA layout pattern with the first-run storage-mode choice, a white header, red divider, local-mode badge, back/home controls on feature pages, and a constrained mobile content column.
-Android dark-mode startup now keeps the native launch/normal window background light so the app does not fall back to a black shell before Flutter paints.
-Android embedding disables Impeller explicitly for this emulator-tested build path because the UI hierarchy was present while the hardware screenshot surface stayed black on the local emulator.
+Android dark-mode startup now keeps the native launch/normal window background light so the app does not fall back to a black shell before Flutter paints, and native tests cover the light launch backgrounds.
+Android embedding disables Impeller explicitly for this emulator-tested build path because the UI hierarchy was present while the hardware screenshot surface stayed black on the local emulator; the manifest flag is covered by native tests.
 
 ## Local data protection
 

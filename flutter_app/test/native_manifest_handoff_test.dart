@@ -38,6 +38,47 @@ void main() {
     expect(manifest, contains('android:name="android.permission.INTERNET"'));
   });
 
+  test('Android startup keeps light shell and disables Impeller fallback', () {
+    final manifest = File(
+      'android/app/src/main/AndroidManifest.xml',
+    ).readAsStringSync();
+    final styles = File(
+      'android/app/src/main/res/values/styles.xml',
+    ).readAsStringSync();
+    final nightStyles = File(
+      'android/app/src/main/res/values-night/styles.xml',
+    ).readAsStringSync();
+    final launchBackground = File(
+      'android/app/src/main/res/drawable/launch_background.xml',
+    ).readAsStringSync();
+    final launchBackgroundV21 = File(
+      'android/app/src/main/res/drawable-v21/launch_background.xml',
+    ).readAsStringSync();
+
+    expect(
+      manifest,
+      contains('android:name="io.flutter.embedding.android.NormalTheme"'),
+    );
+    expect(manifest, contains('android:resource="@style/NormalTheme"'));
+    expect(
+      manifest,
+      contains('android:name="io.flutter.embedding.android.EnableImpeller"'),
+    );
+    expect(manifest, contains('android:value="false"'));
+
+    for (final xml in [styles, nightStyles]) {
+      expect(xml, contains('Theme.Light.NoTitleBar'));
+      expect(
+        xml,
+        contains(
+          '<item name="android:windowBackground">@android:color/white</item>',
+        ),
+      );
+    }
+    expect(launchBackground, contains('@android:color/white'));
+    expect(launchBackgroundV21, contains('@android:color/white'));
+  });
+
   test('Android release Gradle config uses store identity and signing', () {
     final buildGradle = File('android/app/build.gradle.kts').readAsStringSync();
     final pubspec = File('pubspec.yaml').readAsStringSync();
