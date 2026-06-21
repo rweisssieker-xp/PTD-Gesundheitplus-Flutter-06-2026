@@ -7,7 +7,7 @@ Date: 2026-06-21
 - `flutter doctor -v`: no issues after installing Android SDK command-line tools and accepting Android licenses.
 - `dart format lib test`: clean.
 - `flutter analyze`: no issues.
-- `flutter test`: 162 tests passed.
+- `flutter test`: 163 tests passed.
 - `flutter test integration_test/app_flow_test.dart`: Android integration flow passed on the local emulator, including first-run local storage selection and core feature route rendering.
 - `flutter build apk --debug`: built successfully.
 - `flutter build apk --release`: built successfully with local release keystore.
@@ -87,7 +87,7 @@ Android embedding disables Impeller explicitly for this emulator-tested build pa
 - Scanned documents expose local rule-based medical insights, urgency labels, recognized medical areas, and suggested actions without sending document data off-device.
 - The AI coach remains local by default, labels local-only answers, builds consent-gated bounded local context only after explicit consent, and stores a visible recovery answer when an optional configured online responder fails without changing health records.
 - AI consent and revoke are covered at widget level: the coach answers after context consent, privacy settings can revoke the consent, and the next AI question is visibly blocked from health context.
-- Local data deletion is covered through the privacy screen confirmation flow and verifies that local health rows are removed after the user confirms deletion.
+- Local data deletion is covered through the privacy and storage-mode confirmation flows and verifies that local health, document, and emergency rows are removed after the user confirms deletion.
 - Optional online AI can be enabled at build time with `--dart-define=GESUNDHEIT_PLUS_AI_ENDPOINT=https://...`; when omitted, the AI coach stays local-only.
 
 ## Remaining production gates

@@ -57,6 +57,47 @@ void main() {
     expect(find.text('Dokumente'), findsOneWidget);
     expect(find.text('Notfall & Kommunikation'), findsOneWidget);
   });
+
+  testWidgets('storage mode delete confirmation clears local device data', (
+    tester,
+  ) async {
+    final db = AppDatabase.memory();
+    addTearDown(db.close);
+    await StorageModeRepository(db).selectLocalMode();
+    _seedStorageData(db);
+
+    tester.view.physicalSize = const Size(430, 1800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [appDatabaseProvider.overrideWith((ref) async => db)],
+        child: const MaterialApp(home: StorageModeScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(_tableCount(db, 'medications'), 1);
+    expect(_tableCount(db, 'health_documents'), 1);
+    expect(_tableCount(db, 'emergency_contacts'), 1);
+
+    await tester.tap(find.text('Alle lokalen Daten löschen'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(FilledButton, 'Löschen'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Lokale Daten wurden gelöscht.'), findsOneWidget);
+    expect(_tableCount(db, 'medications'), 0);
+    expect(_tableCount(db, 'health_documents'), 0);
+    expect(_tableCount(db, 'emergency_contacts'), 0);
+  });
+}
+
+int _tableCount(AppDatabase db, String table) {
+  final rows = db.select('SELECT COUNT(*) AS count FROM $table');
+  return rows.first['count'] as int;
 }
 
 void _seedStorageData(AppDatabase db) {
