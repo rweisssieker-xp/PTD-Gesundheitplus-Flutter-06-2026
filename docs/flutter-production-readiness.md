@@ -53,6 +53,7 @@ Android embedding disables Impeller explicitly for this emulator-tested build pa
 - Document scanning checks native camera/gallery permissions before opening the picker and links blocked users to app settings.
 - The dashboard runs local proactive health checks on startup and writes deduplicated on-device alerts for medication refills, high-risk interaction checks, missing/unverified emergency contacts, and incomplete local emergency profile data.
 - The iOS bundle display name is set to `Gesundheit Plus`.
+- Android includes Gesundheit-Plus launcher icons for legacy and adaptive/round launcher surfaces.
 - The iOS Runner target includes `PrivacyInfo.xcprivacy` with no tracking declaration and initial Required Reason API entries for app preferences and file metadata access.
 - The PWA language switcher is backed by a local on-device preference and translates the native dashboard entry points for German, English, Turkish, Arabic, and Ukrainian.
 - Emergency contacts expose native phone, SMS, WhatsApp, Telegram, system share, and current-location SMS handoff actions from the emergency profile and offline emergency views with visible failure messages when a target app is unavailable.
